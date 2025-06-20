@@ -245,7 +245,7 @@ pnpm vitest --watch
 
 ### Metrics
 
-- Test Coverage: 0%
+- Test Coverage: 66.12%
 - Tests Written: 0
 - Tests Passing: 0
 - Code Quality Score: N/A
@@ -262,15 +262,15 @@ pnpm vitest --watch
 ## TODO
 
 - [x] Research Cloudflare Workers MCP requirements and limitations
-- [ ] Check SSE compatibility with Cloudflare Workers
-- [ ] Create wrangler.toml for Cloudflare Workers configuration
-- [ ] Adapt Express server to Cloudflare Workers format
-- [ ] Implement KV storage for OAuth tokens
+- [x] Check SSE compatibility with Cloudflare Workers
+- [x] Create wrangler.toml for Cloudflare Workers configuration
+- [x] Adapt Express server to Cloudflare Workers format
+- [x] Implement KV storage for OAuth tokens
 - [ ] Deploy to Cloudflare Workers and verify functionality
 - [x] Update commit command to clarify internal-only changes don't need version bump
-- [ ] Add /memory command for documenting repeated problem solutions
-- [ ] Add /compact command for context window optimization
-- [ ] Add vim to disallowed_tools in user settings
+- [x] Add /memory command for documenting repeated problem solutions
+- [x] Add /compact command for context window optimization
+- [x] Add vim to disallowed_tools in user settings
 ### TDD Workflow
 
 1. Write failing test
