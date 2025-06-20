@@ -57,22 +57,33 @@ Proceed with commit? [y/N]
 ## Commit Types
 
 ### Feature Development
-- ✨ **feat**: New features (including implementations with tests in TDD)
+- ✨ **feat**: New USER-FACING features or functionality
 - ✅ **test**: Adding tests ONLY to existing functionality
 - ♻️ **refactor**: Code restructuring without changing functionality
 - ⚡️ **perf**: Performance improvements
 
 ### Maintenance
-- 🐛 **fix**: Bug fixes
+- 🐛 **fix**: Bug fixes that affect users
 - 🚑 **hotfix**: Critical fixes
 - 🔒 **security**: Security improvements
 - 📝 **docs**: Documentation changes
 
-### Development
+### Infrastructure & Development
 - 🎨 **style**: Code formatting, missing semicolons, etc.
-- 🧑‍💻 **chore**: Tooling, configuration, maintenance
+- 🧑‍💻 **chore**: Tooling, configuration, dependencies, maintenance
+- 🔧 **build**: Build system, bundler config, deployment prep
 - 🚧 **wip**: Work in progress
 - 🔥 **remove**: Removing code or files
+
+### Version Bump Guidelines
+- **feat**: Requires minor version bump (0.X.0)
+- **fix**: Requires patch version bump (0.0.X)
+- **docs/chore/style**: No version bump needed (internal only)
+- **Claude commands**: No version bump needed (developer tools)
+
+⚠️ **Important**: Changes that only affect development tools (.claude/commands/*, 
+internal documentation, test improvements) do NOT require version bumps as they 
+don't impact end users.
 
 ## Process
 
@@ -98,10 +109,12 @@ Proceed with commit? [y/N]
    ```
 
 5. **Determine commit type**
-   - New functionality → feat
+   - New user-facing functionality → feat
+   - Infrastructure/config (wrangler.toml, package.json) → chore or build
    - Only tests added → test
-   - Bug fixes → fix
+   - Bug fixes affecting users → fix
    - Code cleanup → refactor
+   - Deployment preparation → build
 
 6. **Generate commit message**
    ```
@@ -177,7 +190,21 @@ git commit --amend  # Modify previous commit
 
 ## Type Selection Guidelines
 
-- Use `feat` when implementing new functionality, even with tests (TDD)
+### When to use `feat`:
+- Implementing new USER-FACING functionality
+- Adding features that users can directly interact with
+- Deploying to production with new capabilities
+- Example: "feat: add Spotify search functionality"
+
+### When to use `chore` or `build`:
+- Configuration files (wrangler.toml, tsconfig.json)
+- Dependencies updates (package.json)
+- Build scripts and tooling
+- Infrastructure preparation (not yet deployed)
+- Example: "chore: add Cloudflare Workers configuration"
+
+### Other guidelines:
 - Use `test` only when adding tests to existing code
-- If implementation + tests together, use `feat`
+- If implementation + tests together, use `feat` (for user features)
 - For breaking changes, add `!` after type: `feat!:`
+- Internal tooling/commands use `chore`, not `feat`
