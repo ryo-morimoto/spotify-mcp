@@ -1,61 +1,83 @@
-# Create Docs
+# Create Documentation
 
-Create comprehensive documentation for specified components or features.
+Generate comprehensive documentation for specified components, features, or systems.
 
-## Analysis Areas:
-1. Code structure and purpose
-2. Inputs, outputs, and behavior
-3. User interaction flows
-4. Edge cases and error handling
-5. Integration points with other components/systems
+## Usage
 
-## Documentation Template:
+```
+/create-docs <target> [--format <type>]
+```
 
-### Overview
-Brief 1-2 paragraph overview explaining purpose and value
+## What it does
 
-### Usage
-How to use this component/feature with examples
+1. **Analyzes target code**
+   - Examines structure and purpose
+   - Identifies public interfaces
+   - Maps dependencies and relationships
+   - Documents edge cases
 
-### API / Props / Parameters
-Detailed specification of interfaces
+2. **Generates documentation sections**
+   - Overview and purpose
+   - Usage examples with code
+   - API specifications
+   - Error handling patterns
 
-### Component Hierarchy
-Structure and relationships (if applicable)
+3. **Adds supporting materials**
+   - Architecture diagrams
+   - State flow charts
+   - Integration examples
+   - Testing guidelines
 
-### State Management
-How state is handled and flows through the system
+4. **Formats and validates**
+   - Applies project standards
+   - Checks completeness
+   - Verifies code examples
+   - Cross-references related docs
 
-### Behavior
-Expected behavior in different scenarios
+## Example
 
-### Error Handling
-How errors are caught, handled, and reported
+```
+/create-docs src/spotifyApi.ts --format markdown
 
-### Performance Considerations
-Optimization notes and performance characteristics
+Analyzing src/spotifyApi.ts...
 
-### Accessibility
-Accessibility features and compliance
+✓ Generated documentation:
+  - Overview section with purpose
+  - API reference for 12 methods
+  - Error handling guide
+  - Usage examples for each method
+  - Integration patterns
+  - Testing recommendations
 
-### Testing
-How to test this component/feature
+Created: docs/spotify-api.md (2,847 lines)
+```
 
-### Related Components/Features
-Links to related documentation
+## Documentation Sections
 
-## Process:
-1. Analyze the target code thoroughly
-2. Identify all public interfaces
-3. Document expected behaviors
-4. Include code examples
-5. Add diagrams where helpful
-6. Follow project documentation standards
-7. Ensure clarity, completeness, and actionability
+### Core Sections
+- **Overview**: Purpose and key features
+- **Installation**: Setup instructions
+- **Usage**: Quick start examples
+- **API Reference**: Detailed specifications
+- **Examples**: Real-world scenarios
 
-## Output Formats:
-- Markdown for general documentation
-- JSDoc/TSDoc for code comments
-- API documentation format
-- README files
-- Architecture decision records (ADRs)
+### Advanced Sections
+- **Architecture**: System design details
+- **State Management**: Data flow patterns
+- **Error Handling**: Exception scenarios
+- **Performance**: Optimization tips
+- **Security**: Best practices
+
+### Supporting Materials
+- **Diagrams**: Visual representations
+- **Code Samples**: Working examples
+- **Migration Guides**: Version updates
+- **Troubleshooting**: Common issues
+
+## Output Formats
+
+- **Markdown**: General documentation (default)
+- **JSDoc/TSDoc**: Inline code comments
+- **OpenAPI**: API specifications
+- **README**: Project overviews
+- **ADR**: Architecture decisions

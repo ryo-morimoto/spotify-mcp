@@ -1,136 +1,273 @@
-# Transports - Model Context Protocol
-MCP uses JSON-RPC to encode messages. JSON-RPC messages **MUST** be UTF-8 encoded.
+# Remote MCP
 
-The protocol currently defines two standard transport mechanisms for client-server communication:
+Connect to and manage remote MCP servers using HTTP-based transports with SSE support.
 
-1.  [stdio](about:/_sites/modelcontextprotocol.io/specification/2025-03-26/basic/transports#stdio), communication over standard in and standard out
-2.  [Streamable HTTP](about:/_sites/modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http)
+## Usage
 
-Clients **SHOULD** support stdio whenever possible.
+```
+/remote-mcp connect <server-url>
+/remote-mcp test <server-url>
+/remote-mcp --list
+```
 
-It is also possible for clients and servers to implement [custom transports](about:/_sites/modelcontextprotocol.io/specification/2025-03-26/basic/transports#custom-transports) in a pluggable fashion.
+## What it does
 
-stdio
------
+1. **Discovers server capabilities**
+   - Checks transport type
+   - Validates endpoints
+   - Tests connectivity
+   - Verifies protocols
 
-In the **stdio** transport:
+2. **Establishes connection**
+   - Sends initialization request
+   - Negotiates capabilities
+   - Sets up SSE streams
+   - Handles session management
 
-*   The client launches the MCP server as a subprocess.
-*   The server reads JSON-RPC messages from its standard input (`stdin`) and sends messages to its standard output (`stdout`).
-*   Messages may be JSON-RPC requests, notifications, responses—or a JSON-RPC [batch](https://www.jsonrpc.org/specification#batch) containing one or more requests and/or notifications.
-*   Messages are delimited by newlines, and **MUST NOT** contain embedded newlines.
-*   The server **MAY** write UTF-8 strings to its standard error (`stderr`) for logging purposes. Clients **MAY** capture, forward, or ignore this logging.
-*   The server **MUST NOT** write anything to its `stdout` that is not a valid MCP message.
-*   The client **MUST NOT** write anything to the server’s `stdin` that is not a valid MCP message.
+3. **Manages communication**
+   - Sends tool requests
+   - Receives responses
+   - Handles notifications
+   - Maintains connection
 
-Streamable HTTP
----------------
+4. **Handles errors**
+   - Reconnects automatically
+   - Retries failed requests
+   - Reports connection issues
+   - Manages timeouts
 
-In the **Streamable HTTP** transport, the server operates as an independent process that can handle multiple client connections. This transport uses HTTP POST and GET requests. Server can optionally make use of [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events) (SSE) to stream multiple server messages. This permits basic MCP servers, as well as more feature-rich servers supporting streaming and server-to-client notifications and requests.
+## Example
 
-The server **MUST** provide a single HTTP endpoint path (hereafter referred to as the **MCP endpoint**) that supports both POST and GET methods. For example, this could be a URL like `https://example.com/mcp`.
+```
+/remote-mcp connect https://api.example.com/mcp
 
-#### Security Warning
+Discovering server capabilities...
+✅ Server supports Streamable HTTP transport
+✅ SSE endpoint available
+✅ Session management enabled
 
-When implementing Streamable HTTP transport:
+Initializing connection...
+Session ID: abc123-def456-ghi789
+Available tools:
+- search_tracks
+- player_control
+- get_playback_state
 
-1.  Servers **MUST** validate the `Origin` header on all incoming connections to prevent DNS rebinding attacks
-2.  When running locally, servers **SHOULD** bind only to localhost (127.0.0.1) rather than all network interfaces (0.0.0.0)
-3.  Servers **SHOULD** implement proper authentication for all connections
+Connection established!
+```
 
-Without these protections, attackers could use DNS rebinding to interact with local MCP servers from remote websites.
+## Transport Types
 
-### Sending Messages to the Server
+### Streamable HTTP
+- **Modern standard**: Unified endpoint
+- **SSE support**: Real-time updates
+- **Session management**: Stateful connections
+- **Backwards compatible**: Works with older clients
 
-Every JSON-RPC message sent from the client **MUST** be a new HTTP POST request to the MCP endpoint.
+### HTTP+SSE (Legacy)
+- **Deprecated**: From protocol 2024-11-05
+- **Separate endpoints**: POST and SSE
+- **Limited features**: No session support
+- **Still supported**: For compatibility
 
-1.  The client **MUST** use HTTP POST to send JSON-RPC messages to the MCP endpoint.
-2.  The client **MUST** include an `Accept` header, listing both `application/json` and `text/event-stream` as supported content types.
-3.  The body of the POST request **MUST** be one of the following:
-    *   A single JSON-RPC _request_, _notification_, or _response_
-    *   An array [batching](https://www.jsonrpc.org/specification#batch) one or more _requests and/or notifications_
-    *   An array [batching](https://www.jsonrpc.org/specification#batch) one or more _responses_
-4.  If the input consists solely of (any number of) JSON-RPC _responses_ or _notifications_:
-    *   If the server accepts the input, the server **MUST** return HTTP status code 202 Accepted with no body.
-    *   If the server cannot accept the input, it **MUST** return an HTTP error status code (e.g., 400 Bad Request). The HTTP response body **MAY** comprise a JSON-RPC _error response_ that has no `id`.
-5.  If the input contains any number of JSON-RPC _requests_, the server **MUST** either return `Content-Type: text/event-stream`, to initiate an SSE stream, or `Content-Type: application/json`, to return one JSON object. The client **MUST** support both these cases.
-6.  If the server initiates an SSE stream:
-    *   The SSE stream **SHOULD** eventually include one JSON-RPC _response_ per each JSON-RPC _request_ sent in the POST body. These _responses_ **MAY** be [batched](https://www.jsonrpc.org/specification#batch).
-    *   The server **MAY** send JSON-RPC _requests_ and _notifications_ before sending a JSON-RPC _response_. These messages **SHOULD** relate to the originating client _request_. These _requests_ and _notifications_ **MAY** be [batched](https://www.jsonrpc.org/specification#batch).
-    *   The server **SHOULD NOT** close the SSE stream before sending a JSON-RPC _response_ per each received JSON-RPC _request_, unless the [session](about:/_sites/modelcontextprotocol.io/specification/2025-03-26/basic/transports#session-management) expires.
-    *   After all JSON-RPC _responses_ have been sent, the server **SHOULD** close the SSE stream.
-    *   Disconnection **MAY** occur at any time (e.g., due to network conditions). Therefore:
-        *   Disconnection **SHOULD NOT** be interpreted as the client cancelling its request.
-        *   To cancel, the client **SHOULD** explicitly send an MCP `CancelledNotification`.
-        *   To avoid message loss due to disconnection, the server **MAY** make the stream [resumable](about:/_sites/modelcontextprotocol.io/specification/2025-03-26/basic/transports#resumability-and-redelivery).
+### STDIO
+- **Local only**: Subprocess communication
+- **No HTTP**: Direct process I/O
+- **Fast**: No network overhead
+- **Simple**: Basic transport
 
-### Listening for Messages from the Server
+## Process
 
-1.  The client **MAY** issue an HTTP GET to the MCP endpoint. This can be used to open an SSE stream, allowing the server to communicate to the client, without the client first sending data via HTTP POST.
-2.  The client **MUST** include an `Accept` header, listing `text/event-stream` as a supported content type.
-3.  The server **MUST** either return `Content-Type: text/event-stream` in response to this HTTP GET, or else return HTTP 405 Method Not Allowed, indicating that the server does not offer an SSE stream at this endpoint.
-4.  If the server initiates an SSE stream:
-    *   The server **MAY** send JSON-RPC _requests_ and _notifications_ on the stream. These _requests_ and _notifications_ **MAY** be [batched](https://www.jsonrpc.org/specification#batch).
-    *   These messages **SHOULD** be unrelated to any concurrently-running JSON-RPC _request_ from the client.
-    *   The server **MUST NOT** send a JSON-RPC _response_ on the stream **unless** [resuming](about:/_sites/modelcontextprotocol.io/specification/2025-03-26/basic/transports#resumability-and-redelivery) a stream associated with a previous client request.
-    *   The server **MAY** close the SSE stream at any time.
-    *   The client **MAY** close the SSE stream at any time.
+1. **Check server metadata**
+   ```bash
+   GET https://api.example.com/.well-known/oauth-authorization-server
+   ```
 
-### Multiple Connections
+2. **Test MCP endpoint**
+   ```bash
+   POST https://api.example.com/mcp
+   Accept: application/json, text/event-stream
+   ```
 
-1.  The client **MAY** remain connected to multiple SSE streams simultaneously.
-2.  The server **MUST** send each of its JSON-RPC messages on only one of the connected streams; that is, it **MUST NOT** broadcast the same message across multiple streams.
-    *   The risk of message loss **MAY** be mitigated by making the stream [resumable](about:/_sites/modelcontextprotocol.io/specification/2025-03-26/basic/transports#resumability-and-redelivery).
+3. **Initialize connection**
+   ```json
+   {
+     "jsonrpc": "2.0",
+     "method": "initialize",
+     "params": {
+       "protocolVersion": "2025-03-26",
+       "capabilities": {}
+     },
+     "id": 1
+   }
+   ```
 
-### Resumability and Redelivery
+4. **Handle response**
+   - Extract session ID
+   - Store capabilities
+   - Set up SSE if needed
+   - Ready for requests
 
-To support resuming broken connections, and redelivering messages that might otherwise be lost:
+5. **Send tool requests**
+   ```json
+   {
+     "jsonrpc": "2.0",
+     "method": "tools/call",
+     "params": {
+       "name": "search_tracks",
+       "arguments": {"query": "Beatles"}
+     },
+     "id": 2
+   }
+   ```
 
-1.  Servers **MAY** attach an `id` field to their SSE events, as described in the [SSE standard](https://html.spec.whatwg.org/multipage/server-sent-events.html#event-stream-interpretation).
-    *   If present, the ID **MUST** be globally unique across all streams within that [session](about:/_sites/modelcontextprotocol.io/specification/2025-03-26/basic/transports#session-management)—or all streams with that specific client, if session management is not in use.
-2.  If the client wishes to resume after a broken connection, it **SHOULD** issue an HTTP GET to the MCP endpoint, and include the [`Last-Event-ID`](https://html.spec.whatwg.org/multipage/server-sent-events.html#the-last-event-id-header) header to indicate the last event ID it received.
-    *   The server **MAY** use this header to replay messages that would have been sent after the last event ID, _on the stream that was disconnected_, and to resume the stream from that point.
-    *   The server **MUST NOT** replay messages that would have been delivered on a different stream.
+6. **Process SSE stream**
+   ```
+   data: {"jsonrpc":"2.0","result":{...},"id":2}
+   
+   data: {"jsonrpc":"2.0","method":"notification",...}
+   ```
 
-In other words, these event IDs should be assigned by servers on a _per-stream_ basis, to act as a cursor within that particular stream.
+## Connection Options
 
-### Session Management
+### Headers
+```http
+Accept: application/json, text/event-stream
+Content-Type: application/json
+MCP-Protocol-Version: 2025-03-26
+Mcp-Session-Id: <session-id>
+```
 
-An MCP “session” consists of logically related interactions between a client and a server, beginning with the [initialization phase](https://modelcontextprotocol.io/specification/2025-03-26/basic/lifecycle). To support servers which want to establish stateful sessions:
+### Timeouts
+- **Connection**: 30 seconds
+- **Request**: 2 minutes default
+- **SSE stream**: Indefinite
+- **Idle**: Server-dependent
 
-1.  A server using the Streamable HTTP transport **MAY** assign a session ID at initialization time, by including it in an `Mcp-Session-Id` header on the HTTP response containing the `InitializeResult`.
-    *   The session ID **SHOULD** be globally unique and cryptographically secure (e.g., a securely generated UUID, a JWT, or a cryptographic hash).
-    *   The session ID **MUST** only contain visible ASCII characters (ranging from 0x21 to 0x7E).
-2.  If an `Mcp-Session-Id` is returned by the server during initialization, clients using the Streamable HTTP transport **MUST** include it in the `Mcp-Session-Id` header on all of their subsequent HTTP requests.
-    *   Servers that require a session ID **SHOULD** respond to requests without an `Mcp-Session-Id` header (other than initialization) with HTTP 400 Bad Request.
-3.  The server **MAY** terminate the session at any time, after which it **MUST** respond to requests containing that session ID with HTTP 404 Not Found.
-4.  When a client receives HTTP 404 in response to a request containing an `Mcp-Session-Id`, it **MUST** start a new session by sending a new `InitializeRequest` without a session ID attached.
-5.  Clients that no longer need a particular session (e.g., because the user is leaving the client application) **SHOULD** send an HTTP DELETE to the MCP endpoint with the `Mcp-Session-Id` header, to explicitly terminate the session.
-    *   The server **MAY** respond to this request with HTTP 405 Method Not Allowed, indicating that the server does not allow clients to terminate sessions.
+### Retries
+- **Connection failures**: 3 attempts
+- **Request failures**: Exponential backoff
+- **SSE reconnect**: Automatic with Last-Event-ID
+- **Session expired**: Re-initialize
 
-### Sequence Diagram
+## Common Issues
 
-### Backwards Compatibility
+### Connection Refused
+```
+❌ Failed to connect to server
+- Check server URL
+- Verify server is running
+- Check network access
+- Try with curl first
+```
 
-Clients and servers can maintain backwards compatibility with the deprecated [HTTP+SSE transport](about:/specification/2024-11-05/basic/transports#http-with-sse) (from protocol version 2024-11-05) as follows:
+### Method Not Allowed
+```
+❌ HTTP 405 Method Not Allowed
+- Server might be legacy HTTP+SSE
+- Try GET request first
+- Check for endpoint event
+```
 
-**Servers** wanting to support older clients should:
+### Unauthorized
+```
+❌ HTTP 401 Unauthorized
+- Server requires authentication
+- See /remote-mcp-auth
+- Check OAuth configuration
+```
 
-*   Continue to host both the SSE and POST endpoints of the old transport, alongside the new “MCP endpoint” defined for the Streamable HTTP transport.
-    *   It is also possible to combine the old POST endpoint and the new MCP endpoint, but this may introduce unneeded complexity.
+### Session Expired
+```
+❌ HTTP 404 Not Found with session ID
+- Session timed out
+- Re-initialize connection
+- Store new session ID
+```
 
-**Clients** wanting to support older servers should:
+## Best Practices
 
-1.  Accept an MCP server URL from the user, which may point to either a server using the old transport or the new transport.
-2.  Attempt to POST an `InitializeRequest` to the server URL, with an `Accept` header as defined above:
-    *   If it succeeds, the client can assume this is a server supporting the new Streamable HTTP transport.
-    *   If it fails with an HTTP 4xx status code (e.g., 405 Method Not Allowed or 404 Not Found):
-        *   Issue a GET request to the server URL, expecting that this will open an SSE stream and return an `endpoint` event as the first event.
-        *   When the `endpoint` event arrives, the client can assume this is a server running the old HTTP+SSE transport, and should use that transport for all subsequent communication.
+### Connection Management
+- **Test first**: Verify before full setup
+- **Store sessions**: Reuse when possible
+- **Handle reconnects**: Gracefully recover
+- **Clean shutdown**: Close SSE streams
 
-Custom Transports
------------------
+### Error Handling
+- **Expect failures**: Network is unreliable
+- **Retry smartly**: Exponential backoff
+- **Report clearly**: User-friendly messages
+- **Fallback options**: Legacy transport support
 
-Clients and servers **MAY** implement additional custom transport mechanisms to suit their specific needs. The protocol is transport-agnostic and can be implemented over any communication channel that supports bidirectional message exchange.
+### Performance
+- **Reuse connections**: Don't reconnect often
+- **Batch requests**: When possible
+- **Stream responses**: Use SSE effectively
+- **Monitor health**: Track connection state
 
-Implementers who choose to support custom transports **MUST** ensure they preserve the JSON-RPC message format and lifecycle requirements defined by MCP. Custom transports **SHOULD** document their specific connection establishment and message exchange patterns to aid interoperability.
+### Security
+- **Validate origins**: Check server identity
+- **Use HTTPS**: Always for remote
+- **Handle tokens**: If auth required
+- **Limit scope**: Request minimal access
+
+## Configuration
+
+### Environment Variables
+```bash
+MCP_PROTOCOL_VERSION=2025-03-26
+MCP_TIMEOUT=120000
+MCP_RETRY_ATTEMPTS=3
+```
+
+### Debug Mode
+```bash
+DEBUG=mcp:* node client.js  # Verbose logging
+```
+
+### Custom Headers
+```javascript
+{
+  headers: {
+    'User-Agent': 'MCP-Client/1.0',
+    'X-Custom-Header': 'value'
+  }
+}
+```
+
+## Transport Detection
+
+### Auto-detection Flow
+1. Try Streamable HTTP first
+2. Check for 405 error
+3. Fall back to legacy HTTP+SSE
+4. Extract endpoint from SSE
+5. Continue with legacy flow
+
+### Manual Override
+```
+/remote-mcp connect https://api.example.com/mcp --transport=streamable
+/remote-mcp connect https://api.example.com/mcp --transport=legacy
+```
+
+## Session Management
+
+### With Sessions
+- Server provides `Mcp-Session-Id`
+- Include in all requests
+- Handle session expiry
+- Support session deletion
+
+### Without Sessions
+- Stateless operation
+- No session header
+- Each request independent
+- Simpler but limited
+
+## Notes
+
+- Prefer Streamable HTTP transport
+- Support legacy for compatibility
+- Handle all error cases gracefully
+- Test thoroughly before production
+- Monitor connection health actively

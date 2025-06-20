@@ -1,66 +1,121 @@
-Analyze GitHub issue for technical completeness and requirements: $ARGUMENTS
+# Issue Analyze
 
-EXECUTION STEPS:
-1. **Get Issue Details**
-   ```bash
-   gh issue view $ARGUMENTS --json title,body,labels,assignees,comments
-   ```
+Automatically analyze GitHub issues for technical completeness and generate missing requirements.
 
-2. **Content Analysis**
-   - Feature description completeness assessment
-   - Technical requirement gaps identification
-   - User story clarity evaluation
-   - Business value articulation check
+```
+/issue-analyze <issue-number>
+```
 
-3. **Generate Missing Requirements**
-   - API design considerations
-   - Database schema requirements
-   - UI/UX specifications
-   - Performance requirements
-   - Security considerations
-   - Integration points
+## What it does
 
-4. **Create Acceptance Criteria**
-   - Functional requirements → testable criteria
-   - Edge cases identification
-   - Error handling scenarios
-   - User experience validation points
+1. **Fetch issue content**
+   - Get issue title, body, labels, and comments
+   - Extract existing requirements and specifications
+   - Identify stakeholders and assignees
+   - Check for related issues and dependencies
 
-5. **Implementation Suggestions**
-   - Technical approach recommendations
-   - Architecture pattern suggestions
-   - Technology stack considerations
-   - Development phases breakdown
+2. **Analyze completeness**
+   - Assess feature description clarity
+   - Identify missing technical requirements
+   - Evaluate user story quality
+   - Check for business value articulation
 
-6. **Post Analysis Comment**
-   ```markdown
-   ## 🔍 技術要件分析
+3. **Generate requirements**
+   - Create missing API specifications
+   - Define database schema needs
+   - Suggest UI/UX requirements
+   - Add performance and security criteria
 
-   ### 📋 不足要件の特定
-   [Specific missing requirements and questions]
+4. **Post analysis comment**
+   - Add comprehensive technical analysis
+   - Propose acceptance criteria
+   - Suggest implementation approach
+   - Identify risks and dependencies
 
-   ### ✅ 推奨受け入れ基準
-   - [ ] [Actionable, testable criteria]
-   - [ ] [User experience validation]
-   - [ ] [Error handling verification]
+## Example
 
-   ### 🔧 実装アプローチ提案
-   1. **推奨アーキテクチャ**: [Pattern recommendation]
-   2. **技術選択**: [Technology suggestions with rationale]
-   3. **開発フェーズ**: [Phase breakdown]
+```
+/issue-analyze 123
 
-   ### ⚠️ 技術リスク
-   - **リスク1**: [Risk description] → [Mitigation strategy]
-   - **依存関係**: [Dependencies and blockers]
+Fetching issue #123 from GitHub...
+Analyzing technical completeness...
 
-   ### 📊 次のステップ
-   [Recommended immediate actions]
+## 🔍 Technical Requirements Analysis
 
-   ---
-   *🤖 自動分析実行時刻: $(date -u +"%Y-%m-%d %H:%M UTC")*
-   ```
+### 📋 Missing Requirements Identified
+- API endpoint specifications not defined
+- Error handling scenarios unclear
+- Performance requirements missing
+- No integration test criteria
 
-COMPLETION CRITERIA:
-- Analysis comment posted successfully
-- No labels modified (labeling is separate responsibility)
-- Analysis focuses purely on technical content
+### ✅ Recommended Acceptance Criteria
+- [ ] API returns data within 200ms (p95)
+- [ ] Error messages follow RFC 7807 format
+- [ ] Integration tests cover all endpoints
+- [ ] Documentation includes OpenAPI spec
+
+### 🔧 Implementation Approach
+1. **Architecture**: Repository pattern with caching
+2. **Technology**: FastAPI + Redis + PostgreSQL
+3. **Phases**: 
+   - Phase 1: Core API implementation
+   - Phase 2: Caching layer
+   - Phase 3: Monitoring setup
+
+### ⚠️ Technical Risks
+- **Performance**: Large dataset queries → Implement pagination
+- **Dependencies**: External API rate limits → Add circuit breaker
+
+### 📊 Next Steps
+1. Clarify data retention requirements
+2. Define SLA for API availability
+3. Create technical design document
+
+---
+*🤖 Auto-analyzed: 2024-01-15 14:30 UTC*
+```
+
+## Analysis Components
+
+The automated analysis evaluates and enhances:
+
+1. **Functional Requirements** - Core features and behaviors
+2. **Non-functional Requirements** - Performance, security, scalability
+3. **Technical Specifications** - API design, data models, architecture
+4. **Acceptance Criteria** - Testable success conditions
+5. **Implementation Approach** - Technical recommendations
+6. **Risk Assessment** - Technical challenges and mitigations
+7. **Dependencies** - External systems and blockers
+8. **Effort Estimation** - Complexity and time considerations
+
+## Requirements Templates
+
+### API Requirements
+- Endpoint definitions with methods
+- Request/response schemas
+- Authentication requirements
+- Rate limiting specifications
+- Error response formats
+
+### Database Requirements
+- Entity relationships
+- Index requirements
+- Migration strategies
+- Data retention policies
+- Backup considerations
+
+### UI/UX Requirements
+- User flow descriptions
+- Accessibility standards
+- Responsive design needs
+- Performance targets
+- Error state handling
+
+## Best Practices
+
+- Focus on technical gaps, not process
+- Generate actionable requirements
+- Propose concrete solutions
+- Include testable criteria
+- Consider edge cases
+- Maintain neutral, helpful tone

@@ -1,148 +1,223 @@
-# MCP Best Practices Custom Commands
+# Claude Commands Reference
 
-These custom slash commands help you follow MCP (Model Context Protocol) best practices when developing your Spotify Remote MCP server.
+Custom commands for efficient development workflows with Claude Code.
 
 ## Available Commands
 
-### `/mcp-setup`
-Initialize your MCP server with best practices configuration.
-- Sets up Pino logger with file-based logging
-- Creates proper directory structure
-- Configures environment variables
-- Sets up TypeScript with strict mode
-- Creates .env template with MCP-specific variables
+### Development Commands
 
-**Usage:**
+#### `/commit` - Smart Git Commits
+Create well-formatted git commits following repository conventions.
+- Analyzes all changes (staged and unstaged)
+- Generates descriptive commit messages
+- Follows repository commit style
+- Adds Claude Code attribution
+
+```bash
+claude /commit
+```
+
+#### `/tag` - Semantic Version Management
+Manage git tags with semantic versioning.
+- **Subcommands:**
+  - `list` - Show all tags with descriptions
+  - `create <version>` - Create annotated tag
+  - `push` - Push tags to remote
+  - `delete <tag>` - Remove local/remote tag
+
+```bash
+claude /tag list
+claude /tag create v1.2.0
+claude /tag push
+```
+
+#### `/release` - Automated Release Process
+Complete release workflow with validation.
+- Runs comprehensive tests
+- Updates version in package.json
+- Creates git tag
+- Generates changelog
+- Pushes to remote
+
+```bash
+claude /release patch
+claude /release minor
+claude /release major
+```
+
+#### `/update-docs` - Documentation Generation
+Generate LLM-optimized documentation with file references.
+- Creates comprehensive docs in `docs/`
+- Includes architecture, build, testing guides
+- Generates file catalog
+- Updates README with links
+
+```bash
+claude /update-docs
+```
+
+#### `/sync-doc` - Cross-Project Documentation
+Synchronize documentation across related projects.
+- Detects documentation files
+- Compares with reference project
+- Updates with consistent format
+- Preserves project-specific content
+
+```bash
+claude /sync-doc ../reference-project
+```
+
+### MCP-Specific Commands
+
+#### `/mcp-setup` - Initialize MCP Server
+Set up MCP server with best practices.
+- Configures Pino logger
+- Creates directory structure
+- Sets up environment variables
+- Configures TypeScript strict mode
+
 ```bash
 claude /mcp-setup
 ```
 
-### `/mcp-validate`
-Validate your project against MCP best practices.
-- Checks environment configuration
-- Validates logger implementation (no stdio output)
-- Verifies package.json setup
-- Checks TypeScript configuration
-- Validates error handling patterns
-- Ensures file size limits
-- Runs compilation and linting
+#### `/mcp-validate` - Validate MCP Compliance
+Check project against MCP best practices.
+- No stdio output validation
+- Logger implementation check
+- Package.json verification
+- Error handling patterns
+- File size limits
 
-**Usage:**
 ```bash
 claude /mcp-validate
 ```
 
-### `/mcp-info`
-Display server information and diagnostics.
-- Shows version and configuration status
-- Lists available MCP tools
-- Checks dependencies
-- Provides quick start guide
-- Detects common issues
+#### `/mcp-info` - Server Diagnostics
+Display server information and status.
+- Version and configuration
+- Available MCP tools
+- Dependency checks
+- Common issue detection
 
-**Usage:**
 ```bash
 claude /mcp-info
 ```
 
-### `/mcp-test`
-Run comprehensive tests with MCP validation.
+#### `/mcp-test` - Comprehensive Testing
+Run tests with MCP validation.
 - Type checking
-- Linting
-- Code formatting
+- Linting and formatting
 - Unit tests with coverage
-- MCP-specific checks (no stdio, proper error handling)
+- MCP-specific checks
 - Integration tests
 
-**Usage:**
 ```bash
 claude /mcp-test
 ```
 
-### `/mcp-dev`
-Development workflow helper for MCP best practices.
+#### `/mcp-dev` - Development Tools
+MCP development workflow helpers.
+- **Subcommands:**
+  - `tool <name>` - Create new MCP tool
+  - `check` - Environment readiness
+  - `dev` - Run with debug logging
+  - `watch` - TDD watch mode
+  - `coverage` - Coverage report
 
-**Subcommands:**
-- `tool <name>` - Create a new MCP tool with tests
-- `check` - Check development environment readiness
-- `dev` - Run development server with debug logging
-- `watch` - Run tests in watch mode (TDD)
-- `coverage` - Generate test coverage report
-
-**Usage:**
 ```bash
 claude /mcp-dev tool search_albums
-claude /mcp-dev check
 claude /mcp-dev watch
 ```
 
-### `/mcp-release`
-Prepare for release following MCP best practices.
-- Git and version control checks
-- Code quality validation
+#### `/mcp-release` - Release Preparation
+Prepare MCP server for release.
+- Git status validation
+- Code quality checks
 - Security audit
 - Documentation verification
 - Package size validation
-- Build process checks
 
-**Usage:**
 ```bash
 claude /mcp-release
 ```
 
-## MCP Best Practices Summary
+### Utility Commands
 
-These commands enforce the following MCP best practices:
+#### `/tsr-dce` - Dead Code Elimination
+Find and remove unused TypeScript exports.
+- Analyzes export usage
+- Identifies dead code
+- Safe removal options
+- Preserves entry points
 
-1. **No stdio Output**: MCP servers must not output to stdout/stderr
-2. **File-based Logging**: Use Pino logger writing to files
-3. **Environment Variables**: Proper configuration with sensible defaults
-4. **Error Handling**: Use Result types instead of throwing exceptions
-5. **TypeScript**: Strict mode enabled
-6. **Testing**: Comprehensive test coverage with Vitest
-7. **File Size**: Keep files under 500 lines
-8. **Version Management**: Dynamic version reading from package.json
-9. **Tool Descriptions**: Clear, helpful descriptions for all tools
-10. **Info Command**: Diagnostic command for troubleshooting
+```bash
+claude /tsr-dce analyze
+claude /tsr-dce remove --dry-run
+```
 
-## Quick Start
+#### `/orchstrator` - Multi-Agent Orchestration
+Coordinate complex multi-step tasks.
+- Task decomposition
+- Parallel execution
+- Progress tracking
+- Result aggregation
 
-1. Initialize your project:
-   ```bash
-   claude /mcp-setup
-   ```
+```bash
+claude /orchstrator "Refactor authentication system"
+```
 
-2. Validate setup:
-   ```bash
-   claude /mcp-validate
-   ```
+## Best Practices
 
-3. Create a new tool:
-   ```bash
-   claude /mcp-dev tool my_tool_name
-   ```
+### Git Workflow
+1. Make changes
+2. Run `/commit` for smart commits
+3. Use `/tag` for version management
+4. Run `/release` for full release
 
-4. Run tests in watch mode:
-   ```bash
-   claude /mcp-dev watch
-   ```
+### MCP Development
+1. Initialize with `/mcp-setup`
+2. Validate with `/mcp-validate`
+3. Develop with `/mcp-dev watch`
+4. Release with `/mcp-release`
 
-5. Check release readiness:
-   ```bash
-   claude /mcp-release
-   ```
+### Documentation
+1. Generate with `/update-docs`
+2. Sync with `/sync-doc`
+3. Keep docs in `docs/` directory
+4. Reference specific files
 
 ## Environment Variables
 
-The commands use these MCP-specific environment variables:
+### MCP-Specific
+- `SPOTIFY_MCP_LOG_FILE` - Log file path
+- `SPOTIFY_MCP_LOG_LEVEL` - Log level
+- `SPOTIFY_MCP_CONSOLE_LOGGING` - Dev console output
 
-- `SPOTIFY_MCP_LOG_FILE`: Path to log file (with automatic fallback)
-- `SPOTIFY_MCP_LOG_LEVEL`: Log level (fatal, error, warn, info, debug, trace)
-- `SPOTIFY_MCP_CONSOLE_LOGGING`: Enable console output for development only
+### General
+- `GITHUB_TOKEN` - For release automation
+- `NPM_TOKEN` - For package publishing
+
+## Quick Reference
+
+```bash
+# Daily Development
+claude /mcp-dev watch        # TDD mode
+claude /commit               # Smart commits
+claude /mcp-validate         # Pre-commit check
+
+# Release Process
+claude /mcp-test            # Full test suite
+claude /release minor       # Version bump
+claude /tag push           # Push tags
+
+# Documentation
+claude /update-docs        # Generate docs
+claude /mcp-info          # Check status
+```
 
 ## Notes
 
-- Always run `/mcp-validate` before committing changes
-- Use `/mcp-dev watch` for TDD development workflow
-- Run `/mcp-release` before publishing to npm
-- Check `/mcp-info` for current server status and configuration
+- Commands follow repository conventions
+- All paths use absolute references
+- Documentation is LLM-optimized
+- Tests required for all changes

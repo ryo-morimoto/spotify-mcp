@@ -1,110 +1,285 @@
 Split complex GitHub issue into manageable sub-tasks: $ARGUMENTS
 
+OVERVIEW:
+This command analyzes a complex GitHub issue and intelligently splits it into smaller, manageable sub-tasks. It ensures each child issue is independently deliverable, properly scoped, and maintains clear relationships with the parent issue.
+
 EXECUTION STEPS:
-1. **Parent Issue Analysis**
+
+1. **Parent Issue Deep Analysis**
    ```bash
-   gh issue view $ARGUMENTS --json title,body,labels,assignees
+   # Fetch complete issue details
+   gh issue view $ARGUMENTS --json number,title,body,labels,assignees,milestone,state > parent_issue.json
+   
+   # Extract issue number and title
+   PARENT_NUMBER=$(jq -r '.number' parent_issue.json)
+   PARENT_TITLE=$(jq -r '.title' parent_issue.json)
+   PARENT_LABELS=$(jq -r '.labels[].name' parent_issue.json | paste -sd "," -)
+   
+   # Analyze issue complexity
+   echo "📊 Analyzing issue #$PARENT_NUMBER: $PARENT_TITLE"
    ```
 
-2. **Determine Split Strategy**
-   Based on issue content, choose optimal approach:
-   - **Technical Stack Split**: Frontend + Backend + Database + Testing
-   - **Feature Phase Split**: Core MVP + Enhancements + Polish
-   - **Team Boundary Split**: UI Team + API Team + Data Team
-   - **User Journey Split**: Step-by-step user interaction flows
+2. **Intelligent Split Strategy Selection**
+   Based on issue analysis, select optimal decomposition approach:
+   
+   **a) Technical Layer Split** (for full-stack features)
+   - Database Schema & Migration
+   - Backend API & Business Logic
+   - Frontend UI Components
+   - Integration & E2E Testing
+   - Documentation & API Spec
+   
+   **b) User Journey Split** (for workflow features)
+   - Entry Point & Navigation
+   - Core User Action Flow
+   - Edge Cases & Error Handling
+   - Success States & Feedback
+   
+   **c) Incremental Enhancement Split** (for improvements)
+   - Basic Implementation (MVP)
+   - Performance Optimization
+   - UX Polish & Animations
+   - Advanced Features
+   
+   **d) Cross-Cutting Concerns Split** (for system-wide changes)
+   - Security & Authentication
+   - Logging & Monitoring
+   - Caching & Performance
+   - Configuration & Deployment
 
-3. **Generate Child Issue Plan**
-   Create 3-7 child issues with:
-   - Clear scope boundaries
-   - 1-3 day effort each
-   - Independent deliverability
-   - Logical dependency order
-
-4. **Create Child Issues**
+3. **Generate Comprehensive Child Issue Plan**
    ```bash
-   # Frontend child issue
-   gh issue create \
-     --title "[#$ARGUMENTS] Frontend - [Specific Component]" \
-     --body "$(generate_child_issue_body frontend)" \
-     --label "frontend,child-task,$PARENT_LABELS" \
-     --assignee "@me"
+   # Create split analysis
+   cat << EOF > split_analysis.md
+   ## Issue Split Analysis for #$PARENT_NUMBER
    
-   # Backend child issue  
-   gh issue create \
-     --title "[#$ARGUMENTS] Backend - [Specific API/Logic]" \
-     --body "$(generate_child_issue_body backend)" \
-     --label "backend,child-task,$PARENT_LABELS"
+   ### Selected Strategy: [STRATEGY_NAME]
+   Rationale: [Why this strategy fits best]
    
-   # Continue for all identified components...
+   ### Proposed Child Issues:
+   1. **[Component A]** - [Brief description] (Est: X days)
+   2. **[Component B]** - [Brief description] (Est: Y days)
+   3. **[Component C]** - [Brief description] (Est: Z days)
+   
+   ### Dependency Graph:
+   \`\`\`mermaid
+   graph LR
+     A[Component A] --> B[Component B]
+     B --> C[Component C]
+   \`\`\`
+   
+   ### Risk Factors:
+   - [Potential blockers or challenges]
+   - [Integration complexity points]
+   EOF
    ```
 
-5. **Update Parent Issue**
+4. **Create Well-Structured Child Issues**
    ```bash
-   # Add epic label
-   gh issue edit $ARGUMENTS --add-label "epic"
+   # Function to create child issues with rich content
+   create_child_issue() {
+     local order=$1
+     local component=$2
+     local title=$3
+     local estimate=$4
+     local deps=$5
+     
+     gh issue create \
+       --title "[#$PARENT_NUMBER-$order] $title" \
+       --body "$(generate_rich_child_body "$component" "$title" "$estimate" "$deps")" \
+       --label "child-task,${component,,},$PARENT_LABELS" \
+       --milestone "$(jq -r '.milestone.title // empty' parent_issue.json)" \
+       --assignee "$(jq -r '.assignees[0].login // empty' parent_issue.json)"
+   }
    
-   # Add child issue tracking comment
-   gh issue comment $ARGUMENTS --body "
-   ## 📋 子タスク一覧
+   # Create each child issue
+   create_child_issue 1 "backend" "API endpoints for $FEATURE" "2d" "none"
+   create_child_issue 2 "frontend" "UI components for $FEATURE" "3d" "#xxx"
+   create_child_issue 3 "testing" "E2E tests for $FEATURE" "1d" "#xxx,#yyy"
+   ```
+
+5. **Enhanced Parent Issue Update**
+   ```bash
+   # Add epic label and metadata
+   gh issue edit $PARENT_NUMBER \
+     --add-label "epic,needs-refinement" \
+     --remove-label "ready-for-development"
    
-   ### 🎯 分割戦略: [Selected strategy]
+   # Create comprehensive tracking comment
+   gh issue comment $PARENT_NUMBER --body "$(cat << 'EOF'
+   ## 🎯 Issue Decomposition Complete
    
-   - [ ] #[CHILD1] - Frontend コンポーネント (推定: 2日)
-   - [ ] #[CHILD2] - Backend API実装 (推定: 3日)  
-   - [ ] #[CHILD3] - Database スキーマ (推定: 1日)
-   - [ ] #[CHILD4] - テスト実装 (推定: 2日)
+   ### 📋 Child Tasks Overview
    
-   ### 🔗 依存関係
-   [CHILD3] → [CHILD2] → [CHILD1] → [CHILD4]
+   | # | Task | Component | Estimate | Status | Assignee |
+   |---|------|-----------|----------|---------|----------|
+   | 1 | #XXX | Backend   | 2 days   | 🔵 Open | @assignee |
+   | 2 | #YYY | Frontend  | 3 days   | 🔵 Open | @assignee |
+   | 3 | #ZZZ | Testing   | 1 day    | 🔵 Open | @assignee |
    
-   ### 📅 推奨開発順序
-   1. Database schema setup
-   2. Backend API implementation
-   3. Frontend integration
-   4. End-to-end testing
+   ### 🔄 Workflow Sequence
+   ```mermaid
+   gantt
+     title Development Timeline
+     dateFormat YYYY-MM-DD
+     section Backend
+       API Implementation :a1, 2024-01-01, 2d
+     section Frontend  
+       UI Development :a2, after a1, 3d
+     section Testing
+       E2E Tests :a3, after a2, 1d
+   ```
+   
+   ### 📊 Progress Tracking
+   - **Total Estimate**: 6 days
+   - **Parallelizable**: Backend prep can start immediately
+   - **Critical Path**: Backend → Frontend → Testing
+   
+   ### 🚀 Quick Links
+   - [View all child tasks](../../issues?q=is:issue+%23$PARENT_NUMBER)
+   - [Project board](../../projects/1)
    
    ---
-   *✂️ 自動分割実行: $(date -u +"%Y-%m-%d %H:%M UTC")*
-   "
+   *🤖 Automated split by issue-split command on $(date -u +"%Y-%m-%d %H:%M UTC")*
+   EOF
+   )"
    ```
 
-CHILD ISSUE TEMPLATE FUNCTION:
+HELPER FUNCTIONS:
+
 ```bash
-generate_child_issue_body() {
+# Generate rich child issue body with all necessary context
+generate_rich_child_body() {
   local component=$1
+  local title=$2
+  local estimate=$3
+  local dependencies=$4
+  
   cat << EOF
-## 🔗 親Issue
-#$ARGUMENTS - [Parent Title]
+## 🎯 Parent Context
+**Epic**: #$PARENT_NUMBER - $PARENT_TITLE
+**Component**: $component
+**Estimated Effort**: $estimate
 
-## 📝 このタスクのスコープ
-[Specific responsibilities for this component]
+## 📝 Task Description
+$title
 
-## ✅ 受け入れ基準
-- [ ] [Component-specific acceptance criteria]
-- [ ] [Integration requirements]
-- [ ] [Testing completion criteria]
+### Scope Definition
+- **What's Included**:
+  - [Specific deliverable 1]
+  - [Specific deliverable 2]
+  
+- **What's NOT Included**:
+  - [Out of scope item 1]
+  - [Handled in different task]
 
-## 🔧 技術仕様
-- **関連ファイル**: [Expected files to modify]
-- **推定工数**: 1-3日
-- **依存関係**: [Dependency on other child tasks]
+## ✅ Acceptance Criteria
+\`\`\`gherkin
+Given [initial context]
+When [action is performed]
+Then [expected outcome]
+\`\`\`
 
-## 🧪 Definition of Done
-- [ ] Code implementation complete
-- [ ] Unit tests written and passing
-- [ ] Integration tests passing  
-- [ ] Code review completed
+- [ ] Implementation matches acceptance criteria
+- [ ] Unit tests cover all new code (>80% coverage)
+- [ ] Integration tests pass
 - [ ] Documentation updated
+- [ ] Code review approved
+
+## 🔧 Technical Details
+### Implementation Approach
+[High-level technical approach]
+
+### Key Files/Modules
+- \`src/path/to/file.ts\` - [What to modify]
+- \`tests/path/to/test.ts\` - [Test coverage needed]
+
+### API/Interface Changes
+\`\`\`typescript
+// Example interface or API change
+interface NewFeature {
+  // ...
+}
+\`\`\`
+
+## 🔗 Dependencies
+$( [ "$dependencies" != "none" ] && echo "**Blocked by**: $dependencies" || echo "**No blockers** - Can start immediately" )
+
+### Integration Points
+- [ ] Coordinate with [other component]
+- [ ] Ensure compatibility with [existing feature]
+
+## 🧪 Testing Strategy
+1. **Unit Tests**: Cover individual functions/methods
+2. **Integration Tests**: Verify component interactions
+3. **E2E Tests**: User journey validation
+
+## 📚 Resources
+- [Design doc](../docs/design.md)
+- [API specification](../docs/api.md)
+- [Related PR/Issue](#)
 
 ---
-*🤖 親Issue #$ARGUMENTS から自動生成*
+*🤖 Generated from epic #$PARENT_NUMBER by issue-split command*
 EOF
+}
+
+# Analyze issue complexity and recommend split strategy
+analyze_issue_complexity() {
+  local body=$1
+  local labels=$2
+  
+  # Count indicators of complexity
+  local line_count=$(echo "$body" | wc -l)
+  local has_frontend=$(echo "$labels" | grep -c "frontend")
+  local has_backend=$(echo "$labels" | grep -c "backend")
+  local has_api=$(echo "$body" | grep -ci "api\|endpoint")
+  local has_ui=$(echo "$body" | grep -ci "ui\|interface\|component")
+  
+  # Recommend strategy based on indicators
+  if [ $has_frontend -gt 0 ] && [ $has_backend -gt 0 ]; then
+    echo "technical-layer"
+  elif [ $has_api -gt 0 ] && [ $has_ui -gt 0 ]; then
+    echo "full-stack"
+  elif [ $line_count -gt 50 ]; then
+    echo "incremental"
+  else
+    echo "user-journey"
+  fi
 }
 ```
 
 COMPLETION CRITERIA:
-- 3-7 child issues created successfully
-- Parent issue labeled as "epic"
-- Child issue tracking comment added
-- Proper naming convention applied
-- Dependencies documented
+- ✅ Parent issue properly labeled as "epic"
+- ✅ 3-7 child issues created with clear scope
+- ✅ Each child issue has acceptance criteria
+- ✅ Dependencies documented and visualized
+- ✅ Progress tracking comment added
+- ✅ Consistent naming convention applied
+- ✅ Estimates provided for planning
+- ✅ Integration points identified
+
+ERROR HANDLING:
+```bash
+# Validate parent issue exists and is open
+if ! gh issue view $ARGUMENTS &>/dev/null; then
+  echo "❌ Error: Issue #$ARGUMENTS not found"
+  exit 1
+fi
+
+# Check if already split
+if gh issue view $ARGUMENTS --json labels | jq -e '.labels[] | select(.name == "epic")' &>/dev/null; then
+  echo "⚠️  Warning: Issue #$ARGUMENTS is already marked as epic"
+  read -p "Continue with re-split? (y/n) " -n 1 -r
+  [[ ! $REPLY =~ ^[Yy]$ ]] && exit 1
+fi
+```
+
+BEST PRACTICES:
+1. **Size child issues appropriately** - Each should be 1-3 days of work
+2. **Maintain independence** - Child issues should be deployable separately
+3. **Document dependencies** - Clear blocking relationships
+4. **Include testing** - Each child issue includes its own tests
+5. **Consider parallelization** - Identify work that can happen simultaneously
+6. **Add visual aids** - Use mermaid diagrams for clarity
+7. **Link everything** - Cross-reference related issues and docs

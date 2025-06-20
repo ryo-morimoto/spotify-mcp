@@ -1,75 +1,108 @@
 # Create Command
 
-Guide for creating new custom Claude commands with proper structure.
+Guide for creating new custom Claude commands with proper structure and conventions.
 
-## Process:
+## Usage
 
-### 1. Understanding Purpose
-- What problem does this command solve?
-- Who will use this command?
-- What is the expected output?
-- How will users interact with it?
+```
+/create-command <command-name>
+```
 
-### 2. Category Classification
-Determine command type:
-- **Planning**: Project setup, architecture decisions
-- **Implementation**: Code generation, feature development
-- **Analysis**: Code review, performance analysis
-- **Testing**: Test creation, validation
-- **Documentation**: Docs generation, updates
-- **Workflow**: Multi-step processes
-- **Utility**: Helper commands, tools
+## What it does
 
-### 3. Pattern Selection
-Study similar existing commands:
-- Analyze structure and flow
-- Note common patterns
-- Identify reusable components
-- Follow established conventions
+1. **Analyzes command purpose**
+   - Identifies problem being solved
+   - Determines target users
+   - Defines expected outcomes
+   - Plans interaction patterns
 
-### 4. Command Location
-Choose appropriate location:
-- **Project-specific**: `.claude/commands/`
-- **User-level**: `~/.claude/commands/`
-- Consider reusability and context
+2. **Selects appropriate template**
+   - Planning commands for architecture
+   - Implementation for code generation
+   - Analysis for code review
+   - Workflow for multi-step processes
 
-### 5. Command Structure
-Create with these sections:
-- **Title**: Clear, action-oriented name
-- **Description**: One-line summary
-- **Usage**: How to invoke with parameters
-- **Process**: Step-by-step instructions
-- **Examples**: Concrete usage examples
-- **Output**: Expected results
-- **Notes**: Special considerations
+3. **Creates command structure**
+   - Generates markdown file
+   - Adds required sections
+   - Includes usage examples
+   - Sets up parameter handling
 
-## Template:
+4. **Validates and registers**
+   - Checks naming conventions
+   - Verifies file location
+   - Tests command execution
+   - Updates command index
+
+## Example
+
+```
+/create-command sync-database
+
+Creating new command: sync-database
+
+✓ Created .claude/commands/sync-database.md
+✓ Added command structure with:
+  - Title and description
+  - Usage section with parameters
+  - Step-by-step process
+  - Example outputs
+  - Error handling notes
+
+Command created successfully!
+Test with: /sync-database
+```
+
+## Command Structure Template
+
 ```markdown
 # Command Name
 
-Brief description of what this command does.
+One-line description of what this command does.
 
-## Usage:
-`/command-name [arguments]`
+## Usage
 
-## Process:
-1. First step
-2. Second step
-3. Third step
+\```
+/command-name [options] <arguments>
+\```
 
-## Examples:
-- Example 1
-- Example 2
+## What it does
 
-## Notes:
-- Important considerations
-- Limitations
+1. **First major step**
+   - Sub-step details
+   - Implementation notes
+
+2. **Second major step**
+   - Processing logic
+   - Validation rules
+
+3. **Third major step**
+   - Output formatting
+   - Success criteria
+
+4. **Final step**
+   - Cleanup actions
+   - Result summary
+
+## Example
+
+\```
+/command-name --option value
+
+Expected output here...
+\```
+
+## Notes
+
+- Special considerations
+- Error handling
+- Performance tips
 ```
 
-## Best Practices:
-- Keep commands focused and single-purpose
-- Include parameter validation
-- Provide helpful error messages
-- Document expected inputs/outputs
-- Consider edge cases
-- Test thoroughly before finalizing
+## Best Practices
+
+- **Single Responsibility**: Each command should do one thing well
+- **Clear Naming**: Use verb-noun format (e.g., create-test, analyze-code)
+- **Consistent Structure**: Follow the standard section layout
+- **Helpful Examples**: Include realistic usage scenarios
+- **Error Guidance**: Document common issues and solutions

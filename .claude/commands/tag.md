@@ -2,89 +2,214 @@
 
 Create semantic version tags with user-focused descriptions of capabilities and features.
 
-## Usage:
-- `/tag` - Create a tag for the current commit
-- `/tag [version]` - Create a specific version tag (e.g., `/tag v0.2.0`)
-- `/tag --list` - List all tags with descriptions
+## Usage
 
-## Process:
-
-### 1. Determine Version Number
-- Check existing tags with `git tag -l`
-- Follow semantic versioning (MAJOR.MINOR.PATCH):
-  - MAJOR: Breaking changes or complete features
-  - MINOR: New capabilities or significant additions
-  - PATCH: Bug fixes or small improvements
-
-### 2. Analyze Changes Since Last Tag
-- Run `git log [last-tag]..HEAD --oneline`
-- Identify user-facing changes and capabilities
-- Focus on what users can now do, not how it's implemented
-
-### 3. Write User-Focused Description
-- **Title**: What can users do now? (NOT technical details)
-- **Body**: List specific capabilities added
-- Avoid technical jargon unless necessary
-- Think from the user's perspective
-
-### 4. Create Annotated Tag
-- Use `git tag -a [version] -m "[description]"`
-- For past commits: `git tag -a [version] [commit-hash] -m "[description]"`
-
-### 5. Verify Tag Creation
-- Run `git tag -l -n` to confirm
-- Check tag points to correct commit
-
-## Examples:
-
-### Good Tag Descriptions:
 ```
-v0.1.0 - Foundation for Spotify control capabilities
-- Search tracks functionality
-- Playback control methods (play, pause, next, previous)
-- Get current playback state
-
-v0.2.0 - Spotify control via MCP protocol
-- Control Spotify through Claude
-- OAuth authentication support
-- Real-time playback status
-
-v1.0.0 - Full Spotify remote control
-- Complete MCP integration
-- Automatic token refresh
-- Error recovery and retry logic
+/tag
+/tag v0.2.0
+/tag --list
 ```
 
-### Bad Tag Descriptions (Too Technical):
+## What it does
+
+1. **Determines version**
+   - Checks existing tags
+   - Follows semantic versioning
+   - Suggests next version
+   - Validates version format
+
+2. **Analyzes changes**
+   - Reviews commits since last tag
+   - Identifies user-facing features
+   - Groups related changes
+   - Highlights capabilities
+
+3. **Creates description**
+   - Focuses on user capabilities
+   - Avoids technical jargon
+   - Lists concrete features
+   - Explains what's new
+
+4. **Applies tag**
+   - Creates annotated tag
+   - Verifies tag creation
+   - Shows tag details
+   - Confirms success
+
+## Example
+
 ```
-v0.1.0 - Implement Spotify API client with neverthrow
-v0.2.0 - Add OAuth PKCE flow implementation
-v1.0.0 - Refactor error handling with Result types
+/tag
+
+Current version: v0.1.0
+Commits since last tag: 15
+
+Suggested version: v0.2.0 (minor - new features)
+
+Changes include:
+✨ OAuth authentication flow
+🔌 SSE endpoint for real-time updates
+♻️ Improved error handling
+
+Tag description:
+"v0.2.0: Spotify control via MCP protocol
+
+Features:
+- 🔐 Authenticate with Spotify account
+- 🎵 Control playback remotely
+- 🔌 Real-time status updates
+- ♻️ Automatic reconnection"
+
+Create this tag? [Y/n]
 ```
 
-## Tag Naming Rules:
+## Version Guidelines
 
-### Version Guidelines:
-- Start with `v` prefix (e.g., `v0.1.0`)
-- Use semantic versioning strictly
-- Pre-release: `v0.x.x` (not feature-complete)
-- Stable release: `v1.0.0` (ready for production use)
+### Semantic Versioning
+- **MAJOR (1.0.0)**: Breaking changes or complete features
+- **MINOR (0.1.0)**: New capabilities or significant additions  
+- **PATCH (0.0.1)**: Bug fixes or small improvements
 
-### Description Guidelines:
-- Lead with what users can do
-- List capabilities, not implementations
-- Use present tense
-- Keep it concise but complete
-- No technical implementation details in title
+### Version Progression
+```
+v0.1.0 → v0.2.0  # New feature
+v0.2.0 → v0.2.1  # Bug fix
+v0.2.1 → v1.0.0  # Production ready
+v1.0.0 → v2.0.0  # Breaking change
+```
 
-### When to Create Tags:
-- After completing a user-facing feature
-- When reaching a stable milestone
-- Before major refactoring
-- For release candidates
+### Pre-release Versions
+- `v0.x.x` - Development phase
+- `v1.0.0-rc.1` - Release candidate
+- `v1.0.0-beta.1` - Beta version
+- `v1.0.0` - Stable release
 
-## Notes:
-- Tags should tell a story of the project's evolution from the user's perspective
-- Each tag should represent a meaningful checkpoint where something new can be done
-- Avoid creating tags for internal changes that don't affect users
-- If changes are purely technical, consider if a tag is necessary
+## Process
+
+1. **Check existing tags**
+   ```bash
+   git tag -l --sort=-version:refname
+   ```
+
+2. **Review changes**
+   ```bash
+   git log $(git describe --tags --abbrev=0)..HEAD --oneline
+   ```
+
+3. **Determine version bump**
+   - Breaking changes → MAJOR
+   - New features → MINOR
+   - Bug fixes → PATCH
+
+4. **Write user-focused description**
+   - Title: What users can do
+   - Features: Specific capabilities
+   - Format: Emoji + description
+
+5. **Create annotated tag**
+   ```bash
+   git tag -a v0.2.0 -m "description"
+   ```
+
+6. **Verify tag**
+   ```bash
+   git show v0.2.0
+   ```
+
+## Good vs Bad Descriptions
+
+### ✅ Good (User-focused)
+```
+v0.2.0: Full Spotify remote control
+
+Features:
+- 🔐 Login with Spotify account
+- 🎵 Search and play any song
+- ⏯️ Control playback (play/pause/skip)
+- 📊 See what's currently playing
+```
+
+### ❌ Bad (Technical)
+```
+v0.2.0: Implement OAuth and MCP
+
+- Added OAuth PKCE flow
+- Implemented SSE transport
+- Refactored error handling
+- Updated dependencies
+```
+
+## Best Practices
+
+### Focus on Capabilities
+- What can users DO now?
+- What problems are solved?
+- What's the experience like?
+
+### Use Clear Language
+- Avoid technical terms
+- Explain in simple words
+- Use active voice
+- Be specific
+
+### Include Emojis
+- 🔐 Security/Auth
+- 🎵 Music/Audio
+- 🔌 Connections
+- ⚡ Performance
+- 🐛 Bug fixes
+- ✨ New features
+
+### Tag Timing
+- After feature completion
+- At stable milestones
+- Before major changes
+- For releases
+
+## Configuration
+
+### List all tags
+```bash
+git tag -l -n  # With messages
+git tag -l --sort=-version:refname  # Sorted
+```
+
+### Delete tag
+```bash
+git tag -d v0.2.0  # Local
+git push origin --delete v0.2.0  # Remote
+```
+
+### Push tags
+```bash
+git push origin v0.2.0  # Specific tag
+git push origin --tags  # All tags
+```
+
+## Tag Message Template
+
+```
+v{VERSION}: {What users can now do}
+
+Features:
+- {emoji} {User capability 1}
+- {emoji} {User capability 2}
+- {emoji} {User capability 3}
+
+{Optional: brief context or notes}
+```
+
+## When to Tag
+
+- **Feature complete**: Major functionality ready
+- **Stable milestone**: All tests passing
+- **Before refactor**: Checkpoint before changes
+- **Release ready**: Production deployment
+- **User value**: Something new users can do
+
+## Notes
+
+- Tags tell the story of user capabilities
+- Each tag = meaningful user checkpoint
+- Skip tags for internal-only changes
+- Think "What's in it for users?"

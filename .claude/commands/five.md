@@ -1,44 +1,47 @@
 # Five Whys Analysis
 
-Use the "Five Whys" root cause analysis technique to deeply understand problems.
+Perform root cause analysis using the Five Whys technique to identify underlying problems.
 
-## Process:
+## Usage
 
-### 1. Define the Problem
-Clearly state the issue or symptom
+```
+Ask me to analyze a problem using the Five Whys technique:
+"Use Five Whys to analyze why [specific problem]"
+```
 
-### 2. Ask "Why?" Five Times
-- Why did this problem occur? → Answer 1
-- Why did Answer 1 happen? → Answer 2  
-- Why did Answer 2 happen? → Answer 3
-- Why did Answer 3 happen? → Answer 4
-- Why did Answer 4 happen? → Answer 5 (Root Cause)
+## What it does
 
-### 3. Validate Root Cause
-- Verify the logical chain
-- Check if addressing root cause prevents recurrence
-- Consider multiple root causes if applicable
+1. **Identifies root causes** - Traces problems back to their fundamental source by asking "why" repeatedly
+2. **Reveals cause-effect chains** - Maps the logical progression from symptom to underlying issue
+3. **Uncovers systemic issues** - Often reveals process or system failures rather than individual mistakes
+4. **Guides effective solutions** - Ensures fixes address root causes, not just surface symptoms
 
-### 4. Develop Solutions
-- Address the root cause, not just symptoms
-- Create preventive measures
-- Consider systemic improvements
+## Example
 
-## Example:
-**Problem**: Application crashes when processing large files
+```
+Problem: Production deployment failed and caused 2-hour downtime
 
-1. **Why?** → The application runs out of memory
-2. **Why?** → It loads entire file into memory at once
-3. **Why?** → The file parser wasn't designed for streaming
-4. **Why?** → Initial requirements only specified small files
-5. **Why?** → Requirements gathering didn't consider future growth
+Why 1: The deployment script crashed during database migration
+→ Why 2: Migration tried to add a column that already existed
+→ Why 3: The staging database was out of sync with production
+→ Why 4: Manual hotfixes were applied directly to production
+→ Why 5: No documented process for emergency fixes
 
-**Root Cause**: Incomplete requirements gathering process
-**Solution**: Implement streaming parser and improve requirements process
+Root Cause: Lack of emergency fix procedures
+Solution: Implement hotfix workflow with mandatory staging sync
+```
 
-## Best Practices:
-- Focus on process, not people
-- Look for systemic issues
-- Document the analysis
-- Involve relevant stakeholders
-- Test solutions address root cause
+## When to use
+
+- **Incident analysis** - Post-mortem investigations after failures
+- **Quality issues** - Recurring bugs or performance problems
+- **Process breakdowns** - When workflows consistently fail
+- **Team friction** - Understanding collaboration challenges
+
+## Tips for effective analysis
+
+- Keep asking "why" until you reach a process or system issue
+- Avoid blaming individuals - focus on processes
+- Validate each cause-effect link is logical
+- Consider multiple root causes for complex problems
+- Document findings for future reference

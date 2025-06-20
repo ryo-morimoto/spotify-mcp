@@ -1,67 +1,119 @@
-Assess issue complexity and determine story splitting needs: $ARGUMENTS
+# Issue Complexity
 
-EXECUTION STEPS:
-1. **Get Issue Details**
-   ```bash
-   gh issue view $ARGUMENTS --json title,body,labels,comments
-   ```
+Analyze GitHub issue complexity and recommend story splitting strategies
 
-2. **Complexity Metrics Assessment**
-   - **Effort Estimation**: Story points/days based on scope
-   - **Component Count**: Number of system components affected
-   - **Technical Complexity**: Algorithm complexity, new patterns, etc.
-   - **Integration Scope**: External system integrations required
-   - **Testing Complexity**: Test automation requirements
+## Usage
 
-3. **Complexity Scoring**
-   ```bash
-   # Calculate complexity score (0-20 scale)
-   EFFORT_SCORE=0
-   COMPONENT_SCORE=0  
-   TECHNICAL_SCORE=0
-   INTEGRATION_SCORE=0
-   TESTING_SCORE=0
-   
-   # Sum total complexity
-   TOTAL_COMPLEXITY=$((EFFORT_SCORE + COMPONENT_SCORE + TECHNICAL_SCORE + INTEGRATION_SCORE + TESTING_SCORE))
-   ```
+```bash
+# Analyze issue complexity by number
+issue-complexity 42
 
-4. **Apply Complexity Labels**
-   ```bash
-   if [ $TOTAL_COMPLEXITY -ge 15 ]; then
-     gh issue edit $ARGUMENTS --add-label "complex,split-story"
-   elif [ $TOTAL_COMPLEXITY -ge 8 ]; then
-     gh issue edit $ARGUMENTS --add-label "moderate"
-   else
-     gh issue edit $ARGUMENTS --add-label "simple"
-   fi
-   ```
+# Analyze with owner/repo specified
+issue-complexity owner/repo#42
 
-5. **Complexity Assessment Comment**
-   ```markdown
-   ## 📊 複雑度評価結果
+# Analyze current issue in context
+issue-complexity
+```
 
-   ### 📈 複雑度スコア: $TOTAL_COMPLEXITY/20
-   - **開発工数**: $EFFORT_SCORE/5 (推定: X日)
-   - **影響コンポーネント**: $COMPONENT_SCORE/5 (X個のコンポーネント)
-   - **技術的複雑度**: $TECHNICAL_SCORE/5
-   - **統合要件**: $INTEGRATION_SCORE/5  
-   - **テスト複雑度**: $TESTING_SCORE/5
+## What it does
 
-   ### 🎯 推奨アクション
-   [Complex: Story splitting recommended / Moderate: Can proceed as-is / Simple: Ready for development]
+1. **Evaluates issue complexity** - Analyzes effort, components, technical difficulty, integrations, and testing requirements
+2. **Calculates complexity score** - Computes a 0-20 point score across five dimensions
+3. **Applies complexity labels** - Tags issues as simple (0-7), moderate (8-14), or complex (15-20)
+4. **Provides splitting recommendations** - Suggests story breakdown strategies for complex issues
 
-   ### ⚡ 分割戦略 (複雑な場合)
-   1. **コンポーネント分割**: [Frontend/Backend/Database separation]
-   2. **フェーズ分割**: [MVP/Enhancement phases]
-   3. **チーム分割**: [Team responsibility boundaries]
+## Example
 
-   ---
-   *📊 複雑度評価実行: $(date -u +"%Y-%m-%d %H:%M UTC")*
-   ```
+```bash
+$ issue-complexity 42
 
-COMPLETION CRITERIA:
-- Complexity score calculated and documented
-- Appropriate complexity label applied
-- Split recommendation provided if needed
-- Assessment comment posted
+Fetching issue #42: Implement OAuth 2.0 authentication flow...
+
+📊 Complexity Analysis Results
+
+Issue: #42 - Implement OAuth 2.0 authentication flow
+
+### 📈 Complexity Score: 16/20 (Complex)
+
+- **Development Effort**: 4/5 (Estimated: 8-10 days)
+  • OAuth flow implementation
+  • Token management system
+  • Session handling
+  
+- **Affected Components**: 4/5 (4 components)
+  • Frontend auth UI
+  • Backend auth service
+  • Database schema changes
+  • API gateway updates
+
+- **Technical Complexity**: 3/5
+  • PKCE implementation required
+  • Secure token storage
+  • Refresh token rotation
+
+- **Integration Requirements**: 3/5
+  • External OAuth provider
+  • Session management service
+  • User profile service
+
+- **Testing Complexity**: 2/5
+  • Unit tests for auth flow
+  • Integration tests with provider
+  • E2E auth scenarios
+
+### 🎯 Recommended Action: Story Splitting Required
+
+This issue exceeds the complexity threshold (15+) and should be broken down.
+
+### ⚡ Suggested Split Strategy
+
+1. **Phase-Based Split**:
+   - Story 1: Basic OAuth flow (login/logout)
+   - Story 2: Token refresh and rotation
+   - Story 3: Session management and persistence
+
+2. **Component-Based Split**:
+   - Frontend: Auth UI components
+   - Backend: OAuth service implementation
+   - Infrastructure: Database and security updates
+
+3. **Risk-Based Split**:
+   - Core: Essential auth flow (must have)
+   - Enhanced: Advanced security features
+   - Optional: SSO integrations
+
+Applied labels: ✅ complex, split-story
+Comment posted to issue #42
+```
+
+## Complexity Scoring
+
+Each dimension is scored 0-5 points:
+
+- **Development Effort**: Time and resource requirements
+- **Component Count**: Number of system parts affected
+- **Technical Complexity**: Algorithm and architecture challenges
+- **Integration Scope**: External system dependencies
+- **Testing Complexity**: QA and automation needs
+
+## Splitting Strategies
+
+### Component-Based
+Split by system boundaries (frontend/backend/database)
+
+### Phase-Based
+Split by delivery milestones (MVP/enhancement/optimization)
+
+### Risk-Based
+Split by priority (core/enhanced/optional features)
+
+### Team-Based
+Split by team expertise and ownership
+
+## Tips
+
+- Run early in sprint planning to identify complex stories
+- Use with `issue-estimate` for comprehensive planning
+- Complex issues (15+) should always be split
+- Moderate issues (8-14) may benefit from splitting
+- Simple issues (0-7) can proceed as single stories

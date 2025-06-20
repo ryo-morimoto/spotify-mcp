@@ -1,30 +1,88 @@
 # Add to Changelog
 
-Update the project's CHANGELOG.md file with a new entry.
+Update the project's CHANGELOG.md file with a new entry following Keep a Changelog format.
 
-## Usage:
-`/add-to-changelog <version> <change_type> <message>`
+```
+/add-to-changelog <version> <change_type> <message>
+```
 
-## Parameters:
-- `<version>`: Version number (e.g., "1.1.0")
-- `<change_type>`: One of: "added", "changed", "deprecated", "removed", "fixed", "security"
-- `<message>`: Description of the change
+## What it does
 
-## Examples:
-- `/add-to-changelog 1.1.0 added "New markdown to BlockDoc conversion feature"`
-- `/add-to-changelog 1.0.2 fixed "Bug in HTML renderer causing incorrect output"`
+1. **Check changelog file**
+   - Verify CHANGELOG.md exists or create if missing
+   - Ensure proper Keep a Changelog format
+   - Locate specified version section
 
-## Steps:
-1. Check for existing CHANGELOG.md or create if missing
-2. Find or create section for the specified version
-3. Add the new entry under the appropriate change type
-4. Format according to Keep a Changelog conventions
-5. Write the updated changelog back to file
-6. Optionally commit the changes with appropriate message
+2. **Add new entry**
+   - Find or create version section
+   - Add entry under appropriate change type
+   - Format as bullet point with message
+   - Maintain chronological order
 
-## Format:
-Follow [Keep a Changelog](https://keepachangelog.com) format:
-- Group changes by type
-- List changes as bullet points
-- Include date for version sections
-- Keep entries concise but descriptive
+3. **Format properly**
+   - Group changes by type (Added, Changed, Fixed, etc.)
+   - Include date for new version sections
+   - Keep entries concise but descriptive
+   - Follow markdown formatting rules
+
+4. **Save and commit**
+   - Write updated changelog back to file
+   - Stage changes for git
+   - Optionally create commit with message
+   - Verify formatting is correct
+
+## Example
+
+```
+/add-to-changelog 1.1.0 added "OAuth authentication flow with PKCE"
+
+Updating CHANGELOG.md...
+✓ Found existing version 1.1.0 section
+✓ Added entry under "Added"
+✓ Saved changes to CHANGELOG.md
+
+Preview:
+## [1.1.0] - 2024-03-20
+### Added
+- OAuth authentication flow with PKCE
+
+Would you like to commit these changes? [y/N]
+```
+
+## Parameters
+
+- **version**: Version number (e.g., "1.1.0", "2.0.0-beta.1")
+- **change_type**: One of: "added", "changed", "deprecated", "removed", "fixed", "security"
+- **message**: Description of the change (in quotes if contains spaces)
+
+## Change Types
+
+Following [Keep a Changelog](https://keepachangelog.com) format:
+- **Added** - New features
+- **Changed** - Changes in existing functionality
+- **Deprecated** - Soon-to-be removed features
+- **Removed** - Removed features
+- **Fixed** - Bug fixes
+- **Security** - Vulnerability fixes
+
+## Format Example
+
+```markdown
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [Unreleased]
+
+## [1.1.0] - 2024-03-20
+### Added
+- New feature description
+- Another new feature
+
+### Fixed
+- Bug fix description
+
+## [1.0.0] - 2024-03-01
+### Added
+- Initial release
+```
