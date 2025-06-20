@@ -1,0 +1,36 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:cov": "vitest run --coverage",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint src --fix",
+    "format": "prettier --write 'src/**/*.{ts,json,md}'",
+    "format:check": "prettier --check 'src/**/*.{ts,json,md}'",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.0.3",
+    "@vitest/coverage-v8": "3.2.3",
+    "oxlint": "^1.2.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "typescript-mcp": "^0.0.12",
+    "vitest": "^3.2.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.13.0",
+    "@typescript/native-preview": "7.0.0-dev.20250619.1",
+    "express": "^5.1.0",
+    "neverthrow": "^8.2.0"
+  }
+}
