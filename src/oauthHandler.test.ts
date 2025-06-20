@@ -5,8 +5,7 @@ import {
   exchangeCodeForToken, 
   refreshToken, 
   validateToken,
-  type OAuthTokens,
-  type PKCEChallenge
+  type OAuthTokens
 } from './oauthHandler.ts';
 
 describe('oauthHandler', () => {
@@ -205,7 +204,9 @@ describe('oauthHandler', () => {
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error.type).toBe('AuthError');
-        expect(result.error.reason).toBe('expired');
+        if (result.error.type === 'AuthError') {
+          expect(result.error.reason).toBe('expired');
+        }
       }
     });
   });
