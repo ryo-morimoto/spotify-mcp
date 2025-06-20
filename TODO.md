@@ -21,182 +21,71 @@ Spotify Remote MCP Server with HTTP SSE support using TypeScript, TDD, and ts-gu
 
 #### 1.1 Project Structure
 
-```
-TodoWrite([
-  {
-    id: "create_structure",
-    content: "Create project folder structure following ts-guide conventions",
-    status: "pending",
-    priority: "high",
-    mode: "tdd",
-    files: [
-      "src/spotify_api.ts",
-      "src/spotify_api.test.ts",
-      "src/mcp_server.ts",
-      "src/mcp_server.test.ts",
-      "src/oauth_handler.ts",
-      "src/oauth_handler.test.ts",
-      "src/index.ts"
-    ]
-  }
-]);
-```
+- [ ] Create project folder structure following ts-guide conventions
+  - `src/spotify_api.ts`
+  - `src/spotify_api.test.ts`
+  - `src/mcp_server.ts`
+  - `src/mcp_server.test.ts`
+  - `src/oauth_handler.ts`
+  - `src/oauth_handler.test.ts`
+  - `src/index.ts`
 
 #### 1.2 Spotify API Client
 
-```
-TodoWrite([
-  {
-    id: "spotify_api_tests",
-    content: "Write tests for Spotify API client",
-    status: "pending",
-    priority: "high",
-    mode: "tdd",
-    tests: [
-      "searchTracks returns tracks on success",
-      "searchTracks handles auth errors",
-      "searchTracks handles rate limits",
-      "getCurrentPlayback returns player state",
-      "controlPlayback executes commands"
-    ]
-  },
-  {
-    id: "spotify_api_impl",
-    content: "Implement Spotify API client with neverthrow",
-    status: "blocked",
-    blockedBy: ["spotify_api_tests"],
-    priority: "high",
-    mode: "tdd"
-  }
-]);
-```
+- [ ] Write tests for Spotify API client
+  - [ ] searchTracks returns tracks on success
+  - [ ] searchTracks handles auth errors
+  - [ ] searchTracks handles rate limits
+  - [ ] getCurrentPlayback returns player state
+  - [ ] controlPlayback executes commands
+- [ ] Implement Spotify API client with neverthrow (blocked by: spotify_api_tests)
 
 #### 1.3 OAuth Handler
 
-```
-TodoWrite([
-  {
-    id: "oauth_tests",
-    content: "Write tests for OAuth PKCE flow",
-    status: "pending",
-    priority: "high",
-    mode: "tdd",
-    tests: [
-      "generateCodeChallenge creates valid PKCE challenge",
-      "exchangeCodeForToken returns tokens on success",
-      "refreshToken updates access token",
-      "validateToken checks token expiry"
-    ]
-  },
-  {
-    id: "oauth_impl",
-    content: "Implement OAuth handler with PKCE",
-    status: "blocked",
-    blockedBy: ["oauth_tests"],
-    priority: "high",
-    mode: "tdd"
-  }
-]);
-```
+- [ ] Write tests for OAuth PKCE flow
+  - [ ] generateCodeChallenge creates valid PKCE challenge
+  - [ ] exchangeCodeForToken returns tokens on success
+  - [ ] refreshToken updates access token
+  - [ ] validateToken checks token expiry
+- [ ] Implement OAuth handler with PKCE (blocked by: oauth_tests)
 
 ### 🔌 Phase 2: MCP Integration (TDD)
 
 #### 2.1 MCP Server Core
 
-```
-TodoWrite([
-  {
-    id: "mcp_server_tests",
-    content: "Write tests for MCP server tools",
-    status: "pending",
-    priority: "high",
-    mode: "tdd",
-    tests: [
-      "search tool returns track results",
-      "player_state tool returns current state",
-      "player_control tool executes commands",
-      "MCP server handles invalid requests"
-    ]
-  },
-  {
-    id: "mcp_server_impl",
-    content: "Implement MCP server with tool definitions",
-    status: "blocked",
-    blockedBy: ["mcp_server_tests"],
-    priority: "high",
-    mode: "tdd"
-  }
-]);
-```
+- [ ] Write tests for MCP server tools
+  - [ ] search tool returns track results
+  - [ ] player_state tool returns current state
+  - [ ] player_control tool executes commands
+  - [ ] MCP server handles invalid requests
+- [ ] Implement MCP server with tool definitions (blocked by: mcp_server_tests)
 
 #### 2.2 HTTP Server with SSE
 
-```
-TodoWrite([
-  {
-    id: "http_server_tests",
-    content: "Write tests for HTTP/SSE server",
-    status: "pending",
-    priority: "high",
-    mode: "tdd",
-    tests: [
-      "SSE endpoint establishes connection",
-      "SSE streams MCP messages",
-      "Health check returns 200",
-      "OAuth callback handles code exchange"
-    ]
-  },
-  {
-    id: "http_server_impl",
-    content: "Implement Express server with SSE support",
-    status: "blocked",
-    blockedBy: ["http_server_tests"],
-    priority: "high",
-    mode: "tdd"
-  }
-]);
-```
+- [ ] Write tests for HTTP/SSE server
+  - [ ] SSE endpoint establishes connection
+  - [ ] SSE streams MCP messages
+  - [ ] Health check returns 200
+  - [ ] OAuth callback handles code exchange
+- [ ] Implement Express server with SSE support (blocked by: http_server_tests)
 
 ### 🚀 Phase 3: Integration & Deployment
 
 #### 3.1 Integration Tests
 
-```
-TodoWrite([
-  {
-    id: "integration_tests",
-    content: "Write end-to-end integration tests",
-    status: "pending",
-    priority: "medium",
-    mode: "tdd",
-    tests: [
-      "Full OAuth flow with token refresh",
-      "MCP tool execution through SSE",
-      "Error propagation through layers",
-      "Concurrent request handling"
-    ]
-  }
-]);
-```
+- [ ] Write end-to-end integration tests
+  - [ ] Full OAuth flow with token refresh
+  - [ ] MCP tool execution through SSE
+  - [ ] Error propagation through layers
+  - [ ] Concurrent request handling
 
 #### 3.2 Documentation
 
-```
-TodoWrite([
-  {
-    id: "documentation",
-    content: "Create comprehensive documentation",
-    status: "pending",
-    priority: "medium",
-    files: [
-      "README.md",
-      "API.md",
-      "CONTRIBUTING.md",
-      "docs/architecture.md"
-    ]
-  }
-]);
-```
+- [ ] Create comprehensive documentation
+  - `README.md`
+  - `API.md`
+  - `CONTRIBUTING.md`
+  - `docs/architecture.md`
 
 ## Test Execution Strategy
 
@@ -204,16 +93,9 @@ TodoWrite([
 
 ```bash
 # Run all tests in batch
-
-Task("Test Runner", "Execute all tests with coverage", {
-  mode: "tdd",
-  batchOptimized: true,
-  commands: [
-    "pnpm test:cov",
-    "pnpm typecheck",
-    "pnpm lint"
-  ]
-});
+pnpm test:cov
+pnpm typecheck
+pnpm lint
 ```
 
 ### Continuous Testing
