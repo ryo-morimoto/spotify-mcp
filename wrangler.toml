@@ -1,0 +1,96 @@
+name = "spotify-mcp-server"
+main = "dist/worker.js"
+compatibility_date = "2024-01-01"
+
+# Account and deployment settings
+workers_dev = true
+route = ""
+zone_id = ""
+
+# Environment variables (to be set via Cloudflare dashboard or wrangler secret)
+[vars]
+PORT = "8787"
+MCP_VERSION = "1.0.0"
+
+# KV namespace bindings for OAuth token storage
+[[kv_namespaces]]
+binding = "OAUTH_TOKENS"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+# Durable Objects for session management (optional)
+[[durable_objects.bindings]]
+name = "SESSION_MANAGER"
+class_name = "SessionManager"
+script_name = "spotify-mcp-server"
+
+# Build configuration
+[build]
+command = "pnpm build:worker"
+watch_paths = ["src/**/*.ts"]
+
+# Service bindings for external services (if needed)
+# [[services]]
+# binding = "SPOTIFY_SERVICE"
+# service = "spotify-api"
+
+# Triggers and cron jobs (if needed)
+# [[triggers.crons]]
+# cron = "0 0 * * *"
+
+# Rate limiting rules
+[[rate_limiting]]
+threshold = 50
+period = 60
+path = "/sse"
+
+[[rate_limiting]]
+threshold = 100
+period = 60
+path = "/auth/*"
+
+# CORS configuration (handled in code, but documenting expected origins)
+# [cors]
+# allowed_origins = ["https://claude.ai", "https://*.anthropic.com"]
+# allowed_methods = ["GET", "POST", "OPTIONS"]
+# allowed_headers = ["Content-Type", "Authorization"]
+
+# Secrets (use wrangler secret put)
+# SPOTIFY_CLIENT_ID - Set via: wrangler secret put SPOTIFY_CLIENT_ID
+# SPOTIFY_CLIENT_SECRET - Set via: wrangler secret put SPOTIFY_CLIENT_SECRET
+
+# Compatibility flags
+[compatibility_flags]
+streams_enable_constructors = true
+
+# Dev settings
+[dev]
+port = 8787
+local_protocol = "http"
+ip = "0.0.0.0"
+
+# Environment-specific configurations
+[env.production]
+name = "spotify-mcp-server-prod"
+workers_dev = false
+route = "spotify-mcp.example.com/*"
+
+[env.production.vars]
+LOG_LEVEL = "warn"
+ENVIRONMENT = "production"
+
+[[env.production.kv_namespaces]]
+binding = "OAUTH_TOKENS"
+id = "prod-kv-namespace-id"
+
+[env.staging]
+name = "spotify-mcp-server-staging"
+workers_dev = true
+
+[env.staging.vars]
+LOG_LEVEL = "debug"
+ENVIRONMENT = "staging"
+
+[[env.staging.kv_namespaces]]
+binding = "OAUTH_TOKENS"
+id = "staging-kv-namespace-id"
