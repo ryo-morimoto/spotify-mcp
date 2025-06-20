@@ -15,10 +15,15 @@ MCP_VERSION = "1.0.0"
 # KV namespace bindings for OAuth token storage
 [[kv_namespaces]]
 binding = "OAUTH_TOKENS"
-id = "your-kv-namespace-id"
-preview_id = "your-preview-kv-namespace-id"
+id = "kv-namespace-id-here"
+preview_id = "preview-kv-namespace-id-here"
 
-# Durable Objects for session management (optional)
+# Durable Objects for token and session management
+[[durable_objects.bindings]]
+name = "TOKEN_MANAGER"
+class_name = "TokenManager"
+script_name = "spotify-mcp-server"
+
 [[durable_objects.bindings]]
 name = "SESSION_MANAGER"
 class_name = "SessionManager"

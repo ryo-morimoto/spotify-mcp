@@ -211,3 +211,14 @@ export function validateToken(
   const isValid = tokens.expiresAt > now + bufferMs;
   return ok(isValid);
 }
+
+export async function handleOAuthCallback(
+  code: string,
+  _state: string,
+  clientId: string,
+  _clientSecret: string | undefined,
+  redirectUri: string,
+  codeVerifier: string,
+): Promise<Result<OAuthTokens, NetworkError | AuthError>> {
+  return exchangeCodeForToken(code, codeVerifier, clientId, redirectUri);
+}

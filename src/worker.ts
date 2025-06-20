@@ -1,51 +1,46 @@
-import { SSETransport } from '@modelcontextprotocol/sdk/server/sse.js';
-import { createServer } from './mcpServer.ts';
-import { handleOAuthCallback, generateAuthUrl } from './oauthHandler.ts';
-import { err, ok, type Result } from 'neverthrow';
+// SSE Transport will be handled differently in Workers
+import { handleOAuthCallback, generateAuthUrl, generateCodeChallenge } from './oauthHandler.ts';
+import type { PKCEChallenge } from './oauthHandler.ts';
 
 interface Env {
   SPOTIFY_CLIENT_ID: string;
   SPOTIFY_CLIENT_SECRET?: string;
   OAUTH_TOKENS: KVNamespace;
+  TOKEN_MANAGER: DurableObjectNamespace;
   SESSION_MANAGER?: DurableObjectNamespace;
 }
 
-// Token storage helpers using KV
-async function getStoredTokens(env: Env): Promise<Result<{ accessToken: string; refreshToken: string; expiresAt: number } | null, Error>> {
-  try {
-    const data = await env.OAUTH_TOKENS.get('spotify_tokens', 'json');
-    if (!data) return ok(null);
-    return ok(data as { accessToken: string; refreshToken: string; expiresAt: number });
-  } catch (error) {
-    return err(new Error(`Failed to get tokens from KV: ${error}`));
-  }
+// Helper to get or create token manager instance
+function getTokenManager(env: Env, userId: string = 'default'): DurableObjectStub {
+  const id = env.TOKEN_MANAGER.idFromName(userId);
+  return env.TOKEN_MANAGER.get(id);
 }
 
-async function storeTokens(
-  env: Env,
-  tokens: { accessToken: string; refreshToken: string; expiresAt: number }
-): Promise<Result<void, Error>> {
-  try {
-    await env.OAUTH_TOKENS.put('spotify_tokens', JSON.stringify(tokens), {
-      expirationTtl: 60 * 60 * 24 * 30, // 30 days
-    });
-    return ok(undefined);
-  } catch (error) {
-    return err(new Error(`Failed to store tokens in KV: ${error}`));
-  }
+// PKCE storage in KV (temporary during auth flow)
+async function storePKCE(env: Env, state: string, pkce: PKCEChallenge): Promise<void> {
+  await env.OAUTH_TOKENS.put(`pkce_${state}`, JSON.stringify(pkce), {
+    expirationTtl: 600, // 10 minutes
+  });
+}
+
+async function getPKCE(env: Env, state: string): Promise<PKCEChallenge | null> {
+  const data = await env.OAUTH_TOKENS.get(`pkce_${state}`, 'json');
+  if (!data) return null;
+  await env.OAUTH_TOKENS.delete(`pkce_${state}`); // Delete after retrieval
+  return data as PKCEChallenge;
 }
 
 // SSE handler for MCP protocol
 async function handleSSE(request: Request, env: Env): Promise<Response> {
-  const tokensResult = await getStoredTokens(env);
-  if (tokensResult.isErr()) {
-    return new Response('Internal error', { status: 500 });
-  }
+  const tokenManager = getTokenManager(env);
 
-  const tokens = tokensResult.value;
-  if (!tokens) {
+  // Get current valid token from Durable Object
+  const tokenResponse = await tokenManager.fetch(new Request('http://internal/get'));
+  if (!tokenResponse.ok) {
     return new Response('Not authenticated. Please visit /auth first.', { status: 401 });
   }
+
+  (await tokenResponse.json()) as { accessToken: string; expiresAt: number };
 
   // Create readable/writable stream pair for SSE
   const { readable, writable } = new TransformStream();
@@ -56,48 +51,30 @@ async function handleSSE(request: Request, env: Env): Promise<Response> {
   const headers = new Headers({
     'Content-Type': 'text/event-stream',
     'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
+    Connection: 'keep-alive',
     'Access-Control-Allow-Origin': '*',
   });
 
-  // Create MCP server with current tokens
-  const serverResult = await createServer({
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
-    expiresAt: tokens.expiresAt,
-    clientId: env.SPOTIFY_CLIENT_ID,
-    clientSecret: env.SPOTIFY_CLIENT_SECRET,
-  });
+  // For now, return a simple SSE response
+  // Full MCP implementation would require proper SSE handling
+  await writer.write(encoder.encode('event: connected\ndata: {"status":"connected"}\n\n'));
 
-  if (serverResult.isErr()) {
-    return new Response('Failed to create MCP server', { status: 500 });
-  }
-
-  const server = serverResult.value;
-
-  // Set up SSE transport
-  const transport = new SSETransport('/sse', {
-    write: async (chunk: string) => {
-      await writer.write(encoder.encode(chunk));
-    },
-  });
-
-  // Handle the connection
-  server.connect(transport).catch(async (error) => {
-    console.error('MCP connection error:', error);
-    await writer.write(encoder.encode('event: error\ndata: Connection error\n\n'));
-    await writer.close();
-  });
-
-  // Process incoming messages
-  const body = await request.text();
-  if (body) {
+  // Keep connection alive
+  const keepAlive = setInterval(async () => {
     try {
-      await transport.handleMessage(body);
-    } catch (error) {
-      console.error('Error handling message:', error);
+      await writer.write(encoder.encode(':keepalive\n\n'));
+    } catch {
+      clearInterval(keepAlive);
     }
-  }
+  }, 30000);
+
+  // Clean up on close
+  request.signal.addEventListener('abort', () => {
+    clearInterval(keepAlive);
+    writer.close().catch(() => {
+      // Ignore errors on close
+    });
+  });
 
   return new Response(readable, { headers });
 }
@@ -125,8 +102,36 @@ export default {
 
     // OAuth authorization
     if (url.pathname === '/auth') {
-      const authUrl = generateAuthUrl(env.SPOTIFY_CLIENT_ID, 'http://localhost:8787/callback');
-      return Response.redirect(authUrl, 302);
+      const pkceResult = await generateCodeChallenge();
+      if (pkceResult.isErr()) {
+        return new Response('Failed to generate PKCE challenge', { status: 500 });
+      }
+
+      const state = crypto.randomUUID();
+      await storePKCE(env, state, pkceResult.value);
+
+      const scopes = [
+        'user-read-playback-state',
+        'user-modify-playback-state',
+        'user-read-currently-playing',
+      ];
+
+      const authUrlResult = generateAuthUrl(
+        env.SPOTIFY_CLIENT_ID,
+        'http://localhost:8787/callback',
+        pkceResult.value,
+        scopes,
+      );
+
+      if (authUrlResult.isErr()) {
+        return new Response('Failed to generate auth URL', { status: 500 });
+      }
+
+      // Add state parameter to URL
+      const authUrl = new URL(authUrlResult.value);
+      authUrl.searchParams.set('state', state);
+
+      return Response.redirect(authUrl.toString(), 302);
     }
 
     // OAuth callback
@@ -134,25 +139,46 @@ export default {
       const code = url.searchParams.get('code');
       const state = url.searchParams.get('state');
 
-      if (!code) {
-        return new Response('Missing authorization code', { status: 400 });
+      if (!code || !state) {
+        return new Response('Missing authorization code or state', { status: 400 });
+      }
+
+      // Retrieve PKCE from KV
+      const pkce = await getPKCE(env, state);
+      if (!pkce) {
+        return new Response('Invalid or expired authorization state', { status: 400 });
       }
 
       const tokensResult = await handleOAuthCallback(
         code,
-        state || '',
+        state,
         env.SPOTIFY_CLIENT_ID,
         env.SPOTIFY_CLIENT_SECRET,
-        'http://localhost:8787/callback'
+        'http://localhost:8787/callback',
+        pkce.codeVerifier,
       );
 
       if (tokensResult.isErr()) {
-        return new Response(`Authentication failed: ${tokensResult.error.message}`, { status: 500 });
+        return new Response(`Authentication failed: ${tokensResult.error.message}`, {
+          status: 500,
+        });
       }
 
-      // Store tokens in KV
-      const storeResult = await storeTokens(env, tokensResult.value);
-      if (storeResult.isErr()) {
+      // Store tokens in Durable Object
+      const tokenManager = getTokenManager(env);
+      const storeResponse = await tokenManager.fetch(
+        new Request('http://internal/store', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...tokensResult.value,
+            clientId: env.SPOTIFY_CLIENT_ID,
+            clientSecret: env.SPOTIFY_CLIENT_SECRET,
+          }),
+        }),
+      );
+
+      if (!storeResponse.ok) {
         return new Response('Failed to store authentication', { status: 500 });
       }
 
@@ -172,17 +198,5 @@ export default {
   },
 };
 
-// Optional: Durable Object for session management
-export class SessionManager {
-  private state: DurableObjectState;
-  private sessions: Map<string, any> = new Map();
-
-  constructor(state: DurableObjectState) {
-    this.state = state;
-  }
-
-  async fetch(request: Request): Promise<Response> {
-    // Session management logic here
-    return new Response('Session manager');
-  }
-}
+// Export Durable Objects
+export { TokenManager, SessionManager } from './durableObjects.ts';

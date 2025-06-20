@@ -1,0 +1,238 @@
+import { Result, ok, err } from 'neverthrow';
+import { refreshToken } from './oauthHandler.ts';
+import type { NetworkError, AuthError } from './result.ts';
+
+interface StoredTokens {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+  clientId: string;
+  clientSecret?: string;
+}
+
+interface TokenStore {
+  storage: DurableObjectStorage;
+  tokens: StoredTokens | null;
+  refreshTimer: number | null;
+}
+
+// Create a new token store instance
+function createTokenStore(storage: DurableObjectStorage): TokenStore {
+  return {
+    storage,
+    tokens: null,
+    refreshTimer: null,
+  };
+}
+
+// Store tokens in Durable Object storage
+async function storeTokens(store: TokenStore, tokens: StoredTokens): Promise<Result<void, Error>> {
+  try {
+    await store.storage.put('tokens', tokens);
+    store.tokens = tokens;
+    setupAutoRefresh(store);
+    return ok(undefined);
+  } catch (error) {
+    return err(new Error(`Failed to store tokens: ${error}`));
+  }
+}
+
+// Get current valid tokens
+async function getTokens(
+  store: TokenStore,
+): Promise<Result<{ accessToken: string; expiresAt: number }, NetworkError | AuthError>> {
+  // Load from storage if not in memory
+  if (!store.tokens) {
+    try {
+      store.tokens = (await store.storage.get<StoredTokens>('tokens')) || null;
+      if (store.tokens) {
+        setupAutoRefresh(store);
+      }
+    } catch (error) {
+      return err({
+        type: 'NetworkError',
+        message: `Failed to load tokens: ${error}`,
+      });
+    }
+  }
+
+  if (!store.tokens) {
+    return err({
+      type: 'AuthError',
+      message: 'No tokens stored',
+      reason: 'expired',
+    });
+  }
+
+  // Check if token is expired
+  const now = Date.now();
+  if (store.tokens.expiresAt <= now) {
+    // Token expired, try to refresh
+    const refreshResult = await refreshStoredTokens(store);
+    if (refreshResult.isErr()) {
+      return err(refreshResult.error);
+    }
+  }
+
+  return ok({
+    accessToken: store.tokens.accessToken,
+    expiresAt: store.tokens.expiresAt,
+  });
+}
+
+// Refresh tokens
+async function refreshStoredTokens(
+  store: TokenStore,
+): Promise<Result<void, NetworkError | AuthError>> {
+  if (!store.tokens) {
+    return err({
+      type: 'AuthError',
+      message: 'No tokens to refresh',
+      reason: 'invalid',
+    });
+  }
+
+  const refreshResult = await refreshToken(store.tokens.refreshToken, store.tokens.clientId);
+
+  if (refreshResult.isErr()) {
+    return err(refreshResult.error);
+  }
+
+  const newTokens = refreshResult.value;
+
+  // Update stored tokens
+  store.tokens = {
+    ...store.tokens,
+    accessToken: newTokens.accessToken,
+    expiresAt: newTokens.expiresAt,
+    // Keep existing refresh token if not provided in response
+    refreshToken: newTokens.refreshToken || store.tokens.refreshToken,
+  };
+
+  // Persist to storage
+  await store.storage.put('tokens', store.tokens);
+
+  // Reset auto-refresh timer
+  setupAutoRefresh(store);
+
+  return ok(undefined);
+}
+
+// Clear stored tokens
+async function clearTokens(store: TokenStore): Promise<Result<void, Error>> {
+  try {
+    await store.storage.delete('tokens');
+    store.tokens = null;
+    clearAutoRefresh(store);
+    return ok(undefined);
+  } catch (error) {
+    return err(new Error(`Failed to clear tokens: ${error}`));
+  }
+}
+
+// Set up automatic token refresh
+function setupAutoRefresh(store: TokenStore): void {
+  clearAutoRefresh(store);
+
+  if (!store.tokens) return;
+
+  // Calculate when to refresh (5 minutes before expiry)
+  const now = Date.now();
+  const expiresAt = store.tokens.expiresAt;
+  const refreshTime = expiresAt - 5 * 60 * 1000; // 5 minutes before expiry
+  const delay = Math.max(refreshTime - now, 0);
+
+  if (delay > 0) {
+    store.refreshTimer = setTimeout(() => {
+      refreshStoredTokens(store).catch((error) => {
+        console.error('Auto-refresh failed:', error);
+      });
+    }, delay) as unknown as number;
+  }
+}
+
+// Clear auto-refresh timer
+function clearAutoRefresh(store: TokenStore): void {
+  if (store.refreshTimer !== null) {
+    clearTimeout(store.refreshTimer);
+    store.refreshTimer = null;
+  }
+}
+
+// Main export: Handle Durable Object requests
+export async function tokenStore(state: DurableObjectState, request: Request): Promise<Response> {
+  const store = createTokenStore(state.storage);
+  const url = new URL(request.url);
+  const path = url.pathname;
+
+  try {
+    switch (path) {
+      case '/store': {
+        const body = (await request.json()) as StoredTokens;
+
+        // Validate required fields
+        if (!body.accessToken || !body.refreshToken || !body.expiresAt || !body.clientId) {
+          return new Response('Missing required fields', { status: 400 });
+        }
+
+        const result = await storeTokens(store, body);
+        if (result.isErr()) {
+          return new Response(result.error.message, { status: 500 });
+        }
+
+        return new Response('OK', { status: 200 });
+      }
+
+      case '/get': {
+        const result = await getTokens(store);
+        if (result.isErr()) {
+          const error = result.error;
+          const status = error.type === 'AuthError' ? 401 : 500;
+          return new Response(JSON.stringify({ error: error.message, type: error.type }), {
+            status,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+
+        return new Response(JSON.stringify(result.value), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      case '/refresh': {
+        // Load tokens first if not in memory
+        if (!store.tokens) {
+          store.tokens = (await store.storage.get<StoredTokens>('tokens')) || null;
+        }
+
+        const result = await refreshStoredTokens(store);
+        if (result.isErr()) {
+          return new Response(JSON.stringify({ error: 'Refresh failed', details: result.error }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          });
+        }
+
+        return new Response('Token refreshed', { status: 200 });
+      }
+
+      case '/clear': {
+        const result = await clearTokens(store);
+        if (result.isErr()) {
+          return new Response(result.error.message, { status: 500 });
+        }
+
+        return new Response('Tokens cleared', { status: 200 });
+      }
+
+      default:
+        return new Response('Not found', { status: 404 });
+    }
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Internal error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+}
