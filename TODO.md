@@ -258,6 +258,19 @@ pnpm vitest --watch
 
 ## Notes
 
+
+## TODO
+
+- [x] Research Cloudflare Workers MCP requirements and limitations
+- [ ] Check SSE compatibility with Cloudflare Workers
+- [ ] Create wrangler.toml for Cloudflare Workers configuration
+- [ ] Adapt Express server to Cloudflare Workers format
+- [ ] Implement KV storage for OAuth tokens
+- [ ] Deploy to Cloudflare Workers and verify functionality
+- [x] Update commit command to clarify internal-only changes don't need version bump
+- [ ] Add /memory command for documenting repeated problem solutions
+- [ ] Add /compact command for context window optimization
+- [ ] Add vim to disallowed_tools in user settings
 ### TDD Workflow
 
 1. Write failing test

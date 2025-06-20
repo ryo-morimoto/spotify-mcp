@@ -10,7 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "types": ["vitest/importMeta", "node"],
+    "types": ["vitest/importMeta", "node", "@cloudflare/workers-types"],
     
     // Strict type checking
     "noImplicitAny": true,

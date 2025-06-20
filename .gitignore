@@ -5,3 +5,5 @@ coverage
 dist
 .oxlint_cache
 .env
+.wrangler
+.dev.vars
