@@ -22,7 +22,7 @@ export interface OAuthTokens {
 function createNetworkError(message: string): NetworkError {
   return {
     type: 'NetworkError',
-    message: `OAuth request failed: ${message}`
+    message: `OAuth request failed: ${message}`,
   };
 }
 
@@ -30,34 +30,33 @@ function createAuthError(message: string, reason: AuthError['reason'] = 'invalid
   return {
     type: 'AuthError',
     message,
-    reason
+    reason,
   };
 }
 
 function base64URLEncode(buffer: Buffer): string {
-  return buffer.toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
+  return buffer.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 }
 
 export async function generateCodeChallenge(): Promise<Result<PKCEChallenge, NetworkError>> {
   try {
     // Generate code verifier (43-128 characters)
     const verifier = base64URLEncode(randomBytes(32));
-    
+
     // Generate code challenge using SHA256
-    const challenge = base64URLEncode(
-      createHash('sha256').update(verifier).digest()
-    );
-    
+    const challenge = base64URLEncode(createHash('sha256').update(verifier).digest());
+
     return ok({
       codeVerifier: verifier,
       codeChallenge: challenge,
-      challengeMethod: 'S256'
+      challengeMethod: 'S256',
     });
   } catch (error) {
-    return err(createNetworkError(error instanceof Error ? error.message : 'Failed to generate PKCE challenge'));
+    return err(
+      createNetworkError(
+        error instanceof Error ? error.message : 'Failed to generate PKCE challenge',
+      ),
+    );
   }
 }
 
@@ -65,21 +64,23 @@ export function generateAuthUrl(
   clientId: string,
   redirectUri: string,
   pkceChallenge: PKCEChallenge,
-  scopes: string[]
+  scopes: string[],
 ): Result<string, NetworkError> {
   try {
     const url = new URL(`${SPOTIFY_ACCOUNTS_BASE}/authorize`);
-    
+
     url.searchParams.set('client_id', clientId);
     url.searchParams.set('response_type', 'code');
     url.searchParams.set('redirect_uri', redirectUri);
     url.searchParams.set('code_challenge', pkceChallenge.codeChallenge);
     url.searchParams.set('code_challenge_method', pkceChallenge.challengeMethod);
     url.searchParams.set('scope', scopes.join(' '));
-    
+
     return ok(url.toString());
   } catch (error) {
-    return err(createNetworkError(error instanceof Error ? error.message : 'Failed to generate auth URL'));
+    return err(
+      createNetworkError(error instanceof Error ? error.message : 'Failed to generate auth URL'),
+    );
   }
 }
 
@@ -87,7 +88,7 @@ export async function exchangeCodeForToken(
   code: string,
   codeVerifier: string,
   clientId: string,
-  redirectUri: string
+  redirectUri: string,
 ): Promise<Result<OAuthTokens, NetworkError | AuthError>> {
   try {
     const params = new URLSearchParams({
@@ -95,26 +96,31 @@ export async function exchangeCodeForToken(
       code,
       redirect_uri: redirectUri,
       client_id: clientId,
-      code_verifier: codeVerifier
+      code_verifier: codeVerifier,
     });
 
     const response = await fetch(`${SPOTIFY_ACCOUNTS_BASE}/api/token`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: params.toString()
+      body: params.toString(),
     });
 
     if (!response.ok) {
-      const errorData = await response.json() as { error?: string };
+      const errorData = (await response.json()) as { error?: string };
       if (response.status === 400 && errorData.error === 'invalid_grant') {
         return err(createAuthError('Token exchange failed: Invalid authorization code', 'invalid'));
       }
-      return err(createAuthError(`Token exchange failed: ${response.status} ${response.statusText}`, 'invalid'));
+      return err(
+        createAuthError(
+          `Token exchange failed: ${response.status} ${response.statusText}`,
+          'invalid',
+        ),
+      );
     }
 
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       access_token: string;
       refresh_token: string;
       expires_in: number;
@@ -128,41 +134,50 @@ export async function exchangeCodeForToken(
       expiresIn: data.expires_in,
       tokenType: data.token_type,
       scope: data.scope,
-      expiresAt: Date.now() + data.expires_in * 1000
+      expiresAt: Date.now() + data.expires_in * 1000,
     });
   } catch (error) {
-    return err(createNetworkError(error instanceof Error ? error.message : 'Network error during token exchange'));
+    return err(
+      createNetworkError(
+        error instanceof Error ? error.message : 'Network error during token exchange',
+      ),
+    );
   }
 }
 
 export async function refreshToken(
   refreshToken: string,
-  clientId: string
+  clientId: string,
 ): Promise<Result<OAuthTokens, NetworkError | AuthError>> {
   try {
     const params = new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: refreshToken,
-      client_id: clientId
+      client_id: clientId,
     });
 
     const response = await fetch(`${SPOTIFY_ACCOUNTS_BASE}/api/token`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: params.toString()
+      body: params.toString(),
     });
 
     if (!response.ok) {
-      const errorData = await response.json() as { error?: string };
+      const errorData = (await response.json()) as { error?: string };
       if (response.status === 400 && errorData.error === 'invalid_grant') {
         return err(createAuthError('Token refresh failed: Refresh token expired', 'expired'));
       }
-      return err(createAuthError(`Token refresh failed: ${response.status} ${response.statusText}`, 'invalid'));
+      return err(
+        createAuthError(
+          `Token refresh failed: ${response.status} ${response.statusText}`,
+          'invalid',
+        ),
+      );
     }
 
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       access_token: string;
       expires_in: number;
       token_type: string;
@@ -176,16 +191,23 @@ export async function refreshToken(
       expiresIn: data.expires_in,
       tokenType: data.token_type,
       scope: data.scope,
-      expiresAt: Date.now() + data.expires_in * 1000
+      expiresAt: Date.now() + data.expires_in * 1000,
     });
   } catch (error) {
-    return err(createNetworkError(error instanceof Error ? error.message : 'Network error during token refresh'));
+    return err(
+      createNetworkError(
+        error instanceof Error ? error.message : 'Network error during token refresh',
+      ),
+    );
   }
 }
 
-export function validateToken(tokens: OAuthTokens, bufferSeconds: number = 60): Result<boolean, never> {
+export function validateToken(
+  tokens: OAuthTokens,
+  bufferSeconds: number = 60,
+): Result<boolean, never> {
   const now = Date.now();
   const bufferMs = bufferSeconds * 1000;
-  const isValid = tokens.expiresAt > (now + bufferMs);
+  const isValid = tokens.expiresAt > now + bufferMs;
   return ok(isValid);
 }
