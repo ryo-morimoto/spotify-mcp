@@ -9,7 +9,7 @@ vi.mock('./errorMapper.ts', () => ({
     if (error.message === 'Network error') {
       return createNetworkError('Network error', undefined, error);
     } else if (error.message === 'Unauthorized') {
-      return createAuthError('Unauthorized', 'unauthorized');
+      return createAuthError('Unauthorized', 'invalid');
     } else if (error.message === 'Bad request') {
       return createSpotifyError('Bad request', 'bad_request', 400);
     }

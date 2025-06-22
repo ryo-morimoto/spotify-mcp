@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ok, err } from 'neverthrow';
 import { createTokenProviderAdapter } from './tokenProviderAdapter.ts';
-import { createAuthError, createNetworkError } from '../result.ts';
+import { createAuthError } from '../result.ts';
 import type { TokenStorage, StoredToken } from '../types/index.ts';
 
 // Mock auth functions
@@ -38,14 +38,14 @@ describe('TokenProviderAdapter', () => {
       get: vi.fn(),
       store: vi.fn(),
       clear: vi.fn(),
-    };
+    } as any;
   });
 
   describe('getAccessToken', () => {
     it('should return access token for valid token', async () => {
       const { validateToken } = await import('../auth/index.ts');
 
-      mockTokenStorage.get.mockResolvedValue(ok(validToken));
+      (mockTokenStorage.get as any).mockResolvedValue(ok(validToken));
       (validateToken as any).mockReturnValue(ok(true));
 
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
@@ -60,7 +60,7 @@ describe('TokenProviderAdapter', () => {
     });
 
     it('should return error when no token found', async () => {
-      mockTokenStorage.get.mockResolvedValue(ok(null));
+      (mockTokenStorage.get as any).mockResolvedValue(ok(null));
 
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
       const result = await adapter.getAccessToken();
@@ -73,7 +73,7 @@ describe('TokenProviderAdapter', () => {
     });
 
     it('should return error when storage fails', async () => {
-      mockTokenStorage.get.mockResolvedValue(err(new Error('Storage error')));
+      (mockTokenStorage.get as any).mockResolvedValue(err(new Error('Storage error')));
 
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
       const result = await adapter.getAccessToken();
@@ -92,8 +92,8 @@ describe('TokenProviderAdapter', () => {
         accessToken: 'new-access-token',
       };
 
-      mockTokenStorage.get.mockResolvedValue(ok(expiredToken));
-      mockTokenStorage.store.mockResolvedValue(ok(undefined));
+      (mockTokenStorage.get as any).mockResolvedValue(ok(expiredToken));
+      (mockTokenStorage.store as any).mockResolvedValue(ok(undefined));
       (validateToken as any).mockReturnValue(ok(false));
       (refreshTokenWithRetry as any).mockResolvedValue(ok(newToken));
 
@@ -111,7 +111,7 @@ describe('TokenProviderAdapter', () => {
     it('should return error when refresh fails', async () => {
       const { validateToken, refreshTokenWithRetry } = await import('../auth/index.ts');
 
-      mockTokenStorage.get.mockResolvedValue(ok(expiredToken));
+      (mockTokenStorage.get as any).mockResolvedValue(ok(expiredToken));
       (validateToken as any).mockReturnValue(ok(false));
       (refreshTokenWithRetry as any).mockResolvedValue(
         err(createAuthError('Refresh failed', 'invalid')),
@@ -134,7 +134,7 @@ describe('TokenProviderAdapter', () => {
         refreshToken: '',
       };
 
-      mockTokenStorage.get.mockResolvedValue(ok(tokenWithoutRefresh));
+      (mockTokenStorage.get as any).mockResolvedValue(ok(tokenWithoutRefresh));
       (validateToken as any).mockReturnValue(ok(false));
 
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
@@ -152,7 +152,7 @@ describe('TokenProviderAdapter', () => {
     it('should behave the same as getAccessToken', async () => {
       const { validateToken } = await import('../auth/index.ts');
 
-      mockTokenStorage.get.mockResolvedValue(ok(validToken));
+      (mockTokenStorage.get as any).mockResolvedValue(ok(validToken));
       (validateToken as any).mockReturnValue(ok(true));
 
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
@@ -169,7 +169,7 @@ describe('TokenProviderAdapter', () => {
     it('should use default userId when not provided', async () => {
       const { validateToken } = await import('../auth/index.ts');
 
-      mockTokenStorage.get.mockResolvedValue(ok(validToken));
+      (mockTokenStorage.get as any).mockResolvedValue(ok(validToken));
       (validateToken as any).mockReturnValue(ok(true));
 
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId);

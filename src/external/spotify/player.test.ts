@@ -9,7 +9,7 @@ vi.mock('./errorMapper.ts', () => ({
     if (error.message === 'Network error') {
       return createNetworkError('Network error', undefined, error);
     } else if (error.message === 'Unauthorized') {
-      return createAuthError('Unauthorized', 'unauthorized');
+      return createAuthError('Unauthorized', 'invalid');
     } else if (error.message === 'No active device') {
       return createSpotifyError('No active device', 'no_active_device', 404);
     }
@@ -28,7 +28,6 @@ describe('Player Functions', () => {
       name: 'Test Device',
       type: 'Computer',
       volume_percent: 50,
-      supports_volume: true,
     },
     repeat_state: 'off',
     shuffle_state: false,
@@ -39,12 +38,51 @@ describe('Player Functions', () => {
     item: {
       id: 'track123',
       name: 'Test Track',
-      artists: [{ name: 'Test Artist', id: 'artist123' }],
-      album: { name: 'Test Album', id: 'album123' },
+      artists: [{
+        name: 'Test Artist',
+        id: 'artist123',
+        external_urls: { spotify: 'https://spotify.com/artist/artist123' },
+        href: 'https://api.spotify.com/v1/artists/artist123',
+        type: 'artist' as const,
+        uri: 'spotify:artist:artist123',
+      }],
+      album: {
+        name: 'Test Album',
+        id: 'album123',
+        album_group: 'album' as const,
+        artists: [],
+        album_type: 'album' as const,
+        available_markets: [],
+        external_urls: { spotify: 'https://spotify.com/album/album123' },
+        href: 'https://api.spotify.com/v1/albums/album123',
+        images: [],
+        release_date: '2023-01-01',
+        release_date_precision: 'day' as const,
+        restrictions: undefined,
+        total_tracks: 10,
+        type: 'album' as const,
+        uri: 'spotify:album:album123',
+        copyrights: [],
+        external_ids: { isrc: '', ean: '', upc: '' },
+        genres: [],
+        label: '',
+        popularity: 0,
+      },
       duration_ms: 180000,
       uri: 'spotify:track:track123',
-      type: 'track',
-    },
+      type: 'track' as const,
+      available_markets: [],
+      disc_number: 1,
+      track_number: 1,
+      explicit: false,
+      external_ids: { isrc: '' },
+      external_urls: { spotify: 'https://spotify.com/track/track123' },
+      href: 'https://api.spotify.com/v1/tracks/track123',
+      is_local: false,
+      popularity: 50,
+      preview_url: null,
+      restrictions: undefined,
+    } as any,
     currently_playing_type: 'track',
     actions: {
       interrupting_playback: false,

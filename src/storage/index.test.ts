@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { getTokenStorage, getCodeChallengeStorage } from './index.ts';
 
 // Mock the memory module
 vi.mock('./memory.ts', () => ({

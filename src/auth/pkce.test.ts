@@ -170,10 +170,10 @@ describe('PKCE Functions', () => {
 
     it('should handle URL constructor errors', () => {
       // Mock URL constructor to throw
-      const originalURL = global.URL;
-      global.URL = vi.fn().mockImplementation(() => {
+      const originalURL = (globalThis as any).URL;
+      (globalThis as any).URL = vi.fn().mockImplementation(() => {
         throw new Error('Invalid URL');
-      }) as any;
+      });
 
       const result = generateAuthUrl(clientId, redirectUri, pkceChallenge, scopes);
 
@@ -184,15 +184,15 @@ describe('PKCE Functions', () => {
       }
 
       // Restore original URL
-      global.URL = originalURL;
+      (globalThis as any).URL = originalURL;
     });
 
     it('should handle non-Error exceptions in URL generation', () => {
       // Mock URL constructor to throw non-Error
-      const originalURL = global.URL;
-      global.URL = vi.fn().mockImplementation(() => {
+      const originalURL = (globalThis as any).URL;
+      (globalThis as any).URL = vi.fn().mockImplementation(() => {
         throw 'URL error';
-      }) as any;
+      });
 
       const result = generateAuthUrl(clientId, redirectUri, pkceChallenge, scopes);
 
@@ -203,7 +203,7 @@ describe('PKCE Functions', () => {
       }
 
       // Restore original URL
-      global.URL = originalURL;
+      (globalThis as any).URL = originalURL;
     });
 
     it('should maintain parameter order for consistency', () => {

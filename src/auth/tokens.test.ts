@@ -5,7 +5,7 @@ import {
   validateToken,
   refreshTokenWithRetry,
 } from './tokens.ts';
-import { normalizeTokenResponse } from '../types/index.ts';
+// Remove unused import
 
 // Mock fetch globally
 global.fetch = vi.fn();

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Context, Next } from 'hono';
+import { Context } from 'hono';
 import { timingMiddleware } from './timing.ts';
 
 describe('timingMiddleware', () => {

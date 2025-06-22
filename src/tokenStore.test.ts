@@ -170,8 +170,8 @@ describe('tokenStore', () => {
 
       expect(response.status).toBe(500);
       const data = await response.json();
-      expect(data.error).toContain('Failed to load tokens');
-      expect(data.type).toBe('NetworkError');
+      expect((data as any).error).toContain('Failed to load tokens');
+      expect((data as any).type).toBe('NetworkError');
     });
 
     it('should handle storage errors when storing tokens', async () => {
@@ -230,7 +230,7 @@ describe('tokenStore', () => {
       const response = await tokenStore(mockState, request);
 
       expect(response.status).toBe(500);
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.error).toBeDefined();
     });
 
@@ -246,7 +246,7 @@ describe('tokenStore', () => {
       const response = await tokenStore(brokenState as any, request);
 
       expect(response.status).toBe(500);
-      const data = await response.json();
+      const data = await response.json() as any;
       expect(data.error).toBe('Failed to load tokens: String error');
     });
   });

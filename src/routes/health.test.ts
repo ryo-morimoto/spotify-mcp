@@ -12,7 +12,7 @@ describe('Health Routes', () => {
   describe('GET /health', () => {
     it('should return health status', async () => {
       const response = await app.request('/health');
-      const json = await response.json();
+      const json = await response.json() as any;
 
       expect(response.status).toBe(200);
       expect(json).toMatchObject({
@@ -26,7 +26,7 @@ describe('Health Routes', () => {
 
     it('should return valid ISO timestamp', async () => {
       const response = await app.request('/health');
-      const json = await response.json();
+      const json = await response.json() as any;
 
       // Check if timestamp is valid ISO string
       const timestamp = new Date(json.timestamp);
@@ -51,7 +51,7 @@ describe('Health Routes', () => {
 
       const jsons = await Promise.all(responses.map((r) => r.json()));
       jsons.forEach((json) => {
-        expect(json.status).toBe('ok');
+        expect((json as any).status).toBe('ok');
       });
     });
   });

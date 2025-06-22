@@ -140,6 +140,7 @@ describe('In-Memory Storage', () => {
       codeVerifier: 'test-verifier',
       codeChallenge: 'test-challenge',
       expiresAt: Date.now() + 600000, // 10 minutes from now
+      createdAt: Date.now(),
     };
 
     beforeEach(() => {
