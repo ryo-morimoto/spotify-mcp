@@ -4,12 +4,12 @@ import { ok, err } from 'neverthrow';
 /**
  * Custom Result type that extends neverthrow for the Spotify MCP project
  */
-export type Result<T, E> = NeverthrowResult<T, E>;
+type Result<T, E> = NeverthrowResult<T, E>;
 
 /**
  * Common error types for the application
  */
-export interface BaseError {
+interface BaseError {
   readonly type: string;
   readonly message: string;
   readonly cause?: unknown;
@@ -42,7 +42,7 @@ export interface UnknownError extends BaseError {
 export type AppError = NetworkError | AuthError | ValidationError | SpotifyError | UnknownError;
 
 /**
- * Error constructors
+ * Error constructors - All centralized here for consistent usage across the codebase
  */
 export const createNetworkError = (
   message: string,
@@ -57,7 +57,7 @@ export const createNetworkError = (
 
 export const createAuthError = (
   message: string,
-  reason: AuthError['reason'],
+  reason: AuthError['reason'] = 'invalid',
   cause?: unknown,
 ): AuthError => ({
   type: 'AuthError',
@@ -132,19 +132,17 @@ export const tryCatchAsync = async <T>(fn: () => Promise<T>): Promise<Result<T, 
 };
 
 /**
- * Convert unknown errors to AppError
+ * Helper to convert generic Error objects to typed errors
  */
-export const toAppError = (error: unknown): AppError => {
+export const fromError = (error: unknown, defaultMessage = 'An error occurred'): UnknownError => {
   if (error instanceof Error) {
     return createUnknownError(error.message, error);
   }
-  return createUnknownError(String(error), error);
+  if (typeof error === 'string') {
+    return createUnknownError(error);
+  }
+  return createUnknownError(defaultMessage, error);
 };
-
-/**
- * Re-export commonly used functions from neverthrow
- */
-export { ok, err, ResultAsync, fromPromise, fromThrowable } from 'neverthrow';
 
 // Example usage in tests
 if (import.meta.vitest) {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { tokenStore } from './tokenStore.ts';
-import * as oauthHandler from './oauthHandler.ts';
+import * as oauthHandler from './auth/index.ts';
 import { ok, err } from 'neverthrow';
 
 // Mock DurableObjectStorage

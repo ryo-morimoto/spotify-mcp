@@ -1,6 +1,6 @@
 // SSE Transport will be handled differently in Workers
-import { handleOAuthCallback, generateAuthUrl, generateCodeChallenge } from './oauthHandler.ts';
-import type { PKCEChallenge } from './oauthHandler.ts';
+import { handleOAuthCallback, generateAuthUrl, generateCodeChallenge } from './auth/index.ts';
+import type { PKCEChallenge } from './types/index.ts';
 
 interface Env {
   SPOTIFY_CLIENT_ID: string;
@@ -12,6 +12,11 @@ interface Env {
 
 // Helper to get or create token manager instance
 function getTokenManager(env: Env, userId: string = 'default'): DurableObjectStub {
+  // TODO: Implement proper user identification [MID]
+  // - [ ] Extract user ID from authentication token
+  // - [ ] Support multiple Spotify accounts per user
+  // - [ ] Add user session management
+  // Impact: Currently all users share the same token storage
   const id = env.TOKEN_MANAGER.idFromName(userId);
   return env.TOKEN_MANAGER.get(id);
 }
@@ -31,6 +36,11 @@ async function getPKCE(env: Env, state: string): Promise<PKCEChallenge | null> {
 }
 
 // SSE handler for MCP protocol
+// TODO: Implement proper MCP SSE handler [HIGH]
+// - [ ] Add request validation and rate limiting
+// - [ ] Support multiple concurrent connections
+// - [ ] Implement connection pooling for better performance
+// Related: src/transport.ts - Full MCP transport implementation
 async function handleSSE(request: Request, env: Env): Promise<Response> {
   const tokenManager = getTokenManager(env);
 
@@ -55,11 +65,24 @@ async function handleSSE(request: Request, env: Env): Promise<Response> {
     'Access-Control-Allow-Origin': '*',
   });
 
-  // For now, return a simple SSE response
-  // Full MCP implementation would require proper SSE handling
+  // TODO: Implement full MCP protocol over SSE [HIGH]
+  // - [ ] Handle incoming MCP requests from the stream
+  // - [ ] Create proper MCP transport with bidirectional communication
+  // - [ ] Integrate with mcpServer.ts for tool execution
+  // Blocked by: SSE transport implementation in transport.ts
+
+  // FIXME: Current implementation is a placeholder that only sends keepalive [HIGH]
+  // - [ ] Replace with TextEncoder/TextDecoder for proper message parsing
+  // - [ ] Add message framing for MCP protocol
+  // - [ ] Handle connection errors gracefully
+  // Impact: MCP protocol is non-functional in Workers environment
   await writer.write(encoder.encode('event: connected\ndata: {"status":"connected"}\n\n'));
 
-  // Keep connection alive
+  // TODO: Replace with proper SSE event handling [HIGH]
+  // - [ ] Implement request/response pattern for MCP tools
+  // - [ ] Add error event streaming
+  // - [ ] Handle connection state management
+  // See: @modelcontextprotocol/sdk SSEServerTransport for reference
   const keepAlive = setInterval(async () => {
     try {
       await writer.write(encoder.encode(':keepalive\n\n'));
@@ -118,7 +141,7 @@ export default {
 
       const authUrlResult = generateAuthUrl(
         env.SPOTIFY_CLIENT_ID,
-        'http://localhost:8787/callback',
+        'http://127.0.0.1:8000/callback',
         pkceResult.value,
         scopes,
       );
@@ -154,7 +177,7 @@ export default {
         state,
         env.SPOTIFY_CLIENT_ID,
         env.SPOTIFY_CLIENT_SECRET,
-        'http://localhost:8787/callback',
+        'http://127.0.0.1:8000/callback',
         pkce.codeVerifier,
       );
 
