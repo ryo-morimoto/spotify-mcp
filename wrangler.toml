@@ -1,6 +1,7 @@
 name = "spotify-mcp-server"
 main = "dist/worker.js"
 compatibility_date = "2024-01-01"
+node_compat = true
 
 # Account and deployment settings
 workers_dev = true
@@ -18,15 +19,10 @@ binding = "OAUTH_TOKENS"
 id = "kv-namespace-id-here"
 preview_id = "preview-kv-namespace-id-here"
 
-# Durable Objects for token and session management
+# Durable Objects for token management
 [[durable_objects.bindings]]
-name = "TOKEN_MANAGER"
-class_name = "TokenManager"
-script_name = "spotify-mcp-server"
-
-[[durable_objects.bindings]]
-name = "SESSION_MANAGER"
-class_name = "SessionManager"
+name = "TOKEN_STORE"
+class_name = "TokenStore"
 script_name = "spotify-mcp-server"
 
 # Build configuration
