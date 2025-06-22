@@ -76,6 +76,12 @@ Would you like to:
 - Interface vs type aliases
 - Declaration merging
 
+### Code Organization
+- TODO/FIXME formatting patterns
+- Code annotation standards
+- Comment structure consistency
+- Tool integration formats
+
 ### Performance
 - Bundle size optimization
 - Memory leak patterns
