@@ -235,13 +235,13 @@ pcheck check <id>    # Toggle completion
 
 ## 🧪 Testing Philosophy
 
-Follows **Test-Driven Development (TDD)** with strict quality standards:
+Follows **Pragmatic Testing** with focus on high-value tests:
 
-- 🎯 **Unit Tests**: All components with >80% coverage
-- 🔗 **Integration Tests**: Real API interactions and workflows
-- 🔄 **TDD Workflow**: Test-first development cycle
-- 📉 **Coverage Tracking**: Detailed reports with `pnpm test:cov`
-- 🔍 **Vitest Framework**: Modern testing with in-source tests
+- 🎯 **Business Logic First**: Test what matters, skip framework wrappers
+- 🔗 **Integration Tests**: Validate module interactions
+- 📊 **Smart Coverage**: Quality over quantity (70% overall, 90%+ for core)
+- 📖 **Testing Guide**: See [TESTING.md](./TESTING.md) for detailed strategy
+- 🔍 **Vitest Framework**: Fast, modern testing
 
 ## 🚫 Error Handling
 
