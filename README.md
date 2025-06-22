@@ -235,13 +235,13 @@ pcheck check <id>    # Toggle completion
 
 ## 🧪 Testing Philosophy
 
-Follows **Pragmatic Testing** with focus on high-value tests:
+Balanced approach combining **TDD** for core logic with **pragmatic testing** for integrations:
 
-- 🎯 **Business Logic First**: Test what matters, skip framework wrappers
-- 🔗 **Integration Tests**: Validate module interactions
+- 🔄 **TDD for Business Logic**: Test-first for complex features and algorithms
+- 🎯 **Pragmatic Integration Tests**: Focus on real behavior, not mocks
 - 📊 **Smart Coverage**: Quality over quantity (70% overall, 90%+ for core)
-- 📖 **Testing Guide**: See [TESTING.md](./TESTING.md) for detailed strategy
-- 🔍 **Vitest Framework**: Fast, modern testing
+- 📖 **Testing Guide**: See [TESTING.md](./TESTING.md) for when to use each approach
+- 🔍 **Vitest Framework**: Fast, modern testing with great DX
 
 ## 🚫 Error Handling
 
