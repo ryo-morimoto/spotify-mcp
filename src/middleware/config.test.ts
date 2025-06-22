@@ -156,7 +156,7 @@ describe('Config Middleware', () => {
       mockNext.mockRejectedValue(error);
 
       await expect(configMiddleware(mockContext as Context, mockNext as Next)).rejects.toThrow(
-        'Next middleware error'
+        'Next middleware error',
       );
     });
   });

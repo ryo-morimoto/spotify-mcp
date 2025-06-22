@@ -1,7 +1,7 @@
 {
   "name": "spotify-mcp-server",
   "version": "0.1.0-dev",
-  "private": true,
+  "private": false,
   "type": "module",
   "scripts": {
     "start": "tsx src/server.ts",

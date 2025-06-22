@@ -26,13 +26,13 @@ describe('sessionMiddleware', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    
+
     mockContext = {
       set: vi.fn(),
     };
-    
+
     mockNext = vi.fn().mockResolvedValue(undefined);
-    
+
     // Get mocked functions
     const cookieModule = await import('hono/cookie');
     getCookie = cookieModule.getCookie as any;
@@ -60,17 +60,12 @@ describe('sessionMiddleware', () => {
 
     expect(getCookie).toHaveBeenCalledWith(mockContext, 'session_id');
     expect(mockRandomUUID).toHaveBeenCalled();
-    expect(setCookie).toHaveBeenCalledWith(
-      mockContext,
-      'session_id',
-      newSessionId,
-      {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'Lax',
-        maxAge: 604800, // 7 days in seconds
-      }
-    );
+    expect(setCookie).toHaveBeenCalledWith(mockContext, 'session_id', newSessionId, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'Lax',
+      maxAge: 604800, // 7 days in seconds
+    });
     expect(mockContext.set).toHaveBeenCalledWith('sessionId', newSessionId);
     expect(mockNext).toHaveBeenCalled();
   });
@@ -89,7 +84,7 @@ describe('sessionMiddleware', () => {
 
   it('should call next after setting session', async () => {
     const callOrder: string[] = [];
-    
+
     getCookie.mockReturnValue('session-123');
     mockContext.set.mockImplementation(() => {
       callOrder.push('set');
@@ -109,7 +104,7 @@ describe('sessionMiddleware', () => {
     mockNext.mockRejectedValue(error);
 
     await expect(sessionMiddleware(mockContext as Context, mockNext)).rejects.toThrow(
-      'Next middleware error'
+      'Next middleware error',
     );
   });
 

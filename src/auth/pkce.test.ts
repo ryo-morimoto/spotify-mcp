@@ -37,7 +37,9 @@ describe('PKCE Functions', () => {
 
       expect(randomBytes).toHaveBeenCalledWith(32);
       expect(createHash).toHaveBeenCalledWith('sha256');
-      expect(mockHash.update).toHaveBeenCalledWith('dGVzdC1yYW5kb20tYnl0ZXMtZm9yLXBrY2UtY2hhbGxlbmdl');
+      expect(mockHash.update).toHaveBeenCalledWith(
+        'dGVzdC1yYW5kb20tYnl0ZXMtZm9yLXBrY2UtY2hhbGxlbmdl',
+      );
     });
 
     it('should handle base64 URL encoding correctly', async () => {
@@ -117,7 +119,9 @@ describe('PKCE Functions', () => {
         expect(url.searchParams.get('redirect_uri')).toBe(redirectUri);
         expect(url.searchParams.get('code_challenge')).toBe('test-challenge');
         expect(url.searchParams.get('code_challenge_method')).toBe('S256');
-        expect(url.searchParams.get('scope')).toBe('user-read-playback-state user-modify-playback-state');
+        expect(url.searchParams.get('scope')).toBe(
+          'user-read-playback-state user-modify-playback-state',
+        );
         expect(url.searchParams.has('state')).toBe(false);
       }
     });
@@ -146,8 +150,14 @@ describe('PKCE Functions', () => {
     it('should handle special characters in parameters', () => {
       const specialRedirectUri = 'http://localhost:8000/callback?param=value&other=test';
       const specialState = 'state with spaces & special=characters';
-      
-      const result = generateAuthUrl(clientId, specialRedirectUri, pkceChallenge, scopes, specialState);
+
+      const result = generateAuthUrl(
+        clientId,
+        specialRedirectUri,
+        pkceChallenge,
+        scopes,
+        specialState,
+      );
 
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {

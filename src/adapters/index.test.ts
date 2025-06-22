@@ -9,7 +9,7 @@ describe('Adapters Module Exports', () => {
 
   it('should have all expected exports', () => {
     const exports = Object.keys(adaptersModule);
-    
+
     expect(exports).toContain('createTokenProviderAdapter');
     expect(exports).toHaveLength(1);
   });

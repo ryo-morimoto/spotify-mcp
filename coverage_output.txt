@@ -1,0 +1,129 @@
+
+> spotify-mcp-server@0.1.0-dev test:cov /home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp
+> vitest run --coverage
+
+Loaded  vitest@3.2.4  and  @vitest/coverage-v8@3.2.3 .
+Running mixed versions is not supported and may lead into bugs
+Update your dependencies and make sure the versions match.
+
+ RUN  v3.2.4 /home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp
+      Coverage enabled with v8
+
+ ✓ src/storage/index.test.ts (8 tests) 63ms
+ ✓ src/middleware/timing.test.ts (6 tests) 30ms
+ ✓ src/middleware/session.test.ts (6 tests) 30ms
+ ✓ src/middleware/auth.test.ts (11 tests) 38ms
+ ❯ src/tokenStore.test.ts (12 tests | 1 failed) 62ms
+   ✓ tokenStore > store tokens > should store tokens successfully 16ms
+   ✓ tokenStore > store tokens > should reject invalid token data 1ms
+   ✓ tokenStore > get tokens > should return stored tokens 2ms
+   ✓ tokenStore > get tokens > should return null when no tokens stored 1ms
+   ✓ tokenStore > get tokens > should return expired tokens without auto-refresh 1ms
+   ✓ tokenStore > clear tokens > should clear stored tokens 2ms
+   ✓ tokenStore > error handling > should handle storage errors when getting tokens 4ms
+   ✓ tokenStore > error handling > should handle storage errors when storing tokens 1ms
+   ✓ tokenStore > error handling > should handle storage errors when clearing tokens 1ms
+   ✓ tokenStore > error handling > should handle unknown routes 1ms
+   ✓ tokenStore > error handling > should handle JSON parse errors 1ms
+   × tokenStore > error handling > should handle non-Error exceptions 27ms
+     → expected 'Failed to load tokens: String error' to be 'Internal error' // Object.is equality
+stderr | src/routes/mcp.test.ts > MCP JSON-RPC Route > POST /mcp > should handle tool invocation errors
+Error processing tools/invoke: Error: Tool failed
+    at handleToolsInvoke [90m(/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.ts:298:11[90m)[39m
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at processRequest [90m(/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.ts:162:18[90m)[39m
+    at async Promise.all (index 0)
+    at [90m/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.ts:111:23
+    at dispatch [90m(file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39mnode_modules/[4m.pnpm[24m/hono@4.8.2/node_modules/[4mhono[24m/dist/compose.js:22:17[90m)[39m
+    at [90m/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.test.ts:73:7
+    at dispatch [90m(file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39mnode_modules/[4m.pnpm[24m/hono@4.8.2/node_modules/[4mhono[24m/dist/compose.js:22:17[90m)[39m
+    at [90mfile:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39mnode_modules/[4m.pnpm[24m/hono@4.8.2/node_modules/[4mhono[24m/dist/hono-base.js:201:25
+    at [90m/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.test.ts:285:24
+Error stack: Error: Tool failed
+    at handleToolsInvoke (/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.ts:298:11)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at processRequest (/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.ts:162:18)
+    at async Promise.all (index 0)
+    at /home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.ts:111:23
+    at dispatch (file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/node_modules/.pnpm/hono@4.8.2/node_modules/hono/dist/compose.js:22:17)
+    at /home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.test.ts:73:7
+    at dispatch (file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/node_modules/.pnpm/hono@4.8.2/node_modules/hono/dist/compose.js:22:17)
+    at file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/node_modules/.pnpm/hono@4.8.2/node_modules/hono/dist/hono-base.js:201:25
+    at /home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.test.ts:285:24
+
+stderr | src/routes/mcp.test.ts > MCP JSON-RPC Route > POST /mcp > should handle missing tool name
+Error processing tools/invoke: Error: Missing tool name
+    at handleToolsInvoke [90m(/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.ts:282:11[90m)[39m
+    at processRequest [90m(/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.ts:162:24[90m)[39m
+    at [90m/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.ts:112:38
+    at Array.map (<anonymous>)
+    at [90m/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.ts:112:16
+[90m    at processTicksAndRejections (node:internal/process/task_queues:105:5)[39m
+    at dispatch [90m(file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39mnode_modules/[4m.pnpm[24m/hono@4.8.2/node_modules/[4mhono[24m/dist/compose.js:22:17[90m)[39m
+    at [90m/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39msrc/routes/mcp.test.ts:73:7
+    at dispatch [90m(file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39mnode_modules/[4m.pnpm[24m/hono@4.8.2/node_modules/[4mhono[24m/dist/compose.js:22:17[90m)[39m
+    at [90mfile:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/[39mnode_modules/[4m.pnpm[24m/hono@4.8.2/node_modules/[4mhono[24m/dist/hono-base.js:201:25
+Error stack: Error: Missing tool name
+    at handleToolsInvoke (/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.ts:282:11)
+    at processRequest (/home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.ts:162:24)
+    at /home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.ts:112:38
+    at Array.map (<anonymous>)
+    at /home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.ts:112:16
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at dispatch (file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/node_modules/.pnpm/hono@4.8.2/node_modules/hono/dist/compose.js:22:17)
+    at /home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/src/routes/mcp.test.ts:73:7
+    at dispatch (file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/node_modules/.pnpm/hono@4.8.2/node_modules/hono/dist/compose.js:22:17)
+    at file:///home/ryosu/Project/github.com/ryo-morimoto/spotify-mcp/node_modules/.pnpm/hono@4.8.2/node_modules/hono/dist/hono-base.js:201:25
+
+ ✓ src/routes/oauth.test.ts (13 tests) 54ms
+ ✓ src/routes/mcp.test.ts (10 tests) 70ms
+ ✓ src/types/token.test.ts (22 tests) 15ms
+ ✓ src/result.test.ts (22 tests) 35ms
+ ✓ src/external/spotify/player.test.ts (16 tests) 22ms
+ ✓ src/auth/retry.test.ts (8 tests) 26ms
+ ✓ src/auth/tokens.test.ts (19 tests) 29ms
+ ✓ src/auth/auth.test.ts (11 tests) 29ms
+ ✓ src/mcp/server.test.ts (19 tests) 37ms
+ ✓ src/middleware/errorHandler.test.ts (7 tests) 19ms
+ ✓ src/routes/health.test.ts (4 tests) 35ms
+ ✓ src/middleware/config.test.ts (10 tests) 21ms
+ ✓ src/auth/pkce.test.ts (11 tests) 26ms
+ ✓ src/external/spotify/errorMapper.test.ts (22 tests) 12ms
+ ✓ src/middleware/codeChallenge.test.ts (5 tests) 27ms
+ ✓ src/external/spotify/search.test.ts (7 tests) 17ms
+ ✓ src/auth/scopes.test.ts (30 tests) 17ms
+ ✓ src/adapters/tokenProviderAdapter.test.ts (8 tests) 18ms
+ ✓ src/auth/spotify.test.ts (6 tests) 11ms
+ ✓ src/storage/memory.test.ts (18 tests) 26ms
+ ✓ src/result.ts (4 tests) 7ms
+ ✓ src/middleware/index.test.ts (3 tests) 10ms
+ ✓ src/external/spotify/client.test.ts (6 tests) 9ms
+ ✓ src/adapters/index.test.ts (2 tests) 7ms
+ ✓ src/mcp/index.test.ts (3 tests) 5ms
+ ✓ src/routes/index.test.ts (4 tests) 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/tokenStore.test.ts > tokenStore > error handling > should handle non-Error exceptions
+AssertionError: expected 'Failed to load tokens: String error' to be 'Internal error' // Object.is equality
+
+Expected: [32m"[7mInternal[27m error"[39m
+Received: [31m"[7mFailed to load tokens: String[27m error"[39m
+
+ ❯ src/tokenStore.test.ts:248:26
+    246|       expect(response.status).toBe(500);
+    247|       const data = await response.json();
+    248|       expect(data.error).toBe('Internal error');
+       |                          ^
+    249|     });
+    250|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 30 passed (31)
+      Tests  1 failed | 332 passed (333)
+   Start at  22:29:04
+   Duration  3.54s (transform 1.33s, setup 0ms, collect 3.88s, tests 812ms, environment 10ms, prepare 6.26s)
+
+ ELIFECYCLE  Command failed with exit code 1.

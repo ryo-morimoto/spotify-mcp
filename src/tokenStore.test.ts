@@ -236,7 +236,9 @@ describe('tokenStore', () => {
 
     it('should handle non-Error exceptions', async () => {
       const brokenStorage = {
-        get: () => { throw 'String error'; }
+        get: () => {
+          throw 'String error';
+        },
       };
       const brokenState = { storage: brokenStorage };
 

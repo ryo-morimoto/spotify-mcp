@@ -98,7 +98,9 @@ describe('Storage Factory Functions', () => {
     });
 
     it('should create both storages independently', async () => {
-      const { createInMemoryTokenStorage, createInMemoryCodeChallengeStorage } = await import('./memory.ts');
+      const { createInMemoryTokenStorage, createInMemoryCodeChallengeStorage } = await import(
+        './memory.ts'
+      );
       const { getTokenStorage, getCodeChallengeStorage } = await import('./index.ts');
 
       getTokenStorage();

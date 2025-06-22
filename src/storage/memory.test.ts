@@ -21,7 +21,7 @@ describe('In-Memory Storage', () => {
     describe('store', () => {
       it('should store tokens successfully', async () => {
         const result = await storage.store(userId, tokenData);
-        
+
         expect(result.isOk()).toBe(true);
       });
 
@@ -35,7 +35,7 @@ describe('In-Memory Storage', () => {
         const result = await storage.store(userId, newTokenData);
 
         expect(result.isOk()).toBe(true);
-        
+
         const getResult = await storage.get(userId);
         if (getResult.isOk() && getResult.value) {
           expect(getResult.value.accessToken).toBe('new-access-token');
@@ -46,7 +46,7 @@ describe('In-Memory Storage', () => {
     describe('get', () => {
       it('should return null for non-existent user', async () => {
         const result = await storage.get('non-existent-user');
-        
+
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
           expect(result.value).toBeNull();
@@ -56,7 +56,7 @@ describe('In-Memory Storage', () => {
       it('should return stored tokens', async () => {
         await storage.store(userId, tokenData);
         const result = await storage.get(userId);
-        
+
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
           expect(result.value).toEqual(tokenData);
@@ -91,9 +91,9 @@ describe('In-Memory Storage', () => {
       it('should clear tokens for specific user', async () => {
         await storage.store(userId, tokenData);
         const clearResult = await storage.clear(userId);
-        
+
         expect(clearResult.isOk()).toBe(true);
-        
+
         const getResult = await storage.get(userId);
         expect(getResult.isOk()).toBe(true);
         if (getResult.isOk()) {
@@ -127,7 +127,7 @@ describe('In-Memory Storage', () => {
 
       it('should handle clearing non-existent user gracefully', async () => {
         const result = await storage.clear('non-existent-user');
-        
+
         expect(result.isOk()).toBe(true);
       });
     });
@@ -149,7 +149,7 @@ describe('In-Memory Storage', () => {
     describe('store', () => {
       it('should store code challenge successfully', async () => {
         const result = await storage.store(state, challengeData);
-        
+
         expect(result.isOk()).toBe(true);
       });
 
@@ -163,7 +163,7 @@ describe('In-Memory Storage', () => {
         const result = await storage.store(state, newChallengeData);
 
         expect(result.isOk()).toBe(true);
-        
+
         const getResult = await storage.get(state);
         if (getResult.isOk() && getResult.value) {
           expect(getResult.value.codeVerifier).toBe('new-verifier');
@@ -174,7 +174,7 @@ describe('In-Memory Storage', () => {
     describe('get', () => {
       it('should return null for non-existent state', async () => {
         const result = await storage.get('non-existent-state');
-        
+
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
           expect(result.value).toBeNull();
@@ -184,7 +184,7 @@ describe('In-Memory Storage', () => {
       it('should return stored challenge', async () => {
         await storage.store(state, challengeData);
         const result = await storage.get(state);
-        
+
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
           expect(result.value).toEqual(challengeData);
@@ -199,7 +199,7 @@ describe('In-Memory Storage', () => {
 
         await storage.store(state, expiredChallenge);
         const result = await storage.get(state);
-        
+
         expect(result.isOk()).toBe(true);
         if (result.isOk()) {
           expect(result.value).toBeNull();
@@ -214,7 +214,7 @@ describe('In-Memory Storage', () => {
 
         await storage.store(state, expiredChallenge);
         await storage.get(state); // This should trigger auto-deletion
-        
+
         // Even calling get again should return null
         const result = await storage.get(state);
         expect(result.isOk()).toBe(true);
@@ -251,9 +251,9 @@ describe('In-Memory Storage', () => {
       it('should clear challenge for specific state', async () => {
         await storage.store(state, challengeData);
         const clearResult = await storage.clear(state);
-        
+
         expect(clearResult.isOk()).toBe(true);
-        
+
         const getResult = await storage.get(state);
         expect(getResult.isOk()).toBe(true);
         if (getResult.isOk()) {
@@ -287,7 +287,7 @@ describe('In-Memory Storage', () => {
 
       it('should handle clearing non-existent state gracefully', async () => {
         const result = await storage.clear('non-existent-state');
-        
+
         expect(result.isOk()).toBe(true);
       });
     });

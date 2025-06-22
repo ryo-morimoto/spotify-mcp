@@ -11,12 +11,12 @@ describe('MCP Module Exports', () => {
     // Tool schemas
     expect(mcpModule.searchSchema).toBeDefined();
     expect(mcpModule.playerControlSchema).toBeDefined();
-    
+
     // Tool handlers
     expect(mcpModule.handleSearch).toBeDefined();
     expect(mcpModule.handlePlayerState).toBeDefined();
     expect(mcpModule.handlePlayerControl).toBeDefined();
-    
+
     expect(typeof mcpModule.handleSearch).toBe('function');
     expect(typeof mcpModule.handlePlayerState).toBe('function');
     expect(typeof mcpModule.handlePlayerControl).toBe('function');
@@ -24,14 +24,14 @@ describe('MCP Module Exports', () => {
 
   it('should have all expected exports', () => {
     const exports = Object.keys(mcpModule);
-    
+
     // Core function
     expect(exports).toContain('createMcpServer');
-    
+
     // Tool schemas
     expect(exports).toContain('searchSchema');
     expect(exports).toContain('playerControlSchema');
-    
+
     // Tool handlers
     expect(exports).toContain('handleSearch');
     expect(exports).toContain('handlePlayerState');

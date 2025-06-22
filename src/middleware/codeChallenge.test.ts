@@ -17,11 +17,11 @@ describe('codeChallengeMiddleware', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     mockContext = {
       set: vi.fn(),
     };
-    
+
     mockNext = vi.fn().mockResolvedValue(undefined);
   });
 
@@ -35,7 +35,7 @@ describe('codeChallengeMiddleware', () => {
         store: expect.any(Function),
         get: expect.any(Function),
         clear: expect.any(Function),
-      })
+      }),
     );
   });
 
@@ -66,7 +66,7 @@ describe('codeChallengeMiddleware', () => {
     mockNext.mockRejectedValue(error);
 
     await expect(codeChallengeMiddleware(mockContext as Context, mockNext)).rejects.toThrow(
-      'Next middleware error'
+      'Next middleware error',
     );
   });
 

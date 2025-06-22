@@ -13,7 +13,7 @@ describe('createSpotifyClient', () => {
   it('should create a Spotify client with the provided access token', () => {
     const mockClient = { id: 'mock-client' };
     const accessToken = 'test-access-token';
-    
+
     (SpotifyApi.withAccessToken as any).mockReturnValue(mockClient);
 
     const result = createSpotifyClient(accessToken);
@@ -29,7 +29,7 @@ describe('createSpotifyClient', () => {
 
   it('should always use Bearer token type', () => {
     const accessToken = 'another-token';
-    
+
     createSpotifyClient(accessToken);
 
     const callArgs = (SpotifyApi.withAccessToken as any).mock.calls[0];
@@ -38,7 +38,7 @@ describe('createSpotifyClient', () => {
 
   it('should always use 3600 as expires_in', () => {
     const accessToken = 'token-with-expiry';
-    
+
     createSpotifyClient(accessToken);
 
     const callArgs = (SpotifyApi.withAccessToken as any).mock.calls[0];
@@ -47,7 +47,7 @@ describe('createSpotifyClient', () => {
 
   it('should always use empty string for refresh_token', () => {
     const accessToken = 'token-without-refresh';
-    
+
     createSpotifyClient(accessToken);
 
     const callArgs = (SpotifyApi.withAccessToken as any).mock.calls[0];
@@ -56,7 +56,7 @@ describe('createSpotifyClient', () => {
 
   it('should always use empty string as client ID', () => {
     const accessToken = 'test-token';
-    
+
     createSpotifyClient(accessToken);
 
     const callArgs = (SpotifyApi.withAccessToken as any).mock.calls[0];

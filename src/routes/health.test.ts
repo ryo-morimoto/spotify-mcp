@@ -35,20 +35,22 @@ describe('Health Routes', () => {
 
     it('should have correct content type', async () => {
       const response = await app.request('/health');
-      
+
       expect(response.headers.get('content-type')).toContain('application/json');
     });
 
     it('should handle concurrent requests', async () => {
-      const requests = Array(5).fill(null).map(() => app.request('/health'));
+      const requests = Array(5)
+        .fill(null)
+        .map(() => app.request('/health'));
       const responses = await Promise.all(requests);
 
-      responses.forEach(response => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
       });
 
-      const jsons = await Promise.all(responses.map(r => r.json()));
-      jsons.forEach(json => {
+      const jsons = await Promise.all(responses.map((r) => r.json()));
+      jsons.forEach((json) => {
         expect(json.status).toBe('ok');
       });
     });

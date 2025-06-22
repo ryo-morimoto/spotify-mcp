@@ -7,7 +7,7 @@ describe('Middleware Module Exports', () => {
     expect(middlewareModule.requireAuth).toBeDefined();
     expect(middlewareModule.optionalAuth).toBeDefined();
     expect(middlewareModule.requireScopes).toBeDefined();
-    
+
     expect(typeof middlewareModule.authMiddleware).toBe('function');
     expect(typeof middlewareModule.requireAuth).toBe('function');
     expect(typeof middlewareModule.optionalAuth).toBe('function');
@@ -22,7 +22,7 @@ describe('Middleware Module Exports', () => {
     expect(middlewareModule.createLogger).toBeDefined();
     expect(middlewareModule.sessionMiddleware).toBeDefined();
     expect(middlewareModule.timingMiddleware).toBeDefined();
-    
+
     expect(typeof middlewareModule.codeChallengeMiddleware).toBe('function');
     expect(typeof middlewareModule.configMiddleware).toBe('function');
     expect(typeof middlewareModule.createConfig).toBe('function');
@@ -34,13 +34,13 @@ describe('Middleware Module Exports', () => {
 
   it('should have all expected exports', () => {
     const exports = Object.keys(middlewareModule);
-    
+
     // Auth middleware
     expect(exports).toContain('authMiddleware');
     expect(exports).toContain('requireAuth');
     expect(exports).toContain('optionalAuth');
     expect(exports).toContain('requireScopes');
-    
+
     // Other middleware
     expect(exports).toContain('codeChallengeMiddleware');
     expect(exports).toContain('configMiddleware');

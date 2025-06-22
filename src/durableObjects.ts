@@ -17,4 +17,3 @@ export class TokenProvider {
     return tokenStore(this.state, request);
   }
 }
-

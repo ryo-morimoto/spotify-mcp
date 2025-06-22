@@ -9,11 +9,11 @@ describe('timingMiddleware', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     mockContext = {
       header: vi.fn(),
     };
-    
+
     mockNext = vi.fn().mockResolvedValue(undefined);
   });
 
@@ -44,7 +44,7 @@ describe('timingMiddleware', () => {
 
     mockNext.mockImplementation(async () => {
       // Simulate some async work
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     await timingMiddleware(mockContext as Context, mockNext);
@@ -67,7 +67,7 @@ describe('timingMiddleware', () => {
     dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(1000);
 
     await expect(timingMiddleware(mockContext as Context, mockNext)).rejects.toThrow(
-      'Next middleware failed'
+      'Next middleware failed',
     );
 
     // Should not set header when error occurs

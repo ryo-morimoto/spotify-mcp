@@ -14,7 +14,7 @@ describe('TokenProviderAdapter', () => {
   let mockTokenStorage: TokenStorage;
   const clientId = 'test-client-id';
   const userId = 'test-user-id';
-  
+
   const validToken: StoredToken = {
     accessToken: 'valid-access-token',
     refreshToken: 'valid-refresh-token',
@@ -33,7 +33,7 @@ describe('TokenProviderAdapter', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     mockTokenStorage = {
       get: vi.fn(),
       store: vi.fn(),
@@ -44,13 +44,13 @@ describe('TokenProviderAdapter', () => {
   describe('getAccessToken', () => {
     it('should return access token for valid token', async () => {
       const { validateToken } = await import('../auth/index.ts');
-      
+
       mockTokenStorage.get.mockResolvedValue(ok(validToken));
       (validateToken as any).mockReturnValue(ok(true));
-      
+
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
       const result = await adapter.getAccessToken();
-      
+
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
         expect(result.value).toBe('valid-access-token');
@@ -61,10 +61,10 @@ describe('TokenProviderAdapter', () => {
 
     it('should return error when no token found', async () => {
       mockTokenStorage.get.mockResolvedValue(ok(null));
-      
+
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
       const result = await adapter.getAccessToken();
-      
+
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error.type).toBe('AuthError');
@@ -74,10 +74,10 @@ describe('TokenProviderAdapter', () => {
 
     it('should return error when storage fails', async () => {
       mockTokenStorage.get.mockResolvedValue(err(new Error('Storage error')));
-      
+
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
       const result = await adapter.getAccessToken();
-      
+
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error.type).toBe('NetworkError');
@@ -91,15 +91,15 @@ describe('TokenProviderAdapter', () => {
         ...validToken,
         accessToken: 'new-access-token',
       };
-      
+
       mockTokenStorage.get.mockResolvedValue(ok(expiredToken));
       mockTokenStorage.store.mockResolvedValue(ok(undefined));
       (validateToken as any).mockReturnValue(ok(false));
       (refreshTokenWithRetry as any).mockResolvedValue(ok(newToken));
-      
+
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
       const result = await adapter.getAccessToken();
-      
+
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
         expect(result.value).toBe('new-access-token');
@@ -110,16 +110,16 @@ describe('TokenProviderAdapter', () => {
 
     it('should return error when refresh fails', async () => {
       const { validateToken, refreshTokenWithRetry } = await import('../auth/index.ts');
-      
+
       mockTokenStorage.get.mockResolvedValue(ok(expiredToken));
       (validateToken as any).mockReturnValue(ok(false));
       (refreshTokenWithRetry as any).mockResolvedValue(
-        err(createAuthError('Refresh failed', 'invalid'))
+        err(createAuthError('Refresh failed', 'invalid')),
       );
-      
+
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
       const result = await adapter.getAccessToken();
-      
+
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error.type).toBe('AuthError');
@@ -133,13 +133,13 @@ describe('TokenProviderAdapter', () => {
         ...expiredToken,
         refreshToken: '',
       };
-      
+
       mockTokenStorage.get.mockResolvedValue(ok(tokenWithoutRefresh));
       (validateToken as any).mockReturnValue(ok(false));
-      
+
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
       const result = await adapter.getAccessToken();
-      
+
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error.type).toBe('AuthError');
@@ -151,13 +151,13 @@ describe('TokenProviderAdapter', () => {
   describe('refreshTokenIfNeeded', () => {
     it('should behave the same as getAccessToken', async () => {
       const { validateToken } = await import('../auth/index.ts');
-      
+
       mockTokenStorage.get.mockResolvedValue(ok(validToken));
       (validateToken as any).mockReturnValue(ok(true));
-      
+
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId, userId);
       const result = await adapter.refreshTokenIfNeeded();
-      
+
       expect(result.isOk()).toBe(true);
       if (result.isOk()) {
         expect(result.value).toBe('valid-access-token');
@@ -168,13 +168,13 @@ describe('TokenProviderAdapter', () => {
   describe('custom userId', () => {
     it('should use default userId when not provided', async () => {
       const { validateToken } = await import('../auth/index.ts');
-      
+
       mockTokenStorage.get.mockResolvedValue(ok(validToken));
       (validateToken as any).mockReturnValue(ok(true));
-      
+
       const adapter = createTokenProviderAdapter(mockTokenStorage, clientId);
       await adapter.getAccessToken();
-      
+
       expect(mockTokenStorage.get).toHaveBeenCalledWith('default-user');
     });
   });

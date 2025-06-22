@@ -19,7 +19,7 @@ describe('Routes Module Exports', () => {
 
   it('should have all expected exports', () => {
     const exports = Object.keys(routesModule);
-    
+
     expect(exports).toContain('oauthRoutes');
     expect(exports).toContain('healthRoutes');
     expect(exports).toContain('mcpRoutes');

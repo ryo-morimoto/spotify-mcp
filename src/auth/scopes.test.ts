@@ -114,7 +114,7 @@ describe('Scope Management', () => {
       const scopes = scopeString.split(' ');
 
       expect(scopes).toHaveLength(REQUIRED_SCOPES.length);
-      REQUIRED_SCOPES.forEach(scope => {
+      REQUIRED_SCOPES.forEach((scope) => {
         expect(scopes).toContain(scope);
       });
     });
@@ -124,7 +124,7 @@ describe('Scope Management', () => {
       const scopes = scopeString.split(' ');
 
       expect(scopes).toHaveLength(REQUIRED_SCOPES.length + OPTIONAL_SCOPES.length);
-      [...REQUIRED_SCOPES, ...OPTIONAL_SCOPES].forEach(scope => {
+      [...REQUIRED_SCOPES, ...OPTIONAL_SCOPES].forEach((scope) => {
         expect(scopes).toContain(scope);
       });
     });
@@ -145,7 +145,7 @@ describe('Scope Management', () => {
       const scopes = scopeString.split(' ');
 
       // Should not have duplicates
-      const scopeCount = scopes.filter(s => s === 'user-read-playback-state').length;
+      const scopeCount = scopes.filter((s) => s === 'user-read-playback-state').length;
       expect(scopeCount).toBe(1);
       expect(scopes).toHaveLength(REQUIRED_SCOPES.length + 1); // Only 'streaming' is new
     });
@@ -168,7 +168,8 @@ describe('Scope Management', () => {
 
   describe('parseScopeString', () => {
     it('should parse space-separated scope string', () => {
-      const scopeString = 'user-read-playback-state user-modify-playback-state playlist-read-private';
+      const scopeString =
+        'user-read-playback-state user-modify-playback-state playlist-read-private';
       const scopes = parseScopeString(scopeString);
 
       expect(scopes).toEqual([
@@ -190,26 +191,24 @@ describe('Scope Management', () => {
       const scopeString = 'user-read-playback-state  user-modify-playback-state   ';
       const scopes = parseScopeString(scopeString);
 
-      expect(scopes).toEqual([
-        'user-read-playback-state',
-        'user-modify-playback-state',
-      ]);
+      expect(scopes).toEqual(['user-read-playback-state', 'user-modify-playback-state']);
     });
 
     it('should handle leading and trailing spaces', () => {
       const scopeString = '  user-read-playback-state user-modify-playback-state  ';
       const scopes = parseScopeString(scopeString);
 
-      expect(scopes).toEqual([
-        'user-read-playback-state',
-        'user-modify-playback-state',
-      ]);
+      expect(scopes).toEqual(['user-read-playback-state', 'user-modify-playback-state']);
     });
   });
 
   describe('needsReauthentication', () => {
     it('should return false when all required scopes are present', () => {
-      const currentScopes = ['user-read-playback-state', 'user-modify-playback-state', 'playlist-read-private'];
+      const currentScopes = [
+        'user-read-playback-state',
+        'user-modify-playback-state',
+        'playlist-read-private',
+      ];
       const requiredScopes = ['user-read-playback-state', 'user-modify-playback-state'];
 
       expect(needsReauthentication(currentScopes, requiredScopes)).toBe(false);
@@ -224,13 +223,13 @@ describe('Scope Management', () => {
 
     it('should return false with empty required scopes', () => {
       const currentScopes = ['user-read-playback-state'];
-      
+
       expect(needsReauthentication(currentScopes, [])).toBe(false);
     });
 
     it('should return true with empty current scopes', () => {
       const requiredScopes = ['user-read-playback-state'];
-      
+
       expect(needsReauthentication([], requiredScopes)).toBe(true);
     });
 

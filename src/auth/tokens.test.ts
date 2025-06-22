@@ -63,16 +63,13 @@ describe('Token Functions', () => {
         expect(result.value.refreshToken).toBe('test-refresh-token');
       }
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://accounts.spotify.com/api/token',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: expect.stringContaining('grant_type=authorization_code'),
-        }
-      );
+      expect(global.fetch).toHaveBeenCalledWith('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: expect.stringContaining('grant_type=authorization_code'),
+      });
     });
 
     it('should handle invalid grant error', async () => {
@@ -160,16 +157,13 @@ describe('Token Functions', () => {
         expect(result.value.refreshToken).toBe('test-refresh-token'); // Should keep existing
       }
 
-      expect(global.fetch).toHaveBeenCalledWith(
-        'https://accounts.spotify.com/api/token',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: expect.stringContaining('grant_type=refresh_token'),
-        }
-      );
+      expect(global.fetch).toHaveBeenCalledWith('https://accounts.spotify.com/api/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: expect.stringContaining('grant_type=refresh_token'),
+      });
     });
 
     it('should handle expired refresh token', async () => {
@@ -336,7 +330,7 @@ describe('Token Functions', () => {
           initialDelayMs: 1000,
           maxDelayMs: 16000,
           shouldRetry: expect.any(Function),
-        })
+        }),
       );
     });
 
@@ -349,13 +343,13 @@ describe('Token Functions', () => {
         expect.any(Function),
         expect.objectContaining({
           maxRetries: 5,
-        })
+        }),
       );
     });
 
     it('should not retry on invalid auth errors', async () => {
       const { withExponentialBackoff } = await import('./retry.ts');
-      
+
       // Get the shouldRetry function from the call
       await refreshTokenWithRetry(refreshTokenStr, clientId);
       const callArgs = (withExponentialBackoff as any).mock.calls[0];
@@ -369,7 +363,7 @@ describe('Token Functions', () => {
 
     it('should retry on network errors', async () => {
       const { withExponentialBackoff } = await import('./retry.ts');
-      
+
       await refreshTokenWithRetry(refreshTokenStr, clientId);
       const callArgs = (withExponentialBackoff as any).mock.calls[0];
       const options = callArgs[1];
@@ -382,7 +376,7 @@ describe('Token Functions', () => {
 
     it('should retry on expired auth errors', async () => {
       const { withExponentialBackoff } = await import('./retry.ts');
-      
+
       await refreshTokenWithRetry(refreshTokenStr, clientId);
       const callArgs = (withExponentialBackoff as any).mock.calls[0];
       const options = callArgs[1];

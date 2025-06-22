@@ -80,9 +80,9 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle initialize request', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: JSON.stringify({
           jsonrpc: '2.0',
@@ -116,9 +116,9 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle tools/list request', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: JSON.stringify({
           jsonrpc: '2.0',
@@ -141,9 +141,9 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle tools/invoke request', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: JSON.stringify({
           jsonrpc: '2.0',
@@ -171,9 +171,9 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle batch requests', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: JSON.stringify([
           {
@@ -200,9 +200,9 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle notifications (no response)', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: JSON.stringify({
           jsonrpc: '2.0',
@@ -220,9 +220,9 @@ describe('MCP JSON-RPC Route', () => {
     it('should return parse error for invalid JSON', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: 'invalid json',
       });
@@ -238,9 +238,9 @@ describe('MCP JSON-RPC Route', () => {
     it('should return invalid request error for malformed request', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: JSON.stringify({
           // Missing jsonrpc field
@@ -258,9 +258,9 @@ describe('MCP JSON-RPC Route', () => {
     it('should return method not found error', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: JSON.stringify({
           jsonrpc: '2.0',
@@ -284,9 +284,9 @@ describe('MCP JSON-RPC Route', () => {
 
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: JSON.stringify({
           jsonrpc: '2.0',
@@ -308,9 +308,9 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle missing tool name', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer test-token'
+          Authorization: 'Bearer test-token',
         },
         body: JSON.stringify({
           jsonrpc: '2.0',
