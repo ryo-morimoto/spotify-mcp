@@ -156,4 +156,96 @@ describe('tokenStore', () => {
   });
 
   // Auto-refresh functionality moved to auth layer
+
+  describe('error handling', () => {
+    it('should handle storage errors when getting tokens', async () => {
+      const mockErrorStorage = {
+        ...mockState.storage,
+        get: vi.fn().mockRejectedValue(new Error('Storage read error')),
+      };
+      const errorState = { ...mockState, storage: mockErrorStorage };
+
+      const request = new Request('http://internal/get');
+      const response = await tokenStore(errorState as any, request);
+
+      expect(response.status).toBe(500);
+      const data = await response.json();
+      expect(data.error).toContain('Failed to load tokens');
+      expect(data.type).toBe('NetworkError');
+    });
+
+    it('should handle storage errors when storing tokens', async () => {
+      const mockErrorStorage = {
+        ...mockState.storage,
+        put: vi.fn().mockRejectedValue(new Error('Storage write error')),
+      };
+      const errorState = { ...mockState, storage: mockErrorStorage };
+
+      const request = new Request('http://internal/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accessToken: 'test-access-token',
+          refreshToken: 'test-refresh-token',
+          expiresAt: Date.now() + 3600000,
+          tokenType: 'Bearer',
+        }),
+      });
+
+      const response = await tokenStore(errorState as any, request);
+
+      expect(response.status).toBe(500);
+      expect(await response.text()).toContain('Failed to store tokens');
+    });
+
+    it('should handle storage errors when clearing tokens', async () => {
+      const mockErrorStorage = {
+        ...mockState.storage,
+        delete: vi.fn().mockRejectedValue(new Error('Storage delete error')),
+      };
+      const errorState = { ...mockState, storage: mockErrorStorage };
+
+      const request = new Request('http://internal/clear');
+      const response = await tokenStore(errorState as any, request);
+
+      expect(response.status).toBe(500);
+      expect(await response.text()).toContain('Failed to clear tokens');
+    });
+
+    it('should handle unknown routes', async () => {
+      const request = new Request('http://internal/unknown');
+      const response = await tokenStore(mockState, request);
+
+      expect(response.status).toBe(404);
+      expect(await response.text()).toBe('Not found');
+    });
+
+    it('should handle JSON parse errors', async () => {
+      const request = new Request('http://internal/store', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: 'invalid json',
+      });
+
+      const response = await tokenStore(mockState, request);
+
+      expect(response.status).toBe(500);
+      const data = await response.json();
+      expect(data.error).toBeDefined();
+    });
+
+    it('should handle non-Error exceptions', async () => {
+      const brokenStorage = {
+        get: () => { throw 'String error'; }
+      };
+      const brokenState = { storage: brokenStorage };
+
+      const request = new Request('http://internal/get');
+      const response = await tokenStore(brokenState as any, request);
+
+      expect(response.status).toBe(500);
+      const data = await response.json();
+      expect(data.error).toBe('Failed to load tokens: String error');
+    });
+  });
 });

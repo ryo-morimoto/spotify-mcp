@@ -25,7 +25,7 @@ export function mapSpotifyError(error: unknown): NetworkError | AuthError | Spot
   const errorWithStatus = error as { status?: number; message?: string; statusText?: string };
 
   const status = errorWithStatus.status;
-  const message = errorWithStatus.message || 'Unknown error';
+  const message = errorWithStatus.message;
 
   // Map specific HTTP status codes to our error types
   switch (status) {
@@ -39,28 +39,28 @@ export function mapSpotifyError(error: unknown): NetworkError | AuthError | Spot
 
     case 429:
       // Rate limiting
-      return createSpotifyError(message || 'Rate limit exceeded', '429');
+      return createSpotifyError(message || 'Rate limit exceeded', '429', error);
 
     case 404:
       // Resource not found (e.g., no active device for playback)
-      return createSpotifyError(message || 'Resource not found', '404');
+      return createSpotifyError(message || 'Resource not found', '404', error);
 
     case 400:
       // Bad request - client error
-      return createSpotifyError(message || 'Invalid request', '400');
+      return createSpotifyError(message || 'Invalid request', '400', error);
 
     default:
       // Handle other 4xx errors as Spotify errors
       if (status && status >= 400 && status < 500) {
-        return createSpotifyError(message, status.toString());
+        return createSpotifyError(message || 'Unknown error', status.toString(), error);
       }
 
       // Handle 5xx errors and network issues as NetworkError
       if (status && status >= 500) {
-        return createNetworkError(message, status, error);
+        return createNetworkError(message || 'Unknown error', status, error);
       }
 
       // No status code - likely a network error
-      return createNetworkError(message, undefined, error);
+      return createNetworkError(message || 'Unknown error', undefined, error);
   }
 }
