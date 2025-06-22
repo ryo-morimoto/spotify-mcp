@@ -33,7 +33,7 @@ All Spotify API functions **MUST** follow this pattern:
 export async function functionName(
   client: SpotifyApi,
   param1: Type1,
-  param2?: Type2
+  param2?: Type2,
 ): Promise<Result<ReturnType, NetworkError | AuthError | SpotifyError>> {
   try {
     const result = await client.namespace.method(param1, param2);
@@ -52,7 +52,7 @@ export async function functionName(
 // ❌ BAD: Throwing errors instead of returning Result
 export async function searchTracks(client: SpotifyApi, query: string) {
   const results = await client.search(query, ['track']);
-  if (!results) throw new Error("No results");
+  if (!results) throw new Error('No results');
   return results;
 }
 
@@ -73,10 +73,12 @@ export async function getCurrentPlayback(client: SpotifyApi) {
 ### Error Mapping
 
 The SDK throws standard JavaScript `Error` objects with:
+
 - `status`: HTTP status code
 - `message`: Error description
 
 Our `errorMapper.ts` converts these to domain errors:
+
 - **401, 403** → `AuthError`
 - **400, 404, 429, 4xx** → `SpotifyError`
 - **5xx, network** → `NetworkError`
@@ -93,9 +95,10 @@ Each function handles its own special cases internally:
 Keep special case handling inside each function. Don't create new abstractions unless absolutely necessary.
 
 #### Example: Handling 204 in getCurrentPlayback
+
 ```typescript
 export async function getCurrentPlayback(
-  client: SpotifyApi
+  client: SpotifyApi,
 ): Promise<Result<PlayerState | null, NetworkError | AuthError | SpotifyError>> {
   try {
     const state = await client.player.getPlaybackState();
@@ -113,12 +116,13 @@ export async function getCurrentPlayback(
 ## Usage Examples
 
 ### Search Tracks
+
 ```typescript
 import { createSpotifyClient } from './client.ts';
 import { searchTracks } from './search.ts';
 
 const client = createSpotifyClient(accessToken);
-const result = await searchTracks(client, "query", 10);
+const result = await searchTracks(client, 'query', 10);
 
 if (result.isErr()) {
   // Handle error based on type
@@ -127,6 +131,7 @@ if (result.isErr()) {
 ```
 
 ### Player Control
+
 ```typescript
 import { getCurrentPlayback, controlPlayback } from './player.ts';
 

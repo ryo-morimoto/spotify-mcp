@@ -13,7 +13,7 @@ export type PlaybackCommand = 'play' | 'pause' | 'next' | 'previous';
  * Returns null when no device is active (204 No Content)
  */
 export async function getCurrentPlayback(
-  client: SpotifyApi
+  client: SpotifyApi,
 ): Promise<Result<PlaybackState | null, NetworkError | AuthError | SpotifyError>> {
   try {
     const playbackState = await client.player.getPlaybackState();
@@ -35,13 +35,13 @@ export async function getCurrentPlayback(
 export async function controlPlayback(
   client: SpotifyApi,
   command: PlaybackCommand,
-  deviceId?: string
+  deviceId?: string,
 ): Promise<Result<void, NetworkError | AuthError | SpotifyError>> {
   try {
     // SDK requires device_id as string, but Spotify API accepts empty string for current device
     // This is a known SDK limitation where the types don't match the actual API behavior
     const device = deviceId || '';
-    
+
     switch (command) {
       case 'play':
         await client.player.startResumePlayback(device);
@@ -60,7 +60,7 @@ export async function controlPlayback(
         const _exhaustive: never = command;
         throw new Error(`Unknown command: ${_exhaustive}`);
     }
-    
+
     return ok(undefined);
   } catch (error) {
     return err(mapSpotifyError(error));

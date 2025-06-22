@@ -2,11 +2,11 @@
 export { generateCodeChallenge, generateAuthUrl } from './pkce.ts';
 
 // Token management
-export { 
-  exchangeCodeForToken, 
-  refreshToken, 
+export {
+  exchangeCodeForToken,
+  refreshToken,
   refreshTokenWithRetry,
-  validateToken 
+  validateToken,
 } from './tokens.ts';
 
 // Retry utilities

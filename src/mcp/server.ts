@@ -77,12 +77,7 @@ export function createMcpServer(tokenManager: TokenManager): any {
   toolHandlers.set('player_control', playerControlHandler);
 
   // Register tools with MCP server
-  server.tool(
-    'search',
-    'Search for tracks on Spotify',
-    searchSchema.shape,
-    searchHandler,
-  );
+  server.tool('search', 'Search for tracks on Spotify', searchSchema.shape, searchHandler);
 
   server.tool('player_state', 'Get current Spotify playback state', {}, playerStateHandler);
 
@@ -108,8 +103,10 @@ export function createMcpServer(tokenManager: TokenManager): any {
 
     const validationResult = tryCatch(() => {
       // Basic validation for required params
-      if (name === 'search' && !args.query) {
-        throw new Error('Missing required parameter: query');
+      if (name === 'search') {
+        if (!args.query || args.query.trim() === '') {
+          throw new Error('Missing required parameter: query');
+        }
       }
 
       if (name === 'player_control') {

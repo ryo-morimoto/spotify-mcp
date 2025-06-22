@@ -12,6 +12,20 @@
     "skipLibCheck": true,
     "types": ["vitest/importMeta", "node", "@cloudflare/workers-types"],
     
+    // Path aliases
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@external/*": ["src/external/*"],
+      "@mcp/*": ["src/mcp/*"],
+      "@routes/*": ["src/routes/*"],
+      "@auth/*": ["src/auth/*"],
+      "@types/*": ["src/types/*"],
+      "@middleware/*": ["src/middleware/*"],
+      "@storage/*": ["src/storage/*"],
+      "@adapters/*": ["src/adapters/*"]
+    },
+    
     // Strict type checking
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -38,6 +52,6 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist", "coverage"]
 }

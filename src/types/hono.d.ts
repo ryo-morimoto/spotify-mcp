@@ -7,6 +7,7 @@
 
 import type { AppConfig } from '../middleware/config.ts';
 import type { getTokenStorage, getCodeChallengeStorage } from '../storage/index.ts';
+import type { StoredToken } from './token.ts';
 
 declare module 'hono' {
   interface ContextVariableMap {
@@ -16,6 +17,9 @@ declare module 'hono' {
 
     /** Whether the current user has valid authentication tokens */
     authenticated: boolean;
+
+    /** Current user's authentication tokens (set when authenticated) */
+    tokens?: StoredToken;
 
     /** Token storage instance for managing OAuth tokens */
     tokenStorage: ReturnType<typeof getTokenStorage>;

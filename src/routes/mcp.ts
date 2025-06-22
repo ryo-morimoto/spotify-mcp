@@ -2,7 +2,8 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { createMcpServer } from '../mcp/index.ts';
 import { createTokenManagerAdapter } from '../adapters/index.ts';
-import { requireAuth } from '../middleware/index.ts';
+import { createConfig } from '../middleware/index.ts';
+// Authentication is handled per-request in the MCP handler
 import type { TokenStorage } from '../types/index.ts';
 
 // Import centralized type augmentations
@@ -41,7 +42,7 @@ const ErrorCodes = {
   INVALID_PARAMS: -32602,
   INTERNAL_ERROR: -32603,
   // Custom error codes
-  AUTHENTICATION_REQUIRED: 1001,
+  AUTHENTICATION_REQUIRED: -32001,
   INVALID_TOKEN: 1002,
   TOKEN_EXPIRED: 1003,
   SPOTIFY_API_ERROR: 2001,
@@ -52,20 +53,38 @@ const ErrorCodes = {
 export const mcpRoutes = new Hono();
 
 // Main MCP JSON-RPC endpoint
-mcpRoutes.post('/mcp', requireAuth, async (c): Promise<Response> => {
+mcpRoutes.post('/mcp', async (c): Promise<Response> => {
+  // Check authentication first
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader) {
+    return c.json(
+      createErrorResponse(null, ErrorCodes.AUTHENTICATION_REQUIRED, 'Authentication required'),
+      401,
+    );
+  }
+
+  // Verify user has valid tokens
+  const authenticated = c.get('authenticated');
+  if (!authenticated) {
+    return c.json(
+      createErrorResponse(null, ErrorCodes.AUTHENTICATION_REQUIRED, 'Authentication required'),
+      401,
+    );
+  }
   const tokenStorage = c.get('tokenStorage') as TokenStorage;
   const userId = c.get('userId') as string;
 
   try {
     // Parse request body
-    const body = await c.req.json().catch(() => null);
-    
+    let body;
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json(createErrorResponse(null, ErrorCodes.PARSE_ERROR, 'Parse error'));
+    }
+
     if (!body) {
-      return c.json(createErrorResponse(
-        null,
-        ErrorCodes.PARSE_ERROR,
-        'Invalid JSON'
-      ));
+      return c.json(createErrorResponse(null, ErrorCodes.PARSE_ERROR, 'Invalid JSON'));
     }
 
     // Check if batch request
@@ -73,46 +92,49 @@ mcpRoutes.post('/mcp', requireAuth, async (c): Promise<Response> => {
     const requests = isBatch ? body : [body];
 
     // Validate requests
-    const validationResult = isBatch 
+    const validationResult = isBatch
       ? jsonRpcBatchRequestSchema.safeParse(requests)
       : jsonRpcRequestSchema.safeParse(requests[0]);
 
     if (!validationResult.success) {
-      return c.json(createErrorResponse(
-        null,
-        ErrorCodes.INVALID_REQUEST,
-        'Invalid JSON-RPC request'
-      ));
+      return c.json(
+        createErrorResponse(null, ErrorCodes.INVALID_REQUEST, 'Invalid JSON-RPC request'),
+      );
     }
 
     // Create MCP server instance
-    const tokenManager = createTokenManagerAdapter(tokenStorage, userId);
+    const config = createConfig();
+    const tokenManager = createTokenManagerAdapter(tokenStorage, config.spotifyClientId, userId);
     const mcpServer = createMcpServer(tokenManager);
 
     // Process requests
     const responses = await Promise.all(
-      requests.map(request => processRequest(request, mcpServer))
+      requests.map((request: any) => processRequest(request, mcpServer)),
     );
 
     // Return batch or single response
     return c.json(isBatch ? responses : responses[0]);
-
   } catch (error) {
     console.error('MCP endpoint error:', error);
-    return c.json(createErrorResponse(
-      null,
-      ErrorCodes.INTERNAL_ERROR,
-      'Internal server error'
-    ));
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+    return c.json(
+      createErrorResponse(
+        null,
+        ErrorCodes.INTERNAL_ERROR,
+        error instanceof Error ? error.message : 'Internal server error',
+      ),
+    );
   }
 });
 
 // Process a single JSON-RPC request
-async function processRequest(
-  request: JsonRpcRequest,
-  mcpServer: any
-): Promise<JsonRpcResponse> {
+async function processRequest(request: JsonRpcRequest, mcpServer: any): Promise<JsonRpcResponse> {
   const { method, params, id } = request;
+
+  // Validate request structure
+  if (!request.jsonrpc || request.jsonrpc !== '2.0') {
+    return createErrorResponse(id ?? null, ErrorCodes.INVALID_REQUEST, 'Invalid JSON-RPC version');
+  }
 
   // Notifications (no id) don't get responses
   const isNotification = id === undefined;
@@ -126,7 +148,7 @@ async function processRequest(
       case 'initialize':
         result = await handleInitialize(params);
         break;
-      
+
       case 'shutdown':
         result = null;
         break;
@@ -135,7 +157,7 @@ async function processRequest(
       case 'tools/list':
         result = await handleToolsList(mcpServer);
         break;
-      
+
       case 'tools/invoke':
         result = await handleToolsInvoke(params, mcpServer);
         break;
@@ -144,31 +166,31 @@ async function processRequest(
       case 'resources/list':
         result = { resources: [] }; // TODO: Implement resources
         break;
-      
+
       case 'resources/read':
         return createErrorResponse(
           id ?? null,
           ErrorCodes.METHOD_NOT_FOUND,
-          'Resources not yet implemented'
+          'Resources not yet implemented',
         );
 
       // Prompt methods (planned)
       case 'prompts/list':
         result = { prompts: [] }; // TODO: Implement prompts
         break;
-      
+
       case 'prompts/execute':
         return createErrorResponse(
           id ?? null,
           ErrorCodes.METHOD_NOT_FOUND,
-          'Prompts not yet implemented'
+          'Prompts not yet implemented',
         );
 
       default:
         return createErrorResponse(
           id ?? null,
           ErrorCodes.METHOD_NOT_FOUND,
-          `Method '${method}' not found`
+          `Method '${method}' not found`,
         );
     }
 
@@ -182,8 +204,10 @@ async function processRequest(
       result,
       id: id ?? null,
     };
-
   } catch (error) {
+    console.error(`Error processing ${method}:`, error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+
     // Don't send error response for notifications
     if (isNotification) {
       console.error(`Notification error for ${method}:`, error);
@@ -192,26 +216,32 @@ async function processRequest(
 
     // Map errors to JSON-RPC errors
     if (error instanceof Error) {
+      const errorWithCode = error as Error & { code?: string };
+
+      // Check for specific error codes
+      if (errorWithCode.code === 'INVALID_PARAMS') {
+        return createErrorResponse(id ?? null, ErrorCodes.INVALID_PARAMS, error.message);
+      }
+      if (errorWithCode.code === 'UNKNOWN_TOOL') {
+        return createErrorResponse(id ?? null, ErrorCodes.METHOD_NOT_FOUND, error.message);
+      }
+
+      // Check for message patterns
       if (error.message.includes('expired')) {
-        return createErrorResponse(
-          id ?? null,
-          ErrorCodes.TOKEN_EXPIRED,
-          'Token expired'
-        );
+        return createErrorResponse(id ?? null, ErrorCodes.TOKEN_EXPIRED, 'Token expired');
       }
       if (error.message.includes('Spotify')) {
-        return createErrorResponse(
-          id ?? null,
-          ErrorCodes.SPOTIFY_API_ERROR,
-          error.message
-        );
+        return createErrorResponse(id ?? null, ErrorCodes.SPOTIFY_API_ERROR, error.message);
+      }
+      if (error.message.includes('Tool not found') || error.message.includes('Unknown tool')) {
+        return createErrorResponse(id ?? null, ErrorCodes.METHOD_NOT_FOUND, error.message);
       }
     }
 
     return createErrorResponse(
       id ?? null,
       ErrorCodes.INTERNAL_ERROR,
-      'Internal error processing request'
+      error instanceof Error ? error.message : 'Internal error processing request',
     );
   }
 }
@@ -226,7 +256,7 @@ async function handleInitialize(_params: any) {
     capabilities: {
       tools: true,
       resources: false, // TODO: Enable when implemented
-      prompts: false,   // TODO: Enable when implemented
+      prompts: false, // TODO: Enable when implemented
     },
   };
 }
@@ -234,7 +264,7 @@ async function handleInitialize(_params: any) {
 async function handleToolsList(mcpServer: any) {
   // Get tool list from MCP server
   const tools = mcpServer.listTools();
-  
+
   return {
     tools: tools.map((tool: any) => ({
       name: tool.name,
@@ -253,11 +283,18 @@ async function handleToolsInvoke(params: any, mcpServer: any) {
   }
 
   const { name, arguments: args } = params;
-  
+
   // Call tool through MCP server
   const result = await mcpServer.callTool(name, args || {});
-  
+
   if (result.isErr()) {
+    // Check for specific error codes
+    if (result.error.code === 'INVALID_PARAMS') {
+      throw Object.assign(new Error(result.error.message), { code: 'INVALID_PARAMS' });
+    }
+    if (result.error.code === 'UNKNOWN_TOOL') {
+      throw Object.assign(new Error(result.error.message), { code: 'UNKNOWN_TOOL' });
+    }
     throw new Error(result.error.message);
   }
 
@@ -269,7 +306,7 @@ function createErrorResponse(
   id: string | number | null,
   code: number,
   message: string,
-  data?: any
+  data?: any,
 ): JsonRpcResponse {
   return {
     jsonrpc: '2.0',

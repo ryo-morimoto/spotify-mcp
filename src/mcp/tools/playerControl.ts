@@ -2,10 +2,7 @@ import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
 import type { AppError } from '../../result.ts';
 import type { TokenManager } from '../../types/index.ts';
-import {
-  createSpotifyClient,
-  controlPlayback,
-} from '../../external/spotify/index.ts';
+import { createSpotifyClient, controlPlayback } from '../../external/spotify/index.ts';
 
 // TODO: Add more player control features [MID]
 // - [ ] Volume control with fade in/out
@@ -21,16 +18,14 @@ import {
 // Impact: Prevents errors when device is offline or doesn't support command
 
 export const playerControlSchema = z.object({
-  command: z
-    .enum(['play', 'pause', 'next', 'previous'])
-    .describe('Playback command to execute'),
+  command: z.enum(['play', 'pause', 'next', 'previous']).describe('Playback command to execute'),
 });
 
 export type PlayerControlArgs = z.infer<typeof playerControlSchema>;
 
 export async function handlePlayerControl(
   args: PlayerControlArgs,
-  tokenManager: TokenManager
+  tokenManager: TokenManager,
 ): Promise<Result<string, AppError>> {
   // Get access token
   const tokenResult = await tokenManager.refreshTokenIfNeeded();

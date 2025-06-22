@@ -12,36 +12,9 @@ export class TokenManager {
   }
 
   async fetch(request: Request): Promise<Response> {
-    // TODO: Add request middleware [LOW]
-    // - [ ] Log all requests for debugging
-    // - [ ] Add request timing metrics
-    // - [ ] Implement request retry logic
-    // Context: Improve observability for Durable Object requests
+    // NOTE: Middleware concerns should be handled at the Worker level, not here
+    // This is a thin wrapper that delegates to tokenStore
     return tokenStore(this.state, request);
   }
 }
 
-// SessionManager Durable Object class (placeholder for future use)
-// TODO: Implement session management [MID]
-// - [ ] Track active MCP connections
-// - [ ] Store user preferences
-// - [ ] Manage connection state across reconnects
-// - [ ] Implement session timeout handling
-// Purpose: Enable persistent sessions across reconnections
-export class SessionManager {
-  constructor(_state: DurableObjectState) {
-    // Initialize when needed
-  }
-
-  async fetch(_request: Request): Promise<Response> {
-    // FIXME: Implement actual session management [MID]
-    // - [ ] Store WebSocket/SSE connections
-    // - [ ] Track connection state and metadata
-    // - [ ] Handle reconnection logic
-    // - [ ] Parse session ID from request
-    // - [ ] Store/retrieve session data
-    // - [ ] Handle session expiration
-    // Blocked by: Full MCP SSE implementation
-    return new Response('Session manager not implemented', { status: 501 });
-  }
-}

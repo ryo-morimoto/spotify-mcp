@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@hono/node-server':
-        specifier: ^1.14.4
-        version: 1.14.4(hono@4.8.2)
       '@modelcontextprotocol/sdk':
         specifier: ^1.13.0
         version: 1.13.0
@@ -36,6 +33,9 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20250620.0
         version: 4.20250620.0
+      '@hono/node-server':
+        specifier: ^1.14.4
+        version: 1.14.4(hono@4.8.2)
       '@types/node':
         specifier: ^24.0.3
         version: 24.0.3

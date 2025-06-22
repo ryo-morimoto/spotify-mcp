@@ -5,7 +5,7 @@ import { mapSpotifyError } from './errorMapper.ts';
 
 /**
  * Search tracks using official SDK with Result error handling
- * 
+ *
  * @param limit - Must be between 1 and 50 (validated by caller)
  */
 export async function searchTracks(
@@ -16,7 +16,7 @@ export async function searchTracks(
   try {
     // SDK requires MaxInt<50> type, cast the validated number
     const searchResults = await client.search(query, ['track'], 'US', limit as MaxInt<50>);
-    
+
     // Empty arrays are valid responses - let consumers decide how to handle
     return ok(searchResults.tracks.items);
   } catch (error) {

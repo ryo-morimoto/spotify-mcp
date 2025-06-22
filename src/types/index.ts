@@ -1,6 +1,6 @@
 /**
  * Central type definitions for Spotify MCP Server
- * 
+ *
  * This module provides a single entry point for all shared types
  * across the application, improving maintainability and discoverability.
  */
@@ -21,11 +21,7 @@ export {
 } from './token.ts';
 
 // Re-export spotify types
-export type {
-  SpotifyTrack,
-  PlayerState,
-  PlaybackCommand,
-} from './spotify.ts';
+export type { SpotifyTrack, PlayerState, PlaybackCommand } from './spotify.ts';
 
 // Re-export storage types
 export type {
@@ -36,20 +32,13 @@ export type {
 } from './storage.ts';
 
 // Re-export oauth types
-export type {
-  PKCEChallenge,
-  OAuthTokens,
-} from './oauth.ts';
+export type { PKCEChallenge, OAuthTokens } from './oauth.ts';
 
 // Re-export mcp types
-export type {
-  TokenManager,
-} from './mcp.ts';
+export type { TokenManager } from './mcp.ts';
 
 // Re-export config types
-export type {
-  AppConfig,
-} from './config.ts';
+export type { AppConfig } from './config.ts';
 
 // Re-export error types
 export type {

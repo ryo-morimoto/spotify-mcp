@@ -1,6 +1,6 @@
 /**
  * Spotify External API Module
- * 
+ *
  * Public interface for Spotify Web API integration.
  * All functions return Result types for explicit error handling.
  */
@@ -12,18 +12,18 @@ export { createSpotifyClient } from './client.ts';
 export { searchTracks } from './search.ts';
 
 // Player functionality
-export { 
+export {
   getCurrentPlayback,
   controlPlayback,
   type PlayerState,
-  type PlaybackCommand
+  type PlaybackCommand,
 } from './player.ts';
 
 // Re-export types from SDK that consumers need
-export type { 
+export type {
   Track as SpotifyTrack,
   Artist as SpotifyArtist,
   Album as SpotifyAlbum,
   Device as SpotifyDevice,
-  PlaybackState
+  PlaybackState,
 } from '@spotify/web-api-ts-sdk';

@@ -1,6 +1,6 @@
 /**
  * Storage layer type definitions
- * 
+ *
  * Types for data persistence and storage abstractions.
  */
 
@@ -13,13 +13,12 @@ export type TokenData = StoredToken;
 
 /**
  * Interface for token storage operations
+ * Pure storage layer - no business logic like validation or refresh
  */
 export interface TokenStorage {
   get(userId: string): Promise<import('neverthrow').Result<TokenData | null, Error>>;
   store(userId: string, token: TokenData): Promise<import('neverthrow').Result<void, Error>>;
-  refresh(userId: string): Promise<import('neverthrow').Result<TokenData, Error>>;
   clear(userId: string): Promise<import('neverthrow').Result<void, Error>>;
-  getValidToken(userId: string): Promise<import('neverthrow').Result<string, Error>>;
 }
 
 /**

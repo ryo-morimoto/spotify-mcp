@@ -22,7 +22,7 @@ describe('Spotify OAuth', () => {
     it('should exchange code for tokens successfully', async () => {
       const { exchangeCodeForToken } = await import('./tokens.ts');
       (exchangeCodeForToken as any).mockResolvedValue(ok(mockTokens));
-      
+
       const result = await handleOAuthCallback(
         'test-code',
         'test-state',
@@ -31,7 +31,7 @@ describe('Spotify OAuth', () => {
         'http://localhost:8000/callback',
         'test-verifier',
       );
-      
+
       expect(result.isOk()).toBe(true);
       expect(result._unsafeUnwrap()).toEqual(mockTokens);
       expect(exchangeCodeForToken).toHaveBeenCalledWith(
@@ -45,7 +45,7 @@ describe('Spotify OAuth', () => {
     it('should validate state parameter when expected state is provided', async () => {
       const { exchangeCodeForToken } = await import('./tokens.ts');
       (exchangeCodeForToken as any).mockResolvedValue(ok(mockTokens));
-      
+
       const result = await handleOAuthCallback(
         'test-code',
         'valid-state',
@@ -55,7 +55,7 @@ describe('Spotify OAuth', () => {
         'test-verifier',
         'valid-state', // Expected state matches
       );
-      
+
       expect(result.isOk()).toBe(true);
       expect(result._unsafeUnwrap()).toEqual(mockTokens);
     });
@@ -70,7 +70,7 @@ describe('Spotify OAuth', () => {
         'test-verifier',
         'expected-state', // Expected state doesn't match
       );
-      
+
       expect(result.isErr()).toBe(true);
       const error = result._unsafeUnwrapErr();
       expect(error.message).toBe('Invalid state parameter - possible CSRF attack');
@@ -81,7 +81,7 @@ describe('Spotify OAuth', () => {
     it('should skip state validation when expected state is not provided', async () => {
       const { exchangeCodeForToken } = await import('./tokens.ts');
       (exchangeCodeForToken as any).mockResolvedValue(ok(mockTokens));
-      
+
       const result = await handleOAuthCallback(
         'test-code',
         'any-state',
@@ -91,7 +91,7 @@ describe('Spotify OAuth', () => {
         'test-verifier',
         // No expected state provided
       );
-      
+
       expect(result.isOk()).toBe(true);
       expect(result._unsafeUnwrap()).toEqual(mockTokens);
     });
@@ -100,7 +100,7 @@ describe('Spotify OAuth', () => {
       const { exchangeCodeForToken } = await import('./tokens.ts');
       const networkError = createNetworkError('Token exchange failed');
       (exchangeCodeForToken as any).mockResolvedValue(err(networkError));
-      
+
       const result = await handleOAuthCallback(
         'test-code',
         'test-state',
@@ -109,7 +109,7 @@ describe('Spotify OAuth', () => {
         'http://localhost:8000/callback',
         'test-verifier',
       );
-      
+
       expect(result.isErr()).toBe(true);
       expect(result._unsafeUnwrapErr()).toEqual(networkError);
     });
@@ -118,7 +118,7 @@ describe('Spotify OAuth', () => {
       const { exchangeCodeForToken } = await import('./tokens.ts');
       const authError = createAuthError('Invalid authorization code', 'invalid');
       (exchangeCodeForToken as any).mockResolvedValue(err(authError));
-      
+
       const result = await handleOAuthCallback(
         'invalid-code',
         'test-state',
@@ -127,7 +127,7 @@ describe('Spotify OAuth', () => {
         'http://localhost:8000/callback',
         'test-verifier',
       );
-      
+
       expect(result.isErr()).toBe(true);
       expect(result._unsafeUnwrapErr()).toEqual(authError);
     });

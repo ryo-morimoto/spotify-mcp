@@ -20,6 +20,6 @@ export async function handleOAuthCallback(
   if (expectedState && state !== expectedState) {
     return err(createAuthError('Invalid state parameter - possible CSRF attack', 'invalid'));
   }
-  
+
   return exchangeCodeForToken(code, codeVerifier, clientId, redirectUri);
 }

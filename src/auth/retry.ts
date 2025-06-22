@@ -31,34 +31,34 @@ export async function withExponentialBackoff<T, E extends NetworkError | AuthErr
 ): Promise<Result<T, E>> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   let lastError: E | null = null;
-  
+
   for (let attempt = 0; attempt <= opts.maxRetries; attempt++) {
     const result = await fn();
-    
+
     if (result.isOk()) {
       return result;
     }
-    
+
     lastError = result.error;
-    
+
     // Check if we should retry
     if (attempt === opts.maxRetries || !opts.shouldRetry(lastError, attempt)) {
       return err(lastError);
     }
-    
+
     // Calculate delay with exponential backoff
     const delay = Math.min(
       opts.initialDelayMs * Math.pow(opts.backoffFactor, attempt),
       opts.maxDelayMs,
     );
-    
+
     // Add jitter to prevent thundering herd
     const jitter = Math.random() * 0.3 * delay;
     const finalDelay = delay + jitter;
-    
+
     await sleep(finalDelay);
   }
-  
+
   return err(lastError!);
 }
 
@@ -66,30 +66,26 @@ export async function withExponentialBackoff<T, E extends NetworkError | AuthErr
  * Create a retry wrapper for token refresh operations
  */
 export function createTokenRefreshRetry(
-  refreshFn: (refreshToken: string, clientId: string) => Promise<Result<any, NetworkError | AuthError>>,
-) {
-  return async (
+  refreshFn: (
     refreshToken: string,
     clientId: string,
-    options?: RetryOptions,
-  ) => {
-    return withExponentialBackoff(
-      () => refreshFn(refreshToken, clientId),
-      {
-        ...options,
-        shouldRetry: (error, attempt) => {
-          // Don't retry if refresh token is invalid/expired
-          if (error.type === 'AuthError' && error.reason === 'invalid') {
-            return false;
-          }
-          // Default retry logic
-          return DEFAULT_OPTIONS.shouldRetry(error, attempt);
-        },
+  ) => Promise<Result<any, NetworkError | AuthError>>,
+) {
+  return async (refreshToken: string, clientId: string, options?: RetryOptions) => {
+    return withExponentialBackoff(() => refreshFn(refreshToken, clientId), {
+      ...options,
+      shouldRetry: (error, attempt) => {
+        // Don't retry if refresh token is invalid/expired
+        if (error.type === 'AuthError' && error.reason === 'invalid') {
+          return false;
+        }
+        // Default retry logic
+        return DEFAULT_OPTIONS.shouldRetry(error, attempt);
       },
-    );
+    });
   };
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

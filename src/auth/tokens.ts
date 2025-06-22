@@ -1,11 +1,11 @@
 import { Result, ok, err } from 'neverthrow';
 import type { NetworkError, AuthError } from '../result.ts';
 import { createNetworkError, createAuthError } from '../result.ts';
-import type { 
-  SpotifyTokenResponse, 
-  SpotifyRefreshResponse, 
+import type {
+  SpotifyTokenResponse,
+  SpotifyRefreshResponse,
   StoredToken,
-  OAuthTokens
+  OAuthTokens,
 } from '../types/index.ts';
 import { normalizeTokenResponse } from '../types/index.ts';
 import { withExponentialBackoff } from './retry.ts';
@@ -120,21 +120,19 @@ export async function refreshTokenWithRetry(
   clientId: string,
   maxRetries: number = 3,
 ): Promise<Result<StoredToken, NetworkError | AuthError>> {
-  return withExponentialBackoff(
-    () => refreshToken(refreshTokenStr, clientId),
-    {
-      maxRetries,
-      initialDelayMs: 1000,
-      maxDelayMs: 16000,
-      shouldRetry: (error, _attempt) => {
-        // Don't retry if refresh token is invalid/expired
-        if (error.type === 'AuthError' && error.reason === 'invalid') {
-          return false;
-        }
-        // Retry on network errors and temporary auth errors
-        return error.type === 'NetworkError' || 
-               (error.type === 'AuthError' && error.reason === 'expired');
-      },
+  return withExponentialBackoff(() => refreshToken(refreshTokenStr, clientId), {
+    maxRetries,
+    initialDelayMs: 1000,
+    maxDelayMs: 16000,
+    shouldRetry: (error, _attempt) => {
+      // Don't retry if refresh token is invalid/expired
+      if (error.type === 'AuthError' && error.reason === 'invalid') {
+        return false;
+      }
+      // Retry on network errors and temporary auth errors
+      return (
+        error.type === 'NetworkError' || (error.type === 'AuthError' && error.reason === 'expired')
+      );
     },
-  );
+  });
 }

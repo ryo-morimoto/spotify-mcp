@@ -1,7 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { tokenStore } from './tokenStore.ts';
-import * as oauthHandler from './auth/index.ts';
-import { ok, err } from 'neverthrow';
 
 // Mock DurableObjectStorage
 class MockDurableObjectStorage {
@@ -98,35 +96,25 @@ describe('tokenStore', () => {
       const data = (await response.json()) as any;
       expect(data.accessToken).toBe('test-access-token');
       expect(data.expiresAt).toBe(tokens.expiresAt);
-      expect(data.refreshToken).toBeUndefined(); // Should not expose refresh token
+      expect(data.refreshToken).toBe('test-refresh-token'); // Returns full token data
     });
 
-    it('should return 401 when no tokens stored', async () => {
+    it('should return null when no tokens stored', async () => {
       const request = new Request('http://internal/get');
       const response = await tokenStore(mockState, request);
 
-      expect(response.status).toBe(401);
-      const error = (await response.json()) as any;
-      expect(error.type).toBe('AuthError');
+      expect(response.status).toBe(200);
+      const data = await response.json();
+      expect(data).toBeNull();
     });
 
-    it('should auto-refresh expired tokens', async () => {
-      const mockRefresh = vi.spyOn(oauthHandler, 'refreshToken').mockResolvedValue(
-        ok({
-          accessToken: 'new-access-token',
-          refreshToken: 'new-refresh-token',
-          expiresIn: 3600,
-          tokenType: 'Bearer',
-          scope: 'user-read-playback-state',
-          expiresAt: Date.now() + 3600000,
-        }),
-      );
-
+    it('should return expired tokens without auto-refresh', async () => {
       const expiredTokens = {
         accessToken: 'old-access-token',
         refreshToken: 'test-refresh-token',
         expiresAt: Date.now() - 1000, // Already expired
-        clientId: 'test-client-id',
+        tokenType: 'Bearer',
+        scope: 'user-read-playback-state',
       };
 
       await mockState.storage.put('tokens', expiredTokens);
@@ -135,68 +123,14 @@ describe('tokenStore', () => {
       const response = await tokenStore(mockState, request);
 
       expect(response.status).toBe(200);
-      expect(mockRefresh).toHaveBeenCalledWith('test-refresh-token', 'test-client-id');
-
       const data = (await response.json()) as any;
-      expect(data.accessToken).toBe('new-access-token');
+      // Returns expired token as-is (refresh handled by auth layer)
+      expect(data.accessToken).toBe('old-access-token');
+      expect(data.expiresAt).toBe(expiredTokens.expiresAt);
     });
   });
 
-  describe('refresh tokens', () => {
-    it('should refresh tokens manually', async () => {
-      const mockRefresh = vi.spyOn(oauthHandler, 'refreshToken').mockResolvedValue(
-        ok({
-          accessToken: 'refreshed-access-token',
-          refreshToken: 'refreshed-refresh-token',
-          expiresIn: 3600,
-          tokenType: 'Bearer',
-          scope: 'user-read-playback-state',
-          expiresAt: Date.now() + 3600000,
-        }),
-      );
-
-      const tokens = {
-        accessToken: 'old-access-token',
-        refreshToken: 'test-refresh-token',
-        expiresAt: Date.now() + 300000, // 5 minutes left
-        clientId: 'test-client-id',
-      };
-
-      await mockState.storage.put('tokens', tokens);
-
-      const request = new Request('http://internal/refresh');
-      const response = await tokenStore(mockState, request);
-
-      expect(response.status).toBe(200);
-      expect(await response.text()).toBe('Token refreshed');
-      expect(mockRefresh).toHaveBeenCalled();
-    });
-
-    it('should handle refresh failure', async () => {
-      vi.spyOn(oauthHandler, 'refreshToken').mockResolvedValue(
-        err({
-          type: 'NetworkError' as const,
-          message: 'Failed to refresh token',
-        }),
-      );
-
-      const tokens = {
-        accessToken: 'old-access-token',
-        refreshToken: 'test-refresh-token',
-        expiresAt: Date.now() + 300000,
-        clientId: 'test-client-id',
-      };
-
-      await mockState.storage.put('tokens', tokens);
-
-      const request = new Request('http://internal/refresh');
-      const response = await tokenStore(mockState, request);
-
-      expect(response.status).toBe(500);
-      const error = (await response.json()) as any;
-      expect(error.error).toBe('Refresh failed');
-    });
-  });
+  // Refresh functionality moved to auth layer - no longer handled here
 
   describe('clear tokens', () => {
     it('should clear stored tokens', async () => {
@@ -221,42 +155,5 @@ describe('tokenStore', () => {
     });
   });
 
-  describe('auto-refresh timer', () => {
-    it('should set up auto-refresh timer', async () => {
-      const futureTime = Date.now() + 10 * 60 * 1000; // 10 minutes from now
-      const tokens = {
-        accessToken: 'test-access-token',
-        refreshToken: 'test-refresh-token',
-        expiresAt: futureTime,
-        clientId: 'test-client-id',
-      };
-
-      const request = new Request('http://internal/store', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tokens),
-      });
-
-      const mockRefresh = vi.spyOn(oauthHandler, 'refreshToken').mockResolvedValue(
-        ok({
-          accessToken: 'auto-refreshed-token',
-          refreshToken: 'test-refresh-token',
-          expiresIn: 3600,
-          tokenType: 'Bearer',
-          scope: 'user-read-playback-state',
-          expiresAt: Date.now() + 3600000,
-        }),
-      );
-
-      await tokenStore(mockState, request);
-
-      // Fast-forward to 5 minutes before expiry
-      vi.advanceTimersByTime(5 * 60 * 1000);
-
-      // Wait for async refresh
-      await vi.runAllTimersAsync();
-
-      expect(mockRefresh).toHaveBeenCalled();
-    });
-  });
+  // Auto-refresh functionality moved to auth layer
 });

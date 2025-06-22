@@ -2,10 +2,7 @@ import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
 import type { AppError } from '../../result.ts';
 import type { TokenManager } from '../../types/index.ts';
-import {
-  createSpotifyClient,
-  searchTracks,
-} from '../../external/spotify/index.ts';
+import { createSpotifyClient, searchTracks } from '../../external/spotify/index.ts';
 
 // TODO: Implement advanced search features [MID]
 // - [ ] Support filtering by genre, year, popularity
@@ -28,7 +25,7 @@ export type SearchArgs = z.infer<typeof searchSchema>;
 
 export async function handleSearch(
   args: SearchArgs,
-  tokenManager: TokenManager
+  tokenManager: TokenManager,
 ): Promise<Result<string, AppError>> {
   // Get access token
   const tokenResult = await tokenManager.refreshTokenIfNeeded();

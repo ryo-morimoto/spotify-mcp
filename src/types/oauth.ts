@@ -1,6 +1,6 @@
 /**
  * OAuth and authentication type definitions
- * 
+ *
  * Types for OAuth flow, PKCE challenge, and authentication.
  */
 

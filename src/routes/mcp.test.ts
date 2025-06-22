@@ -15,6 +15,14 @@ vi.mock('../adapters/index.ts', () => ({
 
 vi.mock('../middleware/index.ts', () => ({
   requireAuth: vi.fn((_c: any, next: any) => next()),
+  createConfig: vi.fn(() => ({
+    spotifyClientId: 'test-client-id',
+    spotifyClientSecret: 'test-secret',
+    port: 8000,
+    redirectUri: 'http://127.0.0.1:8000/callback',
+    environment: 'development',
+    logFormat: 'text',
+  })),
 }));
 
 describe('MCP JSON-RPC Route', () => {
@@ -24,16 +32,14 @@ describe('MCP JSON-RPC Route', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    
+
     app = new Hono();
-    
+
     // Mock token storage
     mockTokenStorage = {
       get: vi.fn().mockResolvedValue(ok(null)),
       store: vi.fn().mockResolvedValue(ok(undefined)),
-      refresh: vi.fn().mockResolvedValue(ok(null)),
       clear: vi.fn().mockResolvedValue(ok(undefined)),
-      getValidToken: vi.fn().mockResolvedValue(ok('mock-token')),
     };
 
     // Mock MCP server
@@ -42,15 +48,17 @@ describe('MCP JSON-RPC Route', () => {
         { name: 'search', description: 'Search for tracks' },
         { name: 'player_state', description: 'Get player state' },
       ]),
-      callTool: vi.fn().mockResolvedValue(ok({ 
-        content: [{ type: 'text', text: 'Tool result' }] 
-      })),
+      callTool: vi.fn().mockResolvedValue(
+        ok({
+          content: [{ type: 'text', text: 'Tool result' }],
+        }),
+      ),
     };
 
     // Set up mocks
     const { createMcpServer } = await import('../mcp/index.ts');
     const { createTokenManagerAdapter } = await import('../adapters/index.ts');
-    
+
     vi.mocked(createMcpServer).mockReturnValue(mockMcpServer);
     vi.mocked(createTokenManagerAdapter).mockReturnValue({
       getAccessToken: vi.fn(),
@@ -72,7 +80,10 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle initialize request', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'initialize',
@@ -105,7 +116,10 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle tools/list request', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'tools/list',
@@ -114,7 +128,7 @@ describe('MCP JSON-RPC Route', () => {
       });
 
       expect(response.status).toBe(200);
-      const body = await response.json() as any;
+      const body = (await response.json()) as any;
       expect(body.jsonrpc).toBe('2.0');
       expect(body.result.tools).toHaveLength(2);
       expect(body.result.tools[0]).toEqual({
@@ -127,7 +141,10 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle tools/invoke request', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'tools/invoke',
@@ -154,7 +171,10 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle batch requests', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: JSON.stringify([
           {
             jsonrpc: '2.0',
@@ -170,7 +190,7 @@ describe('MCP JSON-RPC Route', () => {
       });
 
       expect(response.status).toBe(200);
-      const body = await response.json() as any[];
+      const body = (await response.json()) as any[];
       expect(Array.isArray(body)).toBe(true);
       expect(body).toHaveLength(2);
       expect(body[0].id).toBe('1');
@@ -180,7 +200,10 @@ describe('MCP JSON-RPC Route', () => {
     it('should handle notifications (no response)', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'tools/list',
@@ -189,7 +212,7 @@ describe('MCP JSON-RPC Route', () => {
       });
 
       expect(response.status).toBe(200);
-      const body = await response.json() as any;
+      const body = (await response.json()) as any;
       // Single notification returns empty object
       expect(body).toEqual({});
     });
@@ -197,22 +220,28 @@ describe('MCP JSON-RPC Route', () => {
     it('should return parse error for invalid JSON', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: 'invalid json',
       });
 
       expect(response.status).toBe(200);
-      const body = await response.json() as any;
+      const body = (await response.json()) as any;
       expect(body.error).toEqual({
         code: -32700,
-        message: 'Invalid JSON',
+        message: 'Parse error',
       });
     });
 
     it('should return invalid request error for malformed request', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: JSON.stringify({
           // Missing jsonrpc field
           method: 'test',
@@ -221,7 +250,7 @@ describe('MCP JSON-RPC Route', () => {
       });
 
       expect(response.status).toBe(200);
-      const body = await response.json() as any;
+      const body = (await response.json()) as any;
       expect(body.error.code).toBe(-32600);
       expect(body.error.message).toBe('Invalid JSON-RPC request');
     });
@@ -229,7 +258,10 @@ describe('MCP JSON-RPC Route', () => {
     it('should return method not found error', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'unknown/method',
@@ -238,7 +270,7 @@ describe('MCP JSON-RPC Route', () => {
       });
 
       expect(response.status).toBe(200);
-      const body = await response.json() as any;
+      const body = (await response.json()) as any;
       expect(body.error).toEqual({
         code: -32601,
         message: "Method 'unknown/method' not found",
@@ -247,12 +279,15 @@ describe('MCP JSON-RPC Route', () => {
 
     it('should handle tool invocation errors', async () => {
       mockMcpServer.callTool.mockResolvedValueOnce(
-        err({ code: 'TOOL_ERROR', message: 'Tool failed' })
+        err({ code: 'TOOL_ERROR', message: 'Tool failed' }),
       );
 
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'tools/invoke',
@@ -265,15 +300,18 @@ describe('MCP JSON-RPC Route', () => {
       });
 
       expect(response.status).toBe(200);
-      const body = await response.json() as any;
+      const body = (await response.json()) as any;
       expect(body.error.code).toBe(-32603);
-      expect(body.error.message).toContain('Internal error');
+      expect(body.error.message).toBe('Tool failed');
     });
 
     it('should handle missing tool name', async () => {
       const response = await app.request('/mcp', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer test-token'
+        },
         body: JSON.stringify({
           jsonrpc: '2.0',
           method: 'tools/invoke',
@@ -283,7 +321,7 @@ describe('MCP JSON-RPC Route', () => {
       });
 
       expect(response.status).toBe(200);
-      const body = await response.json() as any;
+      const body = (await response.json()) as any;
       expect(body.error.code).toBe(-32603);
     });
   });

@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
-import { 
-  generateCodeChallenge, 
-  generateAuthUrl, 
+import {
+  generateCodeChallenge,
+  generateAuthUrl,
   buildScopeString,
   parseScopeString,
   hasRequiredScopes,
@@ -66,8 +66,12 @@ oauthRoutes.get('/callback', async (c): Promise<Response> => {
   const error = c.req.query('error');
   const state = c.req.query('state');
 
-  if (error || !code) {
-    return c.json({ error: error || 'No authorization code received' }, 400);
+  if (error) {
+    return c.json({ error: `OAuth error: ${error}` }, 400);
+  }
+
+  if (!code) {
+    return c.json({ error: 'No authorization code received' }, 400);
   }
 
   if (!state) {
@@ -100,20 +104,31 @@ oauthRoutes.get('/callback', async (c): Promise<Response> => {
     );
 
     if (tokenResult.isErr()) {
-      return c.json({ error: tokenResult.error.message }, 400);
+      // Map different error types to appropriate status codes
+      const error = tokenResult.error;
+      if (error.message.includes('invalid_grant')) {
+        return c.json({ error: error.message }, 400);
+      }
+      if (error.message.includes('network') || error.message.includes('timeout')) {
+        return c.json({ error: 'Failed to exchange code for token' }, 500);
+      }
+      return c.json({ error: error.message }, 400);
     }
 
     const tokens = tokenResult.value;
-    
+
     // Validate that we have all required scopes
     const grantedScopes = parseScopeString(tokens.scope || '');
     if (!hasRequiredScopes(grantedScopes)) {
-      return c.json({ 
-        error: 'Authorization did not grant all required scopes',
-        missing_scopes: grantedScopes,
-      }, 400);
+      return c.json(
+        {
+          error: 'Authorization did not grant all required scopes',
+          missing_scopes: grantedScopes,
+        },
+        400,
+      );
     }
-    
+
     const tokenStorage = c.get('tokenStorage');
     const userId = c.get('userId');
 
@@ -121,7 +136,7 @@ oauthRoutes.get('/callback', async (c): Promise<Response> => {
     const storeResult = await tokenStorage.store(userId, tokens);
 
     if (storeResult.isErr()) {
-      return c.json({ error: 'Failed to store tokens' }, 500);
+      return c.json({ error: 'Failed to store token' }, 500);
     }
 
     // Clear PKCE challenge after successful exchange

@@ -1,6 +1,6 @@
 /**
  * Application configuration type definitions
- * 
+ *
  * Types for runtime configuration and environment settings.
  */
 

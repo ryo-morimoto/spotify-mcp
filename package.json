@@ -15,14 +15,13 @@
     "lint:fix": "oxlint src --fix",
     "format": "prettier --write 'src/**/*.{ts,json,md}'",
     "format:check": "prettier --check 'src/**/*.{ts,json,md}'",
-    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
-    "test:server": "tsx test-server.ts",
-    "test:integration": "./test-integration.sh"
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test"
   },
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
     "@cloudflare/workers-types": "^4.20250620.0",
+    "@hono/node-server": "^1.14.4",
     "@types/node": "^24.0.3",
     "@vitest/coverage-v8": "3.2.3",
     "dotenv": "^16.5.0",
@@ -40,7 +39,6 @@
     ]
   },
   "dependencies": {
-    "@hono/node-server": "^1.14.4",
     "@modelcontextprotocol/sdk": "^1.13.0",
     "@spotify/web-api-ts-sdk": "^1.2.0",
     "@typescript/native-preview": "7.0.0-dev.20250619.1",

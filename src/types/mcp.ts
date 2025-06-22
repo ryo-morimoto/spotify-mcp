@@ -1,6 +1,6 @@
 /**
  * Model Context Protocol (MCP) type definitions
- * 
+ *
  * Types specific to MCP server implementation and tools.
  */
 
