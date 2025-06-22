@@ -4,14 +4,6 @@ import { createAuthError } from '../result.ts';
 import type { OAuthTokens } from '../types/index.ts';
 import { exchangeCodeForToken } from './tokens.ts';
 
-// TODO: Add OAuth enhancements [MID]
-// - [ ] Support authorization code flow with state parameter validation
-// - [ ] Add support for refresh token rotation
-// - [ ] Implement token encryption at rest
-// - [ ] Add OAuth scope validation helpers
-// - [ ] Support dynamic scope requests based on user permissions
-// Security: Enhance OAuth implementation for production use
-
 /**
  * Handle OAuth callback with state validation
  */
