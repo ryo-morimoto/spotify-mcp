@@ -1,9 +1,11 @@
 {
+  "name": "spotify-mcp-server",
+  "version": "0.1.0-dev",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx src/index.ts",
-    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/server.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "build:worker": "esbuild src/worker.ts --bundle --format=esm --outfile=dist/worker.js --platform=neutral",
     "typecheck": "tsc --noEmit",
@@ -13,23 +15,20 @@
     "lint:fix": "oxlint src --fix",
     "format": "prettier --write 'src/**/*.{ts,json,md}'",
     "format:check": "prettier --check 'src/**/*.{ts,json,md}'",
-    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test"
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test",
+    "test:server": "tsx test-server.ts",
+    "test:integration": "./test-integration.sh"
   },
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^2.0.0",
     "@cloudflare/workers-types": "^4.20250620.0",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
     "@types/node": "^24.0.3",
-    "@types/supertest": "^6.0.3",
     "@vitest/coverage-v8": "3.2.3",
-    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "esbuild": "^0.25.5",
     "oxlint": "^1.2.0",
     "prettier": "^3.5.3",
-    "supertest": "^7.1.1",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "typescript-mcp": "^0.0.12",
@@ -41,9 +40,11 @@
     ]
   },
   "dependencies": {
+    "@hono/node-server": "^1.14.4",
     "@modelcontextprotocol/sdk": "^1.13.0",
+    "@spotify/web-api-ts-sdk": "^1.2.0",
     "@typescript/native-preview": "7.0.0-dev.20250619.1",
-    "express": "^5.1.0",
+    "hono": "^4.8.2",
     "neverthrow": "^8.2.0",
     "zod": "^3.25.67"
   }
