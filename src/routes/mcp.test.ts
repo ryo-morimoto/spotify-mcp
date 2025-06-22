@@ -10,7 +10,7 @@ vi.mock('../mcp/index.ts', () => ({
 }));
 
 vi.mock('../adapters/index.ts', () => ({
-  createTokenManagerAdapter: vi.fn(),
+  createTokenProviderAdapter: vi.fn(),
 }));
 
 vi.mock('../middleware/index.ts', () => ({
@@ -57,10 +57,10 @@ describe('MCP JSON-RPC Route', () => {
 
     // Set up mocks
     const { createMcpServer } = await import('../mcp/index.ts');
-    const { createTokenManagerAdapter } = await import('../adapters/index.ts');
+    const { createTokenProviderAdapter } = await import('../adapters/index.ts');
 
     vi.mocked(createMcpServer).mockReturnValue(mockMcpServer);
-    vi.mocked(createTokenManagerAdapter).mockReturnValue({
+    vi.mocked(createTokenProviderAdapter).mockReturnValue({
       getAccessToken: vi.fn(),
       refreshTokenIfNeeded: vi.fn(),
     });

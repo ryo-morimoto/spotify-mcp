@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { createMcpServer } from '../mcp/index.ts';
-import { createTokenManagerAdapter } from '../adapters/index.ts';
+import { createTokenProviderAdapter } from '../adapters/index.ts';
 import { createConfig } from '../middleware/index.ts';
 // Authentication is handled per-request in the MCP handler
 import type { TokenStorage } from '../types/index.ts';
@@ -104,7 +104,7 @@ mcpRoutes.post('/mcp', async (c): Promise<Response> => {
 
     // Create MCP server instance
     const config = createConfig();
-    const tokenManager = createTokenManagerAdapter(tokenStorage, config.spotifyClientId, userId);
+    const tokenManager = createTokenProviderAdapter(tokenStorage, config.spotifyClientId, userId);
     const mcpServer = createMcpServer(tokenManager);
 
     // Process requests

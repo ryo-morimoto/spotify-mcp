@@ -1,7 +1,7 @@
 import { Result, ok, err } from 'neverthrow';
 import { z } from 'zod';
 import type { AppError } from '../../result.ts';
-import type { TokenManager } from '../../types/index.ts';
+import type { TokenProvider } from '../../types/index.ts';
 import { createSpotifyClient, controlPlayback } from '../../external/spotify/index.ts';
 
 // TODO: Add more player control features [MID]
@@ -25,7 +25,7 @@ export type PlayerControlArgs = z.infer<typeof playerControlSchema>;
 
 export async function handlePlayerControl(
   args: PlayerControlArgs,
-  tokenManager: TokenManager,
+  tokenManager: TokenProvider,
 ): Promise<Result<string, AppError>> {
   // Get access token
   const tokenResult = await tokenManager.refreshTokenIfNeeded();

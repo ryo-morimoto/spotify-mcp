@@ -106,7 +106,7 @@ export async function tokenStore(state: DurableObjectState, request: Request): P
         });
       }
 
-      // Refresh endpoint removed - handled by auth layer via TokenManagerAdapter
+      // Refresh endpoint removed - handled by auth layer via TokenProviderAdapter
 
       case '/clear': {
         const result = await clearTokens(store);

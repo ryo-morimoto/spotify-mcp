@@ -1,6 +1,6 @@
 import { Result, ok, err } from 'neverthrow';
 import type { AppError } from '../../result.ts';
-import type { TokenManager } from '../../types/index.ts';
+import type { TokenProvider } from '../../types/index.ts';
 import { createSpotifyClient, getCurrentPlayback } from '../../external/spotify/index.ts';
 
 // TODO: Enhance player state information [MID]
@@ -10,7 +10,7 @@ import { createSpotifyClient, getCurrentPlayback } from '../../external/spotify/
 // Related: src/spotifyApi.ts - PlaybackState interface
 
 export async function handlePlayerState(
-  tokenManager: TokenManager,
+  tokenManager: TokenProvider,
 ): Promise<Result<string, AppError>> {
   // Get access token
   const tokenResult = await tokenManager.refreshTokenIfNeeded();

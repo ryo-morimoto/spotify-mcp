@@ -2,7 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { Result, ok, err } from 'neverthrow';
 import type { AppError } from '../result.ts';
-import type { TokenManager } from '../types/index.ts';
+import type { TokenProvider } from '../types/index.ts';
 import { tryCatch } from '../result.ts';
 import {
   searchSchema,
@@ -12,7 +12,7 @@ import {
   handlePlayerControl,
 } from './tools/index.ts';
 
-export function createMcpServer(tokenManager: TokenManager): any {
+export function createMcpServer(tokenManager: TokenProvider): any {
   const server = new McpServer(
     {
       name: 'spotify-remote',

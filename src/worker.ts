@@ -11,7 +11,7 @@ interface Env {
 }
 
 // Helper to get or create token manager instance
-function getTokenManager(env: Env, userId: string = 'default'): DurableObjectStub {
+function getTokenProvider(env: Env, userId: string = 'default'): DurableObjectStub {
   // TODO: Implement proper user identification [MID]
   // - [ ] Extract user ID from authentication token
   // - [ ] Support multiple Spotify accounts per user
@@ -42,7 +42,7 @@ async function getPKCE(env: Env, state: string): Promise<PKCEChallenge | null> {
 // - [ ] Implement connection pooling for better performance
 // Related: src/transport.ts - Full MCP transport implementation
 async function handleSSE(request: Request, env: Env): Promise<Response> {
-  const tokenManager = getTokenManager(env);
+  const tokenManager = getTokenProvider(env);
 
   // Get current valid token from Durable Object
   const tokenResponse = await tokenManager.fetch(new Request('http://internal/get'));
@@ -188,7 +188,7 @@ export default {
       }
 
       // Store tokens in Durable Object
-      const tokenManager = getTokenManager(env);
+      const tokenManager = getTokenProvider(env);
       const storeResponse = await tokenManager.fetch(
         new Request('http://internal/store', {
           method: 'POST',
@@ -222,4 +222,4 @@ export default {
 };
 
 // Export Durable Objects
-export { TokenManager, SessionManager } from './durableObjects.ts';
+export { TokenProvider } from './durableObjects.ts';

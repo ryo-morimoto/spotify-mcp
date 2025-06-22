@@ -1,15 +1,15 @@
 import { Result, ok, err } from 'neverthrow';
-import type { TokenStorage, TokenManager } from '../types/index.ts';
+import type { TokenStorage, TokenProvider } from '../types/index.ts';
 import type { NetworkError, AuthError } from '../result.ts';
 import { createNetworkError, createAuthError } from '../result.ts';
 import { validateToken, refreshTokenWithRetry } from '../auth/index.ts';
 
 // Create a token manager adapter
-export function createTokenManagerAdapter(
+export function createTokenProviderAdapter(
   tokenStorage: TokenStorage,
   clientId: string,
   userId: string = 'default-user',
-): TokenManager {
+): TokenProvider {
   return {
     getAccessToken: () => getAccessToken(tokenStorage, clientId, userId),
     refreshTokenIfNeeded: () => refreshTokenIfNeeded(tokenStorage, clientId, userId),

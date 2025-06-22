@@ -11,7 +11,7 @@ import type { NetworkError, AuthError } from '../result.ts';
  * Interface for managing authentication tokens in MCP context
  * Provides access token retrieval and refresh capabilities
  */
-export interface TokenManager {
+export interface TokenProvider {
   getAccessToken(): Promise<Result<string, NetworkError | AuthError>>;
   refreshTokenIfNeeded(): Promise<Result<string, NetworkError | AuthError>>;
 }

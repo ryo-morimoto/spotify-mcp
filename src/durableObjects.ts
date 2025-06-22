@@ -1,10 +1,10 @@
 import { tokenStore } from './tokenStore.ts';
 
-// TokenManager Durable Object class (required by Cloudflare)
+// TokenProvider Durable Object class (required by Cloudflare)
 // NOTE: Classes are required here by Cloudflare Workers runtime
 // This is the only place where we use classes in the codebase
 // Reference: https://developers.cloudflare.com/durable-objects/
-export class TokenManager {
+export class TokenProvider {
   private state: DurableObjectState;
 
   constructor(state: DurableObjectState) {

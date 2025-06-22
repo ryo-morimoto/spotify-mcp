@@ -35,7 +35,7 @@ export type {
 export type { PKCEChallenge, OAuthTokens } from './oauth.ts';
 
 // Re-export mcp types
-export type { TokenManager } from './mcp.ts';
+export type { TokenProvider } from './mcp.ts';
 
 // Re-export config types
 export type { AppConfig } from './config.ts';

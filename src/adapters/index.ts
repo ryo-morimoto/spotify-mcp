@@ -1,2 +1,2 @@
-// Token manager adapter
-export { createTokenManagerAdapter } from './tokenManagerAdapter.ts';
+// Token provider adapter
+export { createTokenProviderAdapter } from './tokenProviderAdapter.ts';

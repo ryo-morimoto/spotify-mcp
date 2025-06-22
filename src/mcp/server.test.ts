@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createMcpServer } from './server.ts';
-import type { TokenManager } from '../types/index.ts';
+import type { TokenProvider } from '../types/index.ts';
 import * as spotifyApiSdk from '../external/spotify/index.ts';
 import { ok, err } from 'neverthrow';
 
@@ -8,17 +8,17 @@ vi.mock('../external/spotify/index.ts');
 
 describe('mcpServer', () => {
   let server: any;
-  let mockTokenManager: TokenManager;
+  let mockTokenProvider: TokenProvider;
 
   beforeEach(() => {
     vi.clearAllMocks();
 
-    mockTokenManager = {
+    mockTokenProvider = {
       getAccessToken: vi.fn().mockResolvedValue(ok('mock-access-token')),
       refreshTokenIfNeeded: vi.fn().mockResolvedValue(ok('mock-access-token')),
     };
 
-    server = createMcpServer(mockTokenManager);
+    server = createMcpServer(mockTokenProvider);
   });
 
   afterEach(() => {
@@ -255,7 +255,7 @@ describe('mcpServer', () => {
     });
 
     it('should handle token manager errors', async () => {
-      mockTokenManager.refreshTokenIfNeeded = vi.fn().mockResolvedValueOnce(
+      mockTokenProvider.refreshTokenIfNeeded = vi.fn().mockResolvedValueOnce(
         err({
           type: 'AuthError',
           message: 'Failed to get token',
@@ -272,12 +272,12 @@ describe('mcpServer', () => {
     });
 
     it('should refresh token when needed', async () => {
-      mockTokenManager.refreshTokenIfNeeded = vi.fn().mockResolvedValueOnce(ok('new-token'));
+      mockTokenProvider.refreshTokenIfNeeded = vi.fn().mockResolvedValueOnce(ok('new-token'));
       vi.mocked(spotifyApiSdk.searchTracks).mockResolvedValueOnce(ok([]));
 
       await server.callTool('search', { query: 'test' });
 
-      expect(mockTokenManager.refreshTokenIfNeeded).toHaveBeenCalled();
+      expect(mockTokenProvider.refreshTokenIfNeeded).toHaveBeenCalled();
     });
   });
 
