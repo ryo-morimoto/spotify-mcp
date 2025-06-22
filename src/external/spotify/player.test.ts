@@ -38,14 +38,16 @@ describe('Player Functions', () => {
     item: {
       id: 'track123',
       name: 'Test Track',
-      artists: [{
-        name: 'Test Artist',
-        id: 'artist123',
-        external_urls: { spotify: 'https://spotify.com/artist/artist123' },
-        href: 'https://api.spotify.com/v1/artists/artist123',
-        type: 'artist' as const,
-        uri: 'spotify:artist:artist123',
-      }],
+      artists: [
+        {
+          name: 'Test Artist',
+          id: 'artist123',
+          external_urls: { spotify: 'https://spotify.com/artist/artist123' },
+          href: 'https://api.spotify.com/v1/artists/artist123',
+          type: 'artist' as const,
+          uri: 'spotify:artist:artist123',
+        },
+      ],
       album: {
         name: 'Test Album',
         id: 'album123',
