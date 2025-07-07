@@ -1,82 +1,94 @@
 # Project-Specific Instructions for Claude
 
-## 🚨 CRITICAL DESIGN PRINCIPLES - MUST BE FOLLOWED AT ALL TIMES 🚨
+## Project Overview
 
-### KISS (Keep It Simple, Stupid) - MANDATORY RULE
+This is a Spotify MCP (Model Context Protocol) server that provides Spotify search capabilities to AI assistants through a type-safe, functional architecture.
+
+## 🚨 CORE PHILOSOPHY - ABSOLUTE REQUIREMENTS 🚨
+
+### KISS (Keep It Simple, Stupid) - MANDATORY
 - **NEVER add complexity** unless absolutely necessary
 - **ALWAYS choose the simplest solution** that works
 - **FORBIDDEN**: Over-engineering, premature optimization, unnecessary abstractions
 - **REQUIRED**: Clear, readable, straightforward code
 
-### YAGNI (You Aren't Gonna Need It) - MANDATORY RULE  
+### YAGNI (You Aren't Gonna Need It) - MANDATORY
 - **NEVER implement features** that aren't currently needed
 - **ALWAYS wait until a feature is actually required** before implementing it
 - **FORBIDDEN**: Building for hypothetical future requirements
 - **REQUIRED**: Minimal viable implementation for current needs only
 
-**⚠️ THESE PRINCIPLES ARE ABSOLUTE AND NON-NEGOTIABLE ⚠️**
-
-## 📋 PRIORITY DESIGN PRINCIPLE - DEEP MODULE
-
-### Deep Module - MUST BE ENFORCED
+### Deep Module - MANDATORY
 - **NARROW INTERFACE**: Expose minimal public API surface
 - **RICH FUNCTIONALITY**: Provide powerful capabilities through simple interfaces
 - **HIDE COMPLEXITY**: Internal implementation details must be completely hidden
 - **SIMPLE ABSTRACTIONS**: Public APIs should be intuitive and easy to understand
 
-#### Deep Module Rules:
-1. **Minimize Exports**: Only export what is absolutely necessary
-2. **Single Entry Points**: Prefer one well-designed function over multiple specialized ones
-3. **Internal Complexity OK**: Complex implementation is acceptable if the interface remains simple
-4. **Information Hiding**: Never leak implementation details through the interface
+**Why Deep Module?** Unlike shallow modules that expose many details, deep modules reduce cognitive load by hiding complexity behind simple interfaces. This makes the codebase easier to understand and modify.
 
-#### Example Pattern:
+## 📋 DESIGN PRINCIPLES
+
+### Type-Driven Development
+This project follows strict type-first development:
+- **Design with types first**, implement second
+- **All errors must be representable as types**
+- **Use Result<T, E> for all fallible operations**
+
+**Why?** Types serve as living documentation and catch errors at compile time rather than runtime. By designing types first, we ensure our domain model is sound before writing any implementation.
+
+### No-Exception Design
+- **NEVER throw exceptions** in application code
+- **ALWAYS use Result types** for error handling
+- **ALL functions that can fail** must return `Result<T, E>`
+
+**Why?** Exceptions create invisible control flow that's hard to track. Result types make error paths explicit in function signatures, forcing proper error handling and making code more predictable.
+
+### Test-Driven Development (TDD)
+Follow t-wada's TDD methodology:
+1. **Red Phase**: Write a failing test first
+2. **Green Phase**: Write minimum code to pass
+3. **Refactor Phase**: Improve code while keeping tests green
+
+**Why t-wada's approach?** This methodology ensures we write only the code we need (supporting YAGNI) and creates a safety net for refactoring. Tests written first tend to have better coverage and clearer intent.
+
+## 🔧 IMPLEMENTATION RULES
+
+### Type Design Rules
+
+#### Use `type` over `interface`
+- **ALWAYS use `type`** for all type definitions
+- **NEVER use `interface`** unless absolutely necessary
+
+**Why?** Types support union types, intersection types, and conditional types - features essential for ADT (Algebraic Data Type) patterns. Interfaces are limited to object shapes.
+
+#### Centralized Type Definitions
+- **ALL domain types in `src/types.ts`** - no exceptions
+- **Import SDK types directly** - don't redefine them
+
+**Why centralization?** Having all types in one file makes it easy to understand the domain model at a glance and prevents circular dependencies. Direct SDK imports ensure we stay in sync with upstream changes.
+
+#### Branded Types for Domain Concepts
 ```typescript
-// ✅ GOOD - Deep Module: Simple interface, rich functionality
-export function processData(input: string): Result<ProcessedData, Error> {
-  // Complex internal logic hidden behind simple interface
-}
+// ✅ GOOD
+type UserId = string & { _brand: "UserId" };
 
-// ❌ BAD - Shallow Module: Many exports, leaky abstractions
-export class DataProcessor { ... }
-export interface ProcessorConfig { ... }
-export type ProcessorOptions = { ... }
-export function validateInput(...) { ... }
-export function transformData(...) { ... }
-export function formatOutput(...) { ... }
+// ❌ BAD
+type UserId = string;
 ```
 
-## Error Handling Policy
+**Why?** Branded types prevent mixing up semantically different values that happen to have the same primitive type (e.g., UserId vs ProductId). The compiler catches these errors.
 
-This project follows a strict no-exceptions design policy:
+### Error Handling Implementation
 
-- **NEVER throw exceptions** in application code
-- **ALWAYS use Result types** for error handling instead of throwing
-- **ALL functions that can fail** must return `Result<T, E>` instead of throwing
-- Use explicit error handling over implicit exception propagation
-
-### Result Type Implementation
-
+#### Result Type Usage
 This project uses the **neverthrow** library for Result types:
-
 - Import: `import { Result, ok, err } from "neverthrow"`
 - Use `result.isOk()` and `result.isErr()` for type checking
 - Chain operations with `map()`, `mapErr()`, `andThen()`, etc.
 
-### Mandatory Practices
-
-1. **Function Return Types**: All functions that can fail must return `Result<SuccessType, ErrorType>`
-2. **Error Checking**: Always use `result.isOk()` / `result.isErr()` for type-safe error checking
-3. **No Exception Throwing**: Never use `throw` statements in application code
-4. **Async Operations**: Return `Promise<Result<T, E>>` for async functions that can fail
-5. **External Libraries**: Wrap third-party code that might throw using try-catch and return Result
-
-### Example Pattern
-
+#### Example Pattern
 ```typescript
-import { Result, ok, err } from "neverthrow";
-
-// ✅ Good - Returns Result
+// ✅ GOOD - Returns Result
 function parseJson(input: string): Result<unknown, string> {
   try {
     return ok(JSON.parse(input));
@@ -85,93 +97,71 @@ function parseJson(input: string): Result<unknown, string> {
   }
 }
 
-// ❌ Bad - Throws exception
+// ❌ BAD - Throws exception
 function parseJsonBad(input: string): unknown {
   return JSON.parse(input); // This can throw!
 }
 ```
 
-## Coding Rules
+### Project Structure
+- **Flat structure** - no deep directory nesting
+- **One function per file** matching filename
+- **Test files as `*.test.ts`** alongside source files
 
-- File naming convention: `src/<lowerCamelCase>.ts`
-- Add tests in `src/*.test.ts` for `src/*.ts`
-- Use functions and function scope instead of classes
-- Add `.ts` extension to imports for deno compatibility
-- Do not disable any lint rules without explicit user approval
-- Export a function that matches the filename, keep everything else private
-- All lint errors must be fixed before committing code
-- .oxlintrc.json must not be modified without user permission
-- When importing Node.js standard library modules, use the `node:` namespace prefix (e.g., `import path from "node:path"`, `import fs from "node:fs"`)
-- **IMPORTANT**: Always run `pnpm check` before committing to ensure all tests pass and code meets quality standards
+**Why flat?** Deep nesting creates cognitive overhead when navigating files. Flat structure makes files discoverable and imports shorter. One-function-per-file enforces single responsibility.
 
-## Development Workflow - Test-Driven Development (TDD)
+## 📝 CODING CONVENTIONS
 
-This project follows **t-wada's TDD methodology**:
+### File Naming
+- Source files: `src/<lowerCamelCase>.ts`
+- Test files: `src/<name>.test.ts`
+- Always add `.ts` extension to imports
 
-### TDD Cycle (Red-Green-Refactor)
-1. **Red Phase**: Write a failing test first
-2. **Green Phase**: Write the minimum code to make the test pass
-3. **Refactor Phase**: Improve the code while keeping tests green
+**Why .ts extensions?** Enables compatibility with Deno and native ESM, avoiding build tool lock-in.
 
-### TDD Rules (MUST BE FOLLOWED)
-- **NEVER write production code** without a failing test
-- **Write the simplest test** that could possibly fail
-- **Write the minimum code** to pass the test
-- **Refactor only when tests are green**
-- **One test at a time** - don't write multiple tests before implementation
+### Import Rules
+- Node.js modules use `node:` prefix (e.g., `import fs from "node:fs"`)
+- External SDK types import directly (don't redefine)
 
-### Example TDD Flow
-```typescript
-// Step 1: RED - Write failing test
-test("parseNumber returns ok for valid number", () => {
-  const result = parseNumber("123");
-  expect(result.isOk()).toBe(true);
-  expect(result.value).toBe(123);
-});
+**Why node: prefix?** Clearly distinguishes built-in modules from npm packages, preventing accidental shadowing by installed packages.
 
-// Step 2: GREEN - Minimal implementation
-function parseNumber(input: string): Result<number, string> {
-  return ok(123); // Simplest code to pass
-}
+### Export Pattern
+- Export a function that matches the filename
+- Keep everything else private
 
-// Step 3: REFACTOR - Improve implementation
-function parseNumber(input: string): Result<number, string> {
-  const num = Number(input);
-  if (isNaN(num)) {
-    return err("Invalid number");
-  }
-  return ok(num);
-}
-```
+**Why?** This creates a predictable API where the filename tells you exactly what's exported, supporting the Deep Module principle.
 
-## Code Style and Conventions
-
+### Code Style
 - Use TypeScript strict mode
-- Follow the existing code formatting (Biome)
+- Follow existing code formatting (Biome)
 - Use meaningful variable and function names
 - Keep functions small and focused
 - Write tests for new functionality using Vitest
+
+### Quality Gates
+- Run `pnpm check` before committing
+- All lint errors must be fixed
+- All tests must pass
+- Do not disable lint rules without explicit user approval
+- `.oxlintrc.json` must not be modified without user permission
+
+**Why strict gates?** Broken windows theory - allowing small quality issues leads to overall degradation. Automated checks maintain consistent quality.
 
 ## Project Structure
 
 - `src/` - Source code
 - `docs/` - Documentation
-- Tests are separate files: `src/*.test.ts` for each `src/*.ts`
+- `docs/research/` - Technical investigation results
 
-## Technical Research Documents
+## 🚨 FINAL REMINDER: CRITICAL PRINCIPLES 🚨
 
-Technical investigation results are stored in the `docs/research/` directory. This includes:
-- MCP Protocol specifications and implementation patterns
-- Technology evaluations and comparisons
-- Architecture decision backgrounds
-
-## 🚨 FINAL REMINDER: CRITICAL DESIGN PRINCIPLES 🚨
-
-**KISS and YAGNI are ABSOLUTE REQUIREMENTS for this project:**
+**These principles are ABSOLUTE and NON-NEGOTIABLE:**
 
 1. **KISS**: Every line of code MUST be as simple as possible
-2. **YAGNI**: NO feature should be implemented until it's actually needed
-3. **DEEP MODULE**: Every module MUST have a narrow interface with rich functionality
+2. **YAGNI**: NO feature until it's actually needed
+3. **DEEP MODULE**: NARROW interface with RICH functionality
+4. **TYPE-FIRST**: Design with types, errors as values
+5. **NO EXCEPTIONS**: Result<T, E> for everything
 
 **Claude Code MUST enforce these principles in EVERY change, EVERY commit, and EVERY decision.**
 
