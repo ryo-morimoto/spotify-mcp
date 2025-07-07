@@ -45,6 +45,19 @@ function parseJsonBad(input: string): unknown {
 }
 ```
 
+## Coding Rules
+
+- File naming convention: `src/<lowerCamelCase>.ts`
+- Add tests in `src/*.test.ts` for `src/*.ts`
+- Use functions and function scope instead of classes
+- Add `.ts` extension to imports for deno compatibility
+- Do not disable any lint rules without explicit user approval
+- Export a function that matches the filename, keep everything else private
+- All lint errors must be fixed before committing code
+- .oxlintrc.json must not be modified without user permission
+- When importing Node.js standard library modules, use the `node:` namespace prefix (e.g., `import path from "node:path"`, `import fs from "node:fs"`)
+- **IMPORTANT**: Always run `pnpm check` before committing to ensure all tests pass and code meets quality standards
+
 ## Code Style and Conventions
 
 - Use TypeScript strict mode
@@ -57,4 +70,4 @@ function parseJsonBad(input: string): unknown {
 
 - `src/` - Source code
 - `docs/` - Documentation
-- Tests are colocated with source files using Vitest's in-source testing
+- Tests are separate files: `src/*.test.ts` for each `src/*.ts`
