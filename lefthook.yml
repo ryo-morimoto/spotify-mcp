@@ -1,0 +1,44 @@
+pre-commit:
+  parallel: true
+  commands:
+    lint:
+      glob:
+        - '*.ts'
+        - 'src/**/*.ts'
+        - 'package.json'
+        - '.oxlintrc.json'
+      run: pnpm lint
+      fail_text: 'Linting failed. Please fix the issues and try again.'
+
+    format:
+      glob:
+        - '*.{ts,js,json,md,yml,yaml}'
+        - 'src/**/*.{ts,js,json}'
+        - '.github/**/*.{yml,yaml}'
+      run: pnpm format
+      stage_fixed: true
+      fail_text: 'Code formatting failed. Please check the issues and try again.'
+
+    typecheck:
+      glob:
+        - '*.ts'
+        - 'src/**/*.ts'
+        - 'package.json'
+        - 'tsconfig.json'
+      run: pnpm typecheck
+      fail_text: 'TypeScript compilation failed. Please fix type errors and try again.'
+
+    test:
+      glob:
+        - 'src/**/*.ts'
+        - 'src/**/*.test.ts'
+        - 'package.json'
+        - 'vitest.config.ts'
+      run: pnpm test
+      fail_text: 'Tests failed. Please fix failing tests and try again.'
+
+pre-push:
+  commands:
+    check:
+      run: pnpm check
+      fail_text: 'Checks failed. Please fix all issues before pushing.'
