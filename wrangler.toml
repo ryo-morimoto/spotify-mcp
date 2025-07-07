@@ -1,0 +1,15 @@
+name = "spotify-mcp-server"
+main = "src/index.ts"
+compatibility_date = "2025-07-07"
+
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "your-kv-namespace-id"
+
+[vars]
+CLIENT_ID = "your-spotify-client-id"
+# For production, use specific origin. For development, can use "*"
+CORS_ORIGIN = "https://claude.ai"
+
+# Optional: Add multiple allowed origins as comma-separated values
+# ALLOWED_ORIGINS = "https://claude.ai,http://localhost:3000,http://localhost:5173"
