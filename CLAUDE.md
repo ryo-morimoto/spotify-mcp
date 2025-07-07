@@ -153,6 +153,14 @@ function parseJsonBad(input: string): unknown {
 - `docs/` - Documentation
 - `docs/research/` - Technical investigation results
 
+## 📚 Documentation
+
+### `docs/testing.md`
+Mock-free testing strategy. Read when deciding what to test.
+
+### `docs/research/`
+Investigation results storage. Check date in filename for freshness, read first 10 lines for overview when reusing past research.
+
 ## 🚨 FINAL REMINDER: CRITICAL PRINCIPLES 🚨
 
 **These principles are ABSOLUTE and NON-NEGOTIABLE:**
