@@ -11,6 +11,10 @@
     "skipLibCheck": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "types": ["vitest/importMeta"]
+    "types": ["vitest/importMeta"],
+    "paths": {
+      "@types": ["./src/types.ts"],
+      "@mcp/*": ["./src/mcp/*"]
+    }
   }
 }
