@@ -47,3 +47,16 @@ export type ToolDefinition<TSchema extends z.ZodRawShape> = {
   inputSchema: TSchema;
   handler: (input: z.infer<z.ZodObject<TSchema>>) => Promise<CallToolResult>;
 };
+
+// OAuth types
+export type OAuthState = {
+  codeVerifier: string;
+  state: string;
+  redirectUri: string;
+};
+
+export type TokenResponse = {
+  accessToken: SpotifyAccessToken;
+  refreshToken: SpotifyRefreshToken;
+  expiresIn: number;
+};

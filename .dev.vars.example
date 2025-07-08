@@ -2,6 +2,11 @@
 # Copy this file to .dev.vars and fill in your values
 
 CLIENT_ID=your-actual-spotify-client-id
+CLIENT_SECRET=your-spotify-client-secret
+SPOTIFY_ACCESS_TOKEN=your-spotify-access-token
+SPOTIFY_REFRESH_TOKEN=your-spotify-refresh-token
+SPOTIFY_EXPIRES_AT=1234567890000
+SPOTIFY_REDIRECT_URI=http://localhost:8787/auth/callback
 CORS_ORIGIN=*
 # Or use specific origins for development
 # CORS_ORIGIN=http://localhost:3000
