@@ -11,14 +11,20 @@ export default defineConfig(({ mode }) => ({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
+      include: ["src/**/*.ts"],
       exclude: [
-        "node_modules/",
         "src/**/*.test.ts",
-        "test/**/*.test.ts",
         "src/**/*.d.ts",
         "src/**/*.config.*",
         "src/types/**",
+        "src/**/types.ts",
       ],
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
+      },
     },
   },
 }));
