@@ -5,6 +5,7 @@ import { createSearchAlbumsTool } from "./mcp/tools/searchAlbums.ts";
 import { createSearchArtistsTool } from "./mcp/tools/searchArtists.ts";
 import { createSearchPlaylistsTool } from "./mcp/tools/searchPlaylists.ts";
 import { createSearchShowsTool } from "./mcp/tools/searchShows.ts";
+import { createSearchEpisodesTool } from "./mcp/tools/searchEpisodes.ts";
 
 export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const server = new McpServer({
@@ -17,6 +18,7 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const searchArtistsTool = createSearchArtistsTool(spotifyClient);
   const searchPlaylistsTool = createSearchPlaylistsTool(spotifyClient);
   const searchShowsTool = createSearchShowsTool(spotifyClient);
+  const searchEpisodesTool = createSearchEpisodesTool(spotifyClient);
 
   server.registerTool(
     searchTracksTool.name,
@@ -66,6 +68,16 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: searchShowsTool.inputSchema,
     },
     searchShowsTool.handler,
+  );
+
+  server.registerTool(
+    searchEpisodesTool.name,
+    {
+      title: searchEpisodesTool.title,
+      description: searchEpisodesTool.description,
+      inputSchema: searchEpisodesTool.inputSchema,
+    },
+    searchEpisodesTool.handler,
   );
 
   return server;
