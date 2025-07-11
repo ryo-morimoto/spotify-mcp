@@ -1,15 +1,35 @@
 name = "spotify-mcp-server"
 main = "src/index.ts"
-compatibility_date = "2025-07-07"
+compatibility_date = "2025-06-17"
 
 [[kv_namespaces]]
 binding = "OAUTH_KV"
-id = "your-kv-namespace-id"
+id = "904d9fafb8374e308b9c7cc9f55f3a93"
 
 [vars]
-CLIENT_ID = "your-spotify-client-id"
-# For production, use specific origin. For development, can use "*"
-CORS_ORIGIN = "https://claude.ai"
+# For local development
+CORS_ORIGIN = "*"
 
 # Optional: Add multiple allowed origins as comma-separated values
 # ALLOWED_ORIGINS = "https://claude.ai,http://localhost:3000,http://localhost:5173"
+
+# Production environment
+[env.production]
+name = "spotify-mcp"
+vars.CORS_ORIGIN = "https://claude.ai"
+vars.SPOTIFY_REDIRECT_URI = "https://spotify-mcp.ryo-o.dev/auth/spotify/callback"
+route = { pattern = "spotify-mcp.ryo-o.dev", custom_domain = true }
+
+[[env.production.kv_namespaces]]
+binding = "OAUTH_KV"
+id = "1aad58322b5f48bfb695c5ef4f388a85"
+
+# Staging environment
+[env.staging]
+name = "spotify-mcp-server-stg"
+vars.CORS_ORIGIN = "*"
+vars.SPOTIFY_REDIRECT_URI = "https://spotify-mcp-server-stg.ryo-morimoto-dev.workers.dev/auth/spotify/callback"
+
+[[env.staging.kv_namespaces]]
+binding = "OAUTH_KV"
+id = "904d9fafb8374e308b9c7cc9f55f3a93"
