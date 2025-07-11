@@ -4,6 +4,7 @@ import type {
   CallToolResult,
 } from "@modelcontextprotocol/sdk/types.js";
 import type { z } from "zod";
+import type { KVNamespace } from "@cloudflare/workers-types";
 
 // Tool handler return type
 export type ToolResult = {
@@ -53,10 +54,19 @@ export type OAuthState = {
   codeVerifier: string;
   state: string;
   redirectUri: string;
+  mcpSession?: string; // Optional MCP session ID
 };
 
 export type TokenResponse = {
   accessToken: SpotifyAccessToken;
   refreshToken: SpotifyRefreshToken;
   expiresIn: number;
+};
+
+// Cloudflare Worker bindings
+export type Bindings = {
+  CLIENT_ID: string;
+  OAUTH_KV: KVNamespace;
+  SPOTIFY_REDIRECT_URI: string;
+  CORS_ORIGIN?: string;
 };
