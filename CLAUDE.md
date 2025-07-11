@@ -147,6 +147,40 @@ function parseJsonBad(input: string): unknown {
 
 **Why strict gates?** Broken windows theory - allowing small quality issues leads to overall degradation. Automated checks maintain consistent quality.
 
+### Commit Message Convention
+All commit messages must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+#### Format
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+#### Supported Types
+- **feat**: A new feature
+- **fix**: A bug fix
+- **docs**: Documentation only changes
+- **style**: Changes that do not affect the meaning of the code
+- **refactor**: A code change that neither fixes a bug nor adds a feature
+- **perf**: A code change that improves performance
+- **test**: Adding missing tests or correcting existing tests
+- **build**: Changes that affect the build system or external dependencies
+- **ci**: Changes to CI configuration files and scripts
+- **chore**: Other changes that don't modify src or test files
+- **revert**: Reverts a previous commit
+
+#### Examples
+- `feat: add Spotify playlist search functionality`
+- `fix(oauth): resolve token refresh race condition`
+- `docs: update API documentation with new endpoints`
+- `refactor: simplify error handling in auth module`
+- `test: add integration tests for search endpoints`
+
+**Why Conventional Commits?** Enables automated versioning, changelog generation, and provides clear commit history. The standardized format makes it easy to understand what changed and why.
+
 ## Project Structure
 
 - `src/` - Source code

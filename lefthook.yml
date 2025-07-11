@@ -42,3 +42,9 @@ pre-push:
     check:
       run: pnpm check
       fail_text: 'Checks failed. Please fix all issues before pushing.'
+
+commit-msg:
+  commands:
+    commitlint:
+      run: npx commitlint --edit
+      fail_text: 'Commit message must follow Conventional Commits format. Example: feat: add new feature'
