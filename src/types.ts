@@ -23,6 +23,104 @@ export type SpotifyTrackResult = {
   external_url: string;
 };
 
+// Spotify album type for search results
+export type SpotifyAlbumResult = {
+  id: string;
+  name: string;
+  artists: string;
+  release_date: string;
+  total_tracks: number;
+  album_type: string;
+  external_url: string;
+  images: Array<{
+    url: string;
+    height: number | null;
+    width: number | null;
+  }>;
+};
+
+// Spotify artist type for search results
+export type SpotifyArtistResult = {
+  id: string;
+  name: string;
+  genres: string[];
+  popularity: number;
+  followers: number;
+  external_url: string;
+  images: Array<{
+    url: string;
+    height: number | null;
+    width: number | null;
+  }>;
+};
+
+// Spotify playlist type for search results
+export type SpotifyPlaylistResult = {
+  id: string;
+  name: string;
+  description: string | null;
+  owner: string;
+  public: boolean | null;
+  collaborative: boolean;
+  total_tracks: number;
+  external_url: string;
+  images: Array<{
+    url: string;
+    height: number | null;
+    width: number | null;
+  }>;
+};
+
+// Spotify show (podcast) type for search results
+export type SpotifyShowResult = {
+  id: string;
+  name: string;
+  description: string;
+  publisher: string;
+  total_episodes: number;
+  explicit: boolean;
+  external_url: string;
+  images: Array<{
+    url: string;
+    height: number | null;
+    width: number | null;
+  }>;
+};
+
+// Spotify episode type for search results
+export type SpotifyEpisodeResult = {
+  id: string;
+  name: string;
+  description: string;
+  duration_ms: number;
+  release_date: string;
+  explicit: boolean;
+  external_url: string;
+  images: Array<{
+    url: string;
+    height: number | null;
+    width: number | null;
+  }>;
+};
+
+// Spotify audiobook type for search results
+export type SpotifyAudiobookResult = {
+  id: string;
+  name: string;
+  description: string;
+  authors: string[];
+  narrators: string[];
+  publisher: string;
+  total_chapters: number;
+  explicit: boolean;
+  external_url: string;
+  images: Array<{
+    url: string;
+    height: number | null;
+    width: number | null;
+  }>;
+};
+
 // Spotify-specific constants
 export const SPOTIFY_TRACK_MIME_TYPE = "application/x-spotify-track" as const;
 
