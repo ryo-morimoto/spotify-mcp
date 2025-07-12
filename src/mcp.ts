@@ -1,21 +1,21 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createSearchTracksTool } from "./mcp/tools/searchTracks.ts";
-import { createSearchAlbumsTool } from "./mcp/tools/searchAlbums.ts";
-import { createSearchArtistsTool } from "./mcp/tools/searchArtists.ts";
-import { createSearchPlaylistsTool } from "./mcp/tools/searchPlaylists.ts";
-import { createSearchShowsTool } from "./mcp/tools/searchShows.ts";
-import { createSearchEpisodesTool } from "./mcp/tools/searchEpisodes.ts";
-import { createSearchAudiobooksTool } from "./mcp/tools/searchAudiobooks.ts";
-import { createGetTrackTool } from "./mcp/tools/getTrack.ts";
-import { createGetAlbumTool } from "./mcp/tools/getAlbum.ts";
-import { createGetArtistTool } from "./mcp/tools/getArtist.ts";
-import { createGetPlaylistTool } from "./mcp/tools/getPlaylist.ts";
-import { createGetAlbumTracksTool } from "./mcp/tools/getAlbumTracks.ts";
-import { createGetArtistAlbumsTool } from "./mcp/tools/getArtistAlbums.ts";
-import { createGetSeveralAlbumsTool } from "./mcp/tools/getSeveralAlbums.ts";
-import { createGetArtistTopTracksTool } from "./mcp/tools/getArtistTopTracks.ts";
-import { createGetSeveralTracksTool } from "./mcp/tools/getSeveralTracks.ts";
+import { createSearchTracksTool } from "./mcp/tools/search/tracks.ts";
+import { createSearchAlbumsTool } from "./mcp/tools/search/albums.ts";
+import { createSearchArtistsTool } from "./mcp/tools/search/artists.ts";
+import { createSearchPlaylistsTool } from "./mcp/tools/search/playlists.ts";
+import { createSearchShowsTool } from "./mcp/tools/search/shows.ts";
+import { createSearchEpisodesTool } from "./mcp/tools/search/episodes.ts";
+import { createSearchAudiobooksTool } from "./mcp/tools/search/audiobooks.ts";
+import { createGetTrackTool } from "./mcp/tools/tracks/get.ts";
+import { createGetAlbumTool } from "./mcp/tools/albums/get.ts";
+import { createGetArtistTool } from "./mcp/tools/artists/get.ts";
+import { createGetPlaylistTool } from "./mcp/tools/playlists/get.ts";
+import { createGetAlbumTracksTool } from "./mcp/tools/albums/getTracks.ts";
+import { createGetArtistAlbumsTool } from "./mcp/tools/artists/getAlbums.ts";
+import { createGetSeveralAlbumsTool } from "./mcp/tools/albums/getSeveral.ts";
+import { createGetArtistTopTracksTool } from "./mcp/tools/artists/getTopTracks.ts";
+import { createGetSeveralTracksTool } from "./mcp/tools/tracks/getSeveral.ts";
 
 export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const server = new McpServer({

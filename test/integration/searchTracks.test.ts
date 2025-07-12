@@ -1,6 +1,6 @@
 import { describe, test, expect } from "vitest";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createSearchTracksTool } from "../../src/mcp/tools/searchTracks.ts";
+import { createSearchTracksTool } from "../../src/mcp/tools/search/tracks.ts";
 import type { SpotifyTrackResult } from "../../src/types.ts";
 
 describe.skipIf(!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET)(
