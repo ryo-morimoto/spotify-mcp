@@ -43,6 +43,7 @@ import { createTogglePlaybackShuffleTool } from "./mcp/tools/player/togglePlayba
 import { createTransferPlaybackTool } from "./mcp/tools/player/transferPlayback.ts";
 import { createGetRecentlyPlayedTracksTool } from "./mcp/tools/player/getRecentlyPlayedTracks.ts";
 import { createGetUserQueueTool } from "./mcp/tools/player/getUserQueue.ts";
+import { createAddItemToPlaybackQueueTool } from "./mcp/tools/player/addItemToPlaybackQueue.ts";
 
 export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const server = new McpServer({
@@ -93,6 +94,7 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const transferPlaybackTool = createTransferPlaybackTool(spotifyClient);
   const getRecentlyPlayedTracksTool = createGetRecentlyPlayedTracksTool(spotifyClient);
   const getUserQueueTool = createGetUserQueueTool(spotifyClient);
+  const addItemToPlaybackQueueTool = createAddItemToPlaybackQueueTool(spotifyClient);
 
   server.registerTool(
     searchTracksTool.name,
@@ -522,6 +524,16 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: getUserQueueTool.inputSchema,
     },
     getUserQueueTool.handler,
+  );
+
+  server.registerTool(
+    addItemToPlaybackQueueTool.name,
+    {
+      title: addItemToPlaybackQueueTool.title,
+      description: addItemToPlaybackQueueTool.description,
+      inputSchema: addItemToPlaybackQueueTool.inputSchema,
+    },
+    addItemToPlaybackQueueTool.handler,
   );
 
   return server;
