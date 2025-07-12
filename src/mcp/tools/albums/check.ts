@@ -38,7 +38,7 @@ export async function checkSavedAlbums(
 export const createCheckSavedAlbumsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof checkSavedAlbumsSchema> => ({
-  name: "check-saved-albums",
+  name: "check_saved_albums",
   title: "Check if Albums are Saved",
   description: "Check if one or more albums are already saved in the current user's library",
   inputSchema: checkSavedAlbumsSchema,

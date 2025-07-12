@@ -74,7 +74,7 @@ export async function getSavedTracks(
 export const createGetSavedTracksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getSavedTracksSchema> => ({
-  name: "get-saved-tracks",
+  name: "get_saved_tracks",
   title: "Get User's Saved Tracks",
   description: "Get a list of the songs saved in the current Spotify user's library",
   inputSchema: getSavedTracksSchema,

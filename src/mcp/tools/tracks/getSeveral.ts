@@ -63,7 +63,7 @@ type GetSeveralTracksInput = z.infer<z.ZodObject<typeof getSeveralTracksSchema>>
 export const createGetSeveralTracksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getSeveralTracksSchema> => ({
-  name: "get-several-tracks",
+  name: "get_several_tracks",
   title: "Get Several Tracks",
   description: "Get multiple tracks by their IDs from Spotify (maximum 50 tracks)",
   inputSchema: getSeveralTracksSchema,

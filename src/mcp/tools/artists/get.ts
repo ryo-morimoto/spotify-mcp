@@ -42,7 +42,7 @@ type GetArtistInput = z.infer<z.ZodObject<typeof getArtistSchema>>;
 export const createGetArtistTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getArtistSchema> => ({
-  name: "get-artist",
+  name: "get_artist",
   title: "Get Artist",
   description: "Get a single artist by ID from Spotify",
   inputSchema: getArtistSchema,

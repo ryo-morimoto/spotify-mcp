@@ -71,7 +71,7 @@ export { getSeveralAlbums };
 export const createGetSeveralAlbumsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getSeveralAlbumsSchema> => ({
-  name: "get-several-albums",
+  name: "get_several_albums",
   title: "Get Several Albums",
   description: "Get multiple albums by their IDs from Spotify (maximum 20 albums)",
   inputSchema: getSeveralAlbumsSchema,

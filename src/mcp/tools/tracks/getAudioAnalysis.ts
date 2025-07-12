@@ -28,7 +28,7 @@ export async function getTrackAudioAnalysis(
 export const createGetTrackAudioAnalysisTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getTrackAudioAnalysisSchema> => ({
-  name: "get-track-audio-analysis",
+  name: "get_track_audio_analysis",
   title: "Get Track's Audio Analysis",
   description:
     "Get a low-level audio analysis for a track in the Spotify catalog. " +

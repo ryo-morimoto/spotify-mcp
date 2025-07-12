@@ -35,7 +35,7 @@ export async function saveTracks(client: SpotifyApi, ids: string[]): Promise<Res
 export const createSaveTracksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof saveTracksSchema> => ({
-  name: "save-tracks",
+  name: "save_tracks",
   title: "Save Tracks to Library",
   description: "Save one or more tracks to the current user's library",
   inputSchema: saveTracksSchema,

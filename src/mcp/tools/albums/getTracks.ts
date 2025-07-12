@@ -45,7 +45,7 @@ export { getAlbumTracks };
 export const createGetAlbumTracksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getAlbumTracksSchema> => ({
-  name: "get-album-tracks",
+  name: "get_album_tracks",
   title: "Get Album Tracks",
   description: "Get all tracks from a Spotify album",
   inputSchema: getAlbumTracksSchema,

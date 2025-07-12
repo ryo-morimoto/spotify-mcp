@@ -60,7 +60,7 @@ describe("createSaveAlbumsTool", () => {
 
   it("should create a tool with correct metadata", () => {
     const tool = createSaveAlbumsTool(mockClient);
-    expect(tool.name).toBe("save-albums");
+    expect(tool.name).toBe("save_albums");
     expect(tool.title).toBe("Save Albums to Library");
     expect(tool.description).toContain("Save one or more albums to the current user's library");
     expect(tool.inputSchema).toBeDefined();

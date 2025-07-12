@@ -74,7 +74,7 @@ type GetArtistTopTracksInput = z.infer<z.ZodObject<typeof getArtistTopTracksSche
 export const createGetArtistTopTracksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getArtistTopTracksSchema> => ({
-  name: "get-artist-top-tracks",
+  name: "get_artist_top_tracks",
   title: "Get Artist's Top Tracks",
   description: "Get the top tracks of an artist on Spotify by country",
   inputSchema: getArtistTopTracksSchema,

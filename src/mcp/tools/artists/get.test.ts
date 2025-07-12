@@ -140,7 +140,7 @@ describe("getArtist", () => {
     const mockClient = {} as SpotifyApi;
     const tool = createGetArtistTool(mockClient);
 
-    expect(tool.name).toBe("get-artist");
+    expect(tool.name).toBe("get_artist");
     expect(tool.title).toBe("Get Artist");
     expect(tool.description).toBe("Get a single artist by ID from Spotify");
     expect(tool.inputSchema).toHaveProperty("artistId");

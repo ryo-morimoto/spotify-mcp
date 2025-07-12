@@ -74,7 +74,7 @@ export async function getSavedAlbums(
 export const createGetSavedAlbumsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getSavedAlbumsSchema> => ({
-  name: "get-saved-albums",
+  name: "get_saved_albums",
   title: "Get User's Saved Albums",
   description: "Get a list of the albums saved in the current Spotify user's library",
   inputSchema: getSavedAlbumsSchema,

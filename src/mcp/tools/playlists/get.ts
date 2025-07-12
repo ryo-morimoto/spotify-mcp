@@ -44,7 +44,7 @@ type GetPlaylistInput = z.infer<z.ZodObject<typeof getPlaylistSchema>>;
 export const createGetPlaylistTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getPlaylistSchema> => ({
-  name: "get-playlist",
+  name: "get_playlist",
   title: "Get Playlist",
   description: "Get a single playlist by ID from Spotify",
   inputSchema: getPlaylistSchema,

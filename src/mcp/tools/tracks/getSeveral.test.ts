@@ -196,7 +196,7 @@ describe("createGetSeveralTracksTool", () => {
   const tool = createGetSeveralTracksTool(mockSpotifyClient);
 
   it("should create tool with correct metadata", () => {
-    expect(tool.name).toBe("get-several-tracks");
+    expect(tool.name).toBe("get_several_tracks");
     expect(tool.title).toBe("Get Several Tracks");
     expect(tool.description).toBe(
       "Get multiple tracks by their IDs from Spotify (maximum 50 tracks)",

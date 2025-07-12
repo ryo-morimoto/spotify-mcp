@@ -35,7 +35,7 @@ export async function saveAlbums(client: SpotifyApi, ids: string[]): Promise<Res
 export const createSaveAlbumsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof saveAlbumsSchema> => ({
-  name: "save-albums",
+  name: "save_albums",
   title: "Save Albums to Library",
   description: "Save one or more albums to the current user's library",
   inputSchema: saveAlbumsSchema,

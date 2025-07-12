@@ -36,7 +36,7 @@ export async function getSeveralArtists(
 export const createGetSeveralArtistsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getSeveralArtistsSchema> => ({
-  name: "get-several-artists",
+  name: "get_several_artists",
   title: "Get Several Artists",
   description: "Get Spotify catalog information for several artists based on their Spotify IDs",
   inputSchema: getSeveralArtistsSchema,

@@ -40,7 +40,7 @@ export async function removeSavedTracks(
 export const createRemoveSavedTracksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof removeSavedTracksSchema> => ({
-  name: "remove-saved-tracks",
+  name: "remove_saved_tracks",
   title: "Remove Tracks from Library",
   description: "Remove one or more tracks from the current user's library",
   inputSchema: removeSavedTracksSchema,

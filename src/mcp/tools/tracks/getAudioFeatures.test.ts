@@ -70,7 +70,7 @@ describe("createGetTrackAudioFeaturesTool", () => {
 
   it("should create a tool with correct metadata", () => {
     const tool = createGetTrackAudioFeaturesTool(mockClient);
-    expect(tool.name).toBe("get-track-audio-features");
+    expect(tool.name).toBe("get_track_audio_features");
     expect(tool.title).toBe("Get Track's Audio Features");
     expect(tool.description).toContain("Get audio feature information for a single track");
     expect(tool.inputSchema).toBeDefined();

@@ -187,7 +187,7 @@ describe("createGetArtistTopTracksTool", () => {
   const tool = createGetArtistTopTracksTool(mockSpotifyClient);
 
   it("should create tool with correct metadata", () => {
-    expect(tool.name).toBe("get-artist-top-tracks");
+    expect(tool.name).toBe("get_artist_top_tracks");
     expect(tool.title).toBe("Get Artist's Top Tracks");
     expect(tool.description).toBe("Get the top tracks of an artist on Spotify by country");
   });

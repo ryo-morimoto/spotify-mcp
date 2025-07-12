@@ -60,7 +60,7 @@ describe("getPlaylist", () => {
 
   describe("createGetPlaylistTool", () => {
     it("should create tool definition with correct properties", () => {
-      expect(getPlaylistTool.name).toBe("get-playlist");
+      expect(getPlaylistTool.name).toBe("get_playlist");
       expect(getPlaylistTool.title).toBe("Get Playlist");
       expect(getPlaylistTool.description).toBe("Get a single playlist by ID from Spotify");
       expect(getPlaylistTool.inputSchema).toBeDefined();

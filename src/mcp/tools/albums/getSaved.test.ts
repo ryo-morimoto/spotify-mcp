@@ -130,7 +130,7 @@ describe("createGetSavedAlbumsTool", () => {
 
   it("should create a tool with correct metadata", () => {
     const tool = createGetSavedAlbumsTool(mockClient);
-    expect(tool.name).toBe("get-saved-albums");
+    expect(tool.name).toBe("get_saved_albums");
     expect(tool.title).toBe("Get User's Saved Albums");
     expect(tool.description).toContain("saved in the current Spotify user's library");
     expect(tool.inputSchema).toBeDefined();

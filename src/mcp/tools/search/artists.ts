@@ -33,7 +33,7 @@ const mapArtistToResult = (artist: any): SpotifyArtistResult => ({
 export const createSearchArtistsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof searchArtistsSchema> => ({
-  name: "search-artists",
+  name: "search_artists",
   title: "Search Artists",
   description: "Search for artists on Spotify",
   inputSchema: searchArtistsSchema,

@@ -157,7 +157,7 @@ describe("createGetSeveralTracksAudioFeaturesTool", () => {
 
   it("should create a tool with correct metadata", () => {
     const tool = createGetSeveralTracksAudioFeaturesTool(mockClient);
-    expect(tool.name).toBe("get-several-tracks-audio-features");
+    expect(tool.name).toBe("get_several_tracks_audio_features");
     expect(tool.title).toBe("Get Several Tracks' Audio Features");
     expect(tool.description).toContain("Get audio features for multiple tracks");
     expect(tool.inputSchema).toBeDefined();

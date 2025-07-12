@@ -42,7 +42,7 @@ export async function getSeveralTracksAudioFeatures(
 export const createGetSeveralTracksAudioFeaturesTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getSeveralTracksAudioFeaturesSchema> => ({
-  name: "get-several-tracks-audio-features",
+  name: "get_several_tracks_audio_features",
   title: "Get Several Tracks' Audio Features",
   description:
     "Get audio features for multiple tracks based on their Spotify IDs. " +

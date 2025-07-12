@@ -53,7 +53,7 @@ export async function getTrack(
 export const createGetTrackTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getTrackSchema> => ({
-  name: "get-track",
+  name: "get_track",
   title: "Get Track",
   description: "Get a single track by ID from Spotify",
   inputSchema: getTrackSchema,

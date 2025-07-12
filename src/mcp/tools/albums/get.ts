@@ -58,7 +58,7 @@ type GetAlbumInput = z.infer<z.ZodObject<typeof getAlbumSchema>>;
 export const createGetAlbumTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getAlbumSchema> => ({
-  name: "get-album",
+  name: "get_album",
   title: "Get Album",
   description: "Get a single album by ID from Spotify",
   inputSchema: getAlbumSchema,

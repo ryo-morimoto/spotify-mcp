@@ -31,7 +31,7 @@ export async function getTrackAudioFeatures(
 export const createGetTrackAudioFeaturesTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getTrackAudioFeaturesSchema> => ({
-  name: "get-track-audio-features",
+  name: "get_track_audio_features",
   title: "Get Track's Audio Features",
   description:
     "Get audio feature information for a single track identified by its unique Spotify ID. " +

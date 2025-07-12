@@ -28,7 +28,7 @@ export async function getRelatedArtists(
 export const createGetRelatedArtistsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getRelatedArtistsSchema> => ({
-  name: "get-related-artists",
+  name: "get_related_artists",
   title: "Get Artist's Related Artists",
   description:
     "Get Spotify catalog information about artists similar to a given artist. Similarity is based on analysis of the Spotify community's listening history.",

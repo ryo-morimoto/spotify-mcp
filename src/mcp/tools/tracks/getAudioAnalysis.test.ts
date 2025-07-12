@@ -134,7 +134,7 @@ describe("createGetTrackAudioAnalysisTool", () => {
 
   it("should create a tool with correct metadata", () => {
     const tool = createGetTrackAudioAnalysisTool(mockClient);
-    expect(tool.name).toBe("get-track-audio-analysis");
+    expect(tool.name).toBe("get_track_audio_analysis");
     expect(tool.title).toBe("Get Track's Audio Analysis");
     expect(tool.description).toContain("Get a low-level audio analysis");
     expect(tool.inputSchema).toBeDefined();

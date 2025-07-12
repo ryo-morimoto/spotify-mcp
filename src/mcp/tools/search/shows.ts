@@ -34,7 +34,7 @@ const mapShowToResult = (show: any): SpotifyShowResult => ({
 export const createSearchShowsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof searchShowsSchema> => ({
-  name: "search-shows",
+  name: "search_shows",
   title: "Search Shows",
   description: "Search for podcast shows on Spotify",
   inputSchema: searchShowsSchema,

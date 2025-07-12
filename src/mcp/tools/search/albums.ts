@@ -34,7 +34,7 @@ const mapAlbumToResult = (album: any): SpotifyAlbumResult => ({
 export const createSearchAlbumsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof searchAlbumsSchema> => ({
-  name: "search-albums",
+  name: "search_albums",
   title: "Search Albums",
   description: "Search for albums on Spotify",
   inputSchema: searchAlbumsSchema,

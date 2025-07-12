@@ -17,7 +17,7 @@ describe("searchTracks", () => {
 
   describe("createSearchTracksTool", () => {
     it("ツール定義が正しく作成される", () => {
-      expect(searchTracksTool.name).toBe("search-tracks");
+      expect(searchTracksTool.name).toBe("search_tracks");
       expect(searchTracksTool.title).toBe("Search Tracks");
       expect(searchTracksTool.description).toBe("Search for tracks on Spotify");
       expect(searchTracksTool.inputSchema).toBeDefined();

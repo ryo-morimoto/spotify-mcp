@@ -106,7 +106,7 @@ describe("createGetSeveralArtistsTool", () => {
 
   it("should create a tool with correct metadata", () => {
     const tool = createGetSeveralArtistsTool(mockClient);
-    expect(tool.name).toBe("get-several-artists");
+    expect(tool.name).toBe("get_several_artists");
     expect(tool.title).toBe("Get Several Artists");
     expect(tool.description).toContain("Get Spotify catalog information for several artists");
     expect(tool.inputSchema).toBeDefined();

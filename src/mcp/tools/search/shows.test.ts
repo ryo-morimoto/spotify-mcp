@@ -7,7 +7,7 @@ describe("createSearchShowsTool", () => {
     const mockClient = {} as SpotifyApi;
     const tool = createSearchShowsTool(mockClient);
 
-    expect(tool.name).toBe("search-shows");
+    expect(tool.name).toBe("search_shows");
     expect(tool.title).toBe("Search Shows");
     expect(tool.description).toBe("Search for podcast shows on Spotify");
     expect(tool.inputSchema).toBeDefined();

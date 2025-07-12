@@ -67,7 +67,7 @@ describe("createCheckSavedAlbumsTool", () => {
 
   it("should create a tool with correct metadata", () => {
     const tool = createCheckSavedAlbumsTool(mockClient);
-    expect(tool.name).toBe("check-saved-albums");
+    expect(tool.name).toBe("check_saved_albums");
     expect(tool.title).toBe("Check if Albums are Saved");
     expect(tool.description).toContain(
       "Check if one or more albums are already saved in the current user's library",

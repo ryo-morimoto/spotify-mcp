@@ -79,7 +79,7 @@ describe("createGetRelatedArtistsTool", () => {
 
   it("should create a tool with correct metadata", () => {
     const tool = createGetRelatedArtistsTool(mockClient);
-    expect(tool.name).toBe("get-related-artists");
+    expect(tool.name).toBe("get_related_artists");
     expect(tool.title).toBe("Get Artist's Related Artists");
     expect(tool.description).toContain("Get Spotify catalog information about artists similar");
     expect(tool.inputSchema).toBeDefined();

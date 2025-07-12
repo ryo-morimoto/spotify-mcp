@@ -63,7 +63,7 @@ describe("createRemoveSavedAlbumsTool", () => {
 
   it("should create a tool with correct metadata", () => {
     const tool = createRemoveSavedAlbumsTool(mockClient);
-    expect(tool.name).toBe("remove-saved-albums");
+    expect(tool.name).toBe("remove_saved_albums");
     expect(tool.title).toBe("Remove Albums from Library");
     expect(tool.description).toContain("Remove one or more albums from the current user's library");
     expect(tool.inputSchema).toBeDefined();

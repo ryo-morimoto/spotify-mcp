@@ -35,7 +35,7 @@ const mapPlaylistToResult = (playlist: any): SpotifyPlaylistResult => ({
 export const createSearchPlaylistsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof searchPlaylistsSchema> => ({
-  name: "search-playlists",
+  name: "search_playlists",
   title: "Search Playlists",
   description: "Search for playlists on Spotify",
   inputSchema: searchPlaylistsSchema,

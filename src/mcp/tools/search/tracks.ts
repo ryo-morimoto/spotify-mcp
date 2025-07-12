@@ -29,7 +29,7 @@ const mapTrackToResult = (track: any): SpotifyTrackResult => ({
 export const createSearchTracksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof searchTracksSchema> => ({
-  name: "search-tracks",
+  name: "search_tracks",
   title: "Search Tracks",
   description: "Search for tracks on Spotify",
   inputSchema: searchTracksSchema,

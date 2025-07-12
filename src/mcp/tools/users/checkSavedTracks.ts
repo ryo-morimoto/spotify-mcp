@@ -38,7 +38,7 @@ export async function checkSavedTracks(
 export const createCheckSavedTracksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof checkSavedTracksSchema> => ({
-  name: "check-saved-tracks",
+  name: "check_saved_tracks",
   title: "Check if Tracks are Saved",
   description: "Check if one or more tracks are already saved in the current user's library",
   inputSchema: checkSavedTracksSchema,

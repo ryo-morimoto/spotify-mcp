@@ -36,7 +36,7 @@ const mapAudiobookToResult = (audiobook: any): SpotifyAudiobookResult => ({
 export const createSearchAudiobooksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof searchAudiobooksSchema> => ({
-  name: "search-audiobooks",
+  name: "search_audiobooks",
   title: "Search Audiobooks",
   description: "Search for audiobooks on Spotify",
   inputSchema: searchAudiobooksSchema,
