@@ -39,6 +39,7 @@ import { createSkipToPreviousTool } from "./mcp/tools/player/skipToPrevious.ts";
 import { createSeekToPositionTool } from "./mcp/tools/player/seekToPosition.ts";
 import { createSetRepeatModeTool } from "./mcp/tools/player/setRepeatMode.ts";
 import { createSetPlaybackVolumeTool } from "./mcp/tools/player/setPlaybackVolume.ts";
+import { createTogglePlaybackShuffleTool } from "./mcp/tools/player/togglePlaybackShuffle.ts";
 
 export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const server = new McpServer({
@@ -85,6 +86,7 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const seekToPositionTool = createSeekToPositionTool(spotifyClient);
   const setRepeatModeTool = createSetRepeatModeTool(spotifyClient);
   const setPlaybackVolumeTool = createSetPlaybackVolumeTool(spotifyClient);
+  const togglePlaybackShuffleTool = createTogglePlaybackShuffleTool(spotifyClient);
 
   server.registerTool(
     searchTracksTool.name,
@@ -474,6 +476,16 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: setPlaybackVolumeTool.inputSchema,
     },
     setPlaybackVolumeTool.handler,
+  );
+
+  server.registerTool(
+    togglePlaybackShuffleTool.name,
+    {
+      title: togglePlaybackShuffleTool.title,
+      description: togglePlaybackShuffleTool.description,
+      inputSchema: togglePlaybackShuffleTool.inputSchema,
+    },
+    togglePlaybackShuffleTool.handler,
   );
 
   return server;
