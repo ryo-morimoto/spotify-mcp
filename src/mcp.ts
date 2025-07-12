@@ -36,6 +36,7 @@ import { createStartResumePlaybackTool } from "./mcp/tools/player/startResumePla
 import { createPausePlaybackTool } from "./mcp/tools/player/pausePlayback.ts";
 import { createSkipToNextTool } from "./mcp/tools/player/skipToNext.ts";
 import { createSkipToPreviousTool } from "./mcp/tools/player/skipToPrevious.ts";
+import { createSeekToPositionTool } from "./mcp/tools/player/seekToPosition.ts";
 
 export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const server = new McpServer({
@@ -79,6 +80,7 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const pausePlaybackTool = createPausePlaybackTool(spotifyClient);
   const skipToNextTool = createSkipToNextTool(spotifyClient);
   const skipToPreviousTool = createSkipToPreviousTool(spotifyClient);
+  const seekToPositionTool = createSeekToPositionTool(spotifyClient);
 
   server.registerTool(
     searchTracksTool.name,
@@ -438,6 +440,16 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: skipToPreviousTool.inputSchema,
     },
     skipToPreviousTool.handler,
+  );
+
+  server.registerTool(
+    seekToPositionTool.name,
+    {
+      title: seekToPositionTool.title,
+      description: seekToPositionTool.description,
+      inputSchema: seekToPositionTool.inputSchema,
+    },
+    seekToPositionTool.handler,
   );
 
   return server;
