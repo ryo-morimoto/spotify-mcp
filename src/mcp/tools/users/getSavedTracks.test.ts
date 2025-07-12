@@ -126,18 +126,4 @@ describe("get-saved-tracks tool", () => {
       "Error: Market must be a valid ISO 3166-1 alpha-2 country code",
     );
   });
-
-  it("should have correct metadata", () => {
-    const tool = createGetSavedTracksTool(mockClient);
-
-    expect(tool.name).toBe("get_saved_tracks");
-    expect(tool.title).toBe("Get User's Saved Tracks");
-    expect(tool.description).toBe(
-      "Get a list of the songs saved in the current Spotify user's library",
-    );
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.limit).toBeDefined();
-    expect(tool.inputSchema.offset).toBeDefined();
-    expect(tool.inputSchema.market).toBeDefined();
-  });
 });

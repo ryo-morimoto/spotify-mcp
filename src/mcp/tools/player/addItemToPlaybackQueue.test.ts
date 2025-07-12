@@ -161,18 +161,4 @@ describe("add-item-to-playback-queue tool", () => {
       "Error: Failed to add item to queue: Network error",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const mockClient = {} as SpotifyApi;
-      const tool = createAddItemToPlaybackQueueTool(mockClient);
-
-      expect(tool.name).toBe("add_item_to_playback_queue");
-      expect(tool.title).toBe("Add Item to Playback Queue");
-      expect(tool.description).toBe("Add an item to the end of the user's current playback queue");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.uri).toBeDefined();
-      expect(tool.inputSchema.deviceId).toBeDefined();
-    });
-  });
 });

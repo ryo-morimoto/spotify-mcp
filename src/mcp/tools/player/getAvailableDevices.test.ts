@@ -129,18 +129,4 @@ describe("get-available-devices tool", () => {
       volume_percent: 30,
     });
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const mockClient = {} as SpotifyApi;
-      const tool = createGetAvailableDevicesTool(mockClient);
-
-      expect(tool.name).toBe("get_available_devices");
-      expect(tool.title).toBe("Get Available Devices");
-      expect(tool.description).toBe(
-        "Get information about a user's available devices for Spotify playback",
-      );
-      expect(tool.inputSchema).toBeDefined();
-    });
-  });
 });

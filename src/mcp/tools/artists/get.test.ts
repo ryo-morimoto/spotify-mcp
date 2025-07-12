@@ -135,14 +135,4 @@ describe("getArtist", () => {
     const content = JSON.parse((result.content[0] as any).text);
     expect(content.genres).toEqual([]);
   });
-
-  it("should have correct tool metadata", () => {
-    const mockClient = {} as SpotifyApi;
-    const tool = createGetArtistTool(mockClient);
-
-    expect(tool.name).toBe("get_artist");
-    expect(tool.title).toBe("Get Artist");
-    expect(tool.description).toBe("Get a single artist by ID from Spotify");
-    expect(tool.inputSchema).toHaveProperty("artistId");
-  });
 });

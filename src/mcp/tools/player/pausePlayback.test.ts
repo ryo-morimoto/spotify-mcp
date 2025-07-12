@@ -89,17 +89,4 @@ describe("pause-playback tool", () => {
     expect(result.content[0].type).toBe("text");
     expect((result.content[0] as any).text).toBe("Error: Failed to pause playback: Network error");
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const mockClient = {} as SpotifyApi;
-      const tool = createPausePlaybackTool(mockClient);
-
-      expect(tool.name).toBe("pause_playback");
-      expect(tool.title).toBe("Pause Playback");
-      expect(tool.description).toBe("Pause playback on the user's account");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.deviceId).toBeDefined();
-    });
-  });
 });

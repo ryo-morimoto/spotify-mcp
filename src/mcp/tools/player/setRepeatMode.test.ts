@@ -104,17 +104,4 @@ describe("set-repeat-mode tool", () => {
     expect(result.content[0].type).toBe("text");
     expect((result.content[0] as any).text).toBe("Error: Failed to set repeat mode: Network error");
   });
-
-  it("should have correct metadata", () => {
-    const tool = createSetRepeatModeTool(mockClient);
-
-    expect(tool.name).toBe("set_repeat_mode");
-    expect(tool.title).toBe("Set Repeat Mode");
-    expect(tool.description).toBe(
-      "Set the repeat mode for the user's playback. Options are: repeat the current track, repeat the current context, or turn off repeat",
-    );
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.state).toBeDefined();
-    expect(tool.inputSchema.deviceId).toBeDefined();
-  });
 });

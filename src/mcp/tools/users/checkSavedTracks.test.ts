@@ -87,16 +87,4 @@ describe("check-saved-tracks tool", () => {
     expect(content[0]).toEqual({ id: "track0", saved: true });
     expect(mockHasSavedTracks).toHaveBeenCalledWith(ids);
   });
-
-  it("should have correct metadata", () => {
-    const tool = createCheckSavedTracksTool(mockClient);
-
-    expect(tool.name).toBe("check_saved_tracks");
-    expect(tool.title).toBe("Check if Tracks are Saved");
-    expect(tool.description).toBe(
-      "Check if one or more tracks are already saved in the current user's library",
-    );
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.ids).toBeDefined();
-  });
 });

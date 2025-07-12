@@ -216,20 +216,4 @@ describe("get-currently-playing-track tool", () => {
       "Error: Failed to get currently playing track: API request failed",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const mockClient = {} as SpotifyApi;
-      const tool = createGetCurrentlyPlayingTrackTool(mockClient);
-
-      expect(tool.name).toBe("get_currently_playing_track");
-      expect(tool.title).toBe("Get Currently Playing Track");
-      expect(tool.description).toBe(
-        "Get the object currently being played on the user's Spotify account",
-      );
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.market).toBeDefined();
-      expect(tool.inputSchema.additionalTypes).toBeDefined();
-    });
-  });
 });

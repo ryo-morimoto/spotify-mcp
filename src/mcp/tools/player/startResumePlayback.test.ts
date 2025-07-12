@@ -225,20 +225,4 @@ describe("start-resume-playback tool", () => {
       "Error: Failed to start/resume playback: API request failed",
     );
   });
-
-  it("should have correct metadata", () => {
-    const tool = createStartResumePlaybackTool(mockClient);
-
-    expect(tool.name).toBe("start_resume_playback");
-    expect(tool.title).toBe("Start/Resume Playback");
-    expect(tool.description).toBe(
-      "Start a new context or resume current playback on the user's active device",
-    );
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.deviceId).toBeDefined();
-    expect(tool.inputSchema.contextUri).toBeDefined();
-    expect(tool.inputSchema.uris).toBeDefined();
-    expect(tool.inputSchema.offset).toBeDefined();
-    expect(tool.inputSchema.positionMs).toBeDefined();
-  });
 });

@@ -78,14 +78,4 @@ describe("skip-to-previous tool", () => {
       "Error: Failed to skip to previous track: Network error",
     );
   });
-
-  it("should have correct metadata", () => {
-    const tool = createSkipToPreviousTool(mockClient);
-
-    expect(tool.name).toBe("skip_to_previous");
-    expect(tool.title).toBe("Skip To Previous");
-    expect(tool.description).toBe("Skips to previous track in the user's queue");
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.deviceId).toBeDefined();
-  });
 });

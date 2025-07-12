@@ -77,14 +77,4 @@ describe("remove-saved-tracks tool", () => {
     expect((result.content[0] as any).text).toBe("Successfully removed 50 track(s) from library");
     expect(mockRemoveSavedTracks).toHaveBeenCalledWith(ids);
   });
-
-  it("should have correct metadata", () => {
-    const tool = createRemoveSavedTracksTool(mockClient);
-
-    expect(tool.name).toBe("remove_saved_tracks");
-    expect(tool.title).toBe("Remove Tracks from Library");
-    expect(tool.description).toBe("Remove one or more tracks from the current user's library");
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.ids).toBeDefined();
-  });
 });

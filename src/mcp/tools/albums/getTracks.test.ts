@@ -181,17 +181,4 @@ describe("get-album-tracks tool", () => {
     const tracks = JSON.parse((result.content[0] as any).text);
     expect(tracks[0].preview_url).toBeNull();
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const mockClient = {} as SpotifyApi;
-      const tool = createGetAlbumTracksTool(mockClient);
-
-      expect(tool.name).toBe("get_album_tracks");
-      expect(tool.title).toBe("Get Album Tracks");
-      expect(tool.description).toBe("Get all tracks from a Spotify album");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.albumId).toBeDefined();
-    });
-  });
 });

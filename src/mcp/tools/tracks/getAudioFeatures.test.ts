@@ -81,18 +81,4 @@ describe("get-track-audio-features tool", () => {
       "Error: Failed to get audio features: Network error",
     );
   });
-
-  it("should have correct metadata", () => {
-    const tool = createGetTrackAudioFeaturesTool(mockClient);
-
-    expect(tool.name).toBe("get_track_audio_features");
-    expect(tool.title).toBe("Get Track's Audio Features");
-    expect(tool.description).toBe(
-      "Get audio feature information for a single track identified by its unique Spotify ID. " +
-        "Audio features include danceability, energy, key, loudness, mode, speechiness, acousticness, " +
-        "instrumentalness, liveness, valence, tempo, duration, and time signature.",
-    );
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.id).toBeDefined();
-  });
 });

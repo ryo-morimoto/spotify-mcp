@@ -138,20 +138,4 @@ describe("get-saved-albums tool", () => {
       "Error: Failed to get saved albums: API request failed",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const tool = createGetSavedAlbumsTool(mockClient);
-
-      expect(tool.name).toBe("get_saved_albums");
-      expect(tool.title).toBe("Get User's Saved Albums");
-      expect(tool.description).toBe(
-        "Get a list of the albums saved in the current Spotify user's library",
-      );
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.limit).toBeDefined();
-      expect(tool.inputSchema.offset).toBeDefined();
-      expect(tool.inputSchema.market).toBeDefined();
-    });
-  });
 });

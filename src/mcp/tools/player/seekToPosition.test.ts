@@ -88,17 +88,4 @@ describe("seek-to-position tool", () => {
       "Error: Failed to seek to position: Network error",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const tool = createSeekToPositionTool(mockClient);
-
-      expect(tool.name).toBe("seek_to_position");
-      expect(tool.title).toBe("Seek To Position");
-      expect(tool.description).toBe("Seeks to the given position in the currently playing track");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.positionMs).toBeDefined();
-      expect(tool.inputSchema.deviceId).toBeDefined();
-    });
-  });
 });

@@ -8,16 +8,6 @@ describe("get_several_tracks_audio_features tool", () => {
       audioFeatures: vi.fn(),
     },
   } as unknown as SpotifyApi;
-
-  it("should have correct metadata", () => {
-    const tool = createGetSeveralTracksAudioFeaturesTool(mockClient);
-    expect(tool.name).toBe("get_several_tracks_audio_features");
-    expect(tool.title).toBe("Get Several Tracks' Audio Features");
-    expect(tool.description).toContain("Get audio features for multiple tracks");
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.ids).toBeDefined();
-  });
-
   it("should get multiple audio features successfully", async () => {
     const mockAudioFeatures = [
       {

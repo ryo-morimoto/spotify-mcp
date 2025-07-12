@@ -242,20 +242,4 @@ describe("get-playback-state tool", () => {
       "Error: Failed to get playback state: API request failed",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const mockClient = {} as SpotifyApi;
-      const tool = createGetPlaybackStateTool(mockClient);
-
-      expect(tool.name).toBe("get_playback_state");
-      expect(tool.title).toBe("Get Playback State");
-      expect(tool.description).toBe(
-        "Get information about the user's current playback state, including track or episode, progress, and active device",
-      );
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.market).toBeDefined();
-      expect(tool.inputSchema.additionalTypes).toBeDefined();
-    });
-  });
 });

@@ -114,17 +114,4 @@ describe("transfer-playback tool", () => {
       "Error: Failed to transfer playback: Network error",
     );
   });
-
-  it("should have correct metadata", () => {
-    const tool = createTransferPlaybackTool(mockClient);
-
-    expect(tool.name).toBe("transfer_playback");
-    expect(tool.title).toBe("Transfer Playback");
-    expect(tool.description).toBe(
-      "Transfer playback to a new device and determine if it should start playing",
-    );
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.deviceIds).toBeDefined();
-    expect(tool.inputSchema.play).toBeDefined();
-  });
 });

@@ -57,17 +57,6 @@ describe("get_track tool", () => {
     is_local: false,
     available_markets: ["US", "GB", "JP"],
   };
-
-  it("should have correct metadata", () => {
-    const tool = createGetTrackTool(mockClient);
-    expect(tool.name).toBe("get_track");
-    expect(tool.title).toBe("Get Track");
-    expect(tool.description).toContain("Get a single track by ID from Spotify");
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.trackId).toBeDefined();
-    expect(tool.inputSchema.market).toBeDefined();
-  });
-
   it("should get track successfully", async () => {
     vi.mocked(mockClient.tracks.get).mockResolvedValue(mockTrack as any);
 

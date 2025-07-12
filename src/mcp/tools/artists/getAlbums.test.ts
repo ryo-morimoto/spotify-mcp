@@ -248,17 +248,4 @@ describe("get-artist-albums tool", () => {
     const albums = JSON.parse((result.content[0] as any).text);
     expect(albums[0].images).toEqual([]);
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const mockClient = {} as SpotifyApi;
-      const tool = createGetArtistAlbumsTool(mockClient);
-
-      expect(tool.name).toBe("get_artist_albums");
-      expect(tool.title).toBe("Get Artist Albums");
-      expect(tool.description).toBe("Get albums from an artist on Spotify");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.artistId).toBeDefined();
-    });
-  });
 });

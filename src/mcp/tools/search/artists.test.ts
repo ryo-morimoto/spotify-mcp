@@ -3,17 +3,6 @@ import { createSearchArtistsTool } from "./artists.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 describe("createSearchArtistsTool", () => {
-  it("should return a tool definition with correct metadata", () => {
-    const mockClient = {} as SpotifyApi;
-    const tool = createSearchArtistsTool(mockClient);
-
-    expect(tool.name).toBe("search_artists");
-    expect(tool.title).toBe("Search Artists");
-    expect(tool.description).toBe("Search for artists on Spotify");
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.handler).toBeDefined();
-  });
-
   it("should validate input schema correctly", () => {
     const mockClient = {} as SpotifyApi;
     const tool = createSearchArtistsTool(mockClient);

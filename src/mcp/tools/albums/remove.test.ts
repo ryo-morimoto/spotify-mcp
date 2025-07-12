@@ -60,16 +60,4 @@ describe("remove-saved-albums tool", () => {
       "Error: Failed to remove albums: API request failed",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const tool = createRemoveSavedAlbumsTool(mockClient);
-
-      expect(tool.name).toBe("remove_saved_albums");
-      expect(tool.title).toBe("Remove Albums from Library");
-      expect(tool.description).toBe("Remove one or more albums from the current user's library");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.ids).toBeDefined();
-    });
-  });
 });

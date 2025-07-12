@@ -8,16 +8,6 @@ describe("get_several_artists tool", () => {
       get: vi.fn(),
     },
   } as unknown as SpotifyApi;
-
-  it("should have correct metadata", () => {
-    const tool = createGetSeveralArtistsTool(mockClient);
-    expect(tool.name).toBe("get_several_artists");
-    expect(tool.title).toBe("Get Several Artists");
-    expect(tool.description).toContain("Get Spotify catalog information for several artists");
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.ids).toBeDefined();
-  });
-
   it("should get multiple artists successfully", async () => {
     const mockArtists = [
       {

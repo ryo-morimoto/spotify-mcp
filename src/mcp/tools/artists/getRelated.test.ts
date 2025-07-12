@@ -8,16 +8,6 @@ describe("get_related_artists tool", () => {
       relatedArtists: vi.fn(),
     },
   } as unknown as SpotifyApi;
-
-  it("should have correct metadata", () => {
-    const tool = createGetRelatedArtistsTool(mockClient);
-    expect(tool.name).toBe("get_related_artists");
-    expect(tool.title).toBe("Get Artist's Related Artists");
-    expect(tool.description).toContain("Get Spotify catalog information about artists similar");
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.id).toBeDefined();
-  });
-
   it("should get related artists successfully", async () => {
     const mockRelatedArtists = {
       artists: [

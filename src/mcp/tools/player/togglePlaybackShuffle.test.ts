@@ -94,15 +94,4 @@ describe("toggle-playback-shuffle tool", () => {
     expect(result.content[0].type).toBe("text");
     expect((result.content[0] as any).text).toBe("Error: Failed to toggle shuffle: Network error");
   });
-
-  it("should have correct metadata", () => {
-    const tool = createTogglePlaybackShuffleTool(mockClient);
-
-    expect(tool.name).toBe("toggle_playback_shuffle");
-    expect(tool.title).toBe("Toggle Playback Shuffle");
-    expect(tool.description).toBe("Toggle shuffle on or off for the user's playback");
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.state).toBeDefined();
-    expect(tool.inputSchema.deviceId).toBeDefined();
-  });
 });

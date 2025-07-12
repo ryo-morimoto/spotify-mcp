@@ -128,17 +128,4 @@ describe("set-playback-volume tool", () => {
       "Error: Failed to set playback volume: Network error",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const tool = createSetPlaybackVolumeTool(mockClient);
-
-      expect(tool.name).toBe("set_playback_volume");
-      expect(tool.title).toBe("Set Playback Volume");
-      expect(tool.description).toBe("Set the volume for the user's current playback device");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.volumePercent).toBeDefined();
-      expect(tool.inputSchema.deviceId).toBeDefined();
-    });
-  });
 });

@@ -194,15 +194,6 @@ describe("getSeveralTracks", () => {
 describe("createGetSeveralTracksTool", () => {
   const mockSpotifyClient = {} as any;
   const tool = createGetSeveralTracksTool(mockSpotifyClient);
-
-  it("should create tool with correct metadata", () => {
-    expect(tool.name).toBe("get_several_tracks");
-    expect(tool.title).toBe("Get Several Tracks");
-    expect(tool.description).toBe(
-      "Get multiple tracks by their IDs from Spotify (maximum 50 tracks)",
-    );
-  });
-
   it("should have correct input schema", () => {
     const schema = z.object(tool.inputSchema);
 

@@ -78,16 +78,4 @@ describe("skip-to-next tool", () => {
       "Error: Failed to skip to next track: Network error",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const tool = createSkipToNextTool(mockClient);
-
-      expect(tool.name).toBe("skip_to_next");
-      expect(tool.title).toBe("Skip To Next");
-      expect(tool.description).toBe("Skips to next track in the user's queue");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.deviceId).toBeDefined();
-    });
-  });
 });

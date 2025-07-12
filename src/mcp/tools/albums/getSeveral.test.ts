@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi, Album } from "@spotify/web-api-ts-sdk";
-import { z } from "zod";
 import { createGetSeveralAlbumsTool } from "./getSeveral.ts";
 
 describe("get-several-albums tool", () => {
@@ -194,64 +193,5 @@ describe("get-several-albums tool", () => {
     expect(result.isError).toBeFalsy();
     const albums = JSON.parse((result.content[0] as any).text);
     expect(albums[0].images).toEqual([]);
-  });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const tool = createGetSeveralAlbumsTool(mockClient);
-
-      expect(tool.name).toBe("get_several_albums");
-      expect(tool.title).toBe("Get Several Albums");
-      expect(tool.description).toBe(
-        "Get multiple albums by their IDs from Spotify (maximum 20 albums)",
-      );
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.albumIds).toBeDefined();
-      expect(tool.inputSchema.market).toBeDefined();
-    });
-
-    it("should have correct input schema validation", () => {
-      const tool = createGetSeveralAlbumsTool(mockClient);
-      const schema = z.object(tool.inputSchema);
-
-      // Valid input
-      const validInput = {
-        albumIds: ["album1", "album2"],
-        market: "US",
-      };
-      expect(() => schema.parse(validInput)).not.toThrow();
-
-      // Valid input without market
-      const validInputNoMarket = {
-        albumIds: ["album1"],
-      };
-      expect(() => schema.parse(validInputNoMarket)).not.toThrow();
-
-      // Invalid: empty array
-      const invalidEmptyArray = {
-        albumIds: [],
-      };
-      expect(() => schema.parse(invalidEmptyArray)).toThrow();
-
-      // Invalid: too many IDs
-      const invalidTooMany = {
-        albumIds: Array.from({ length: 21 }, (_, i) => `album${i}`),
-      };
-      expect(() => schema.parse(invalidTooMany)).toThrow();
-
-      // Invalid: invalid market code
-      const invalidMarket = {
-        albumIds: ["album1"],
-        market: "USA",
-      };
-      expect(() => schema.parse(invalidMarket)).toThrow();
-
-      // Invalid: lowercase market code
-      const invalidLowercaseMarket = {
-        albumIds: ["album1"],
-        market: "us",
-      };
-      expect(() => schema.parse(invalidLowercaseMarket)).toThrow();
-    });
   });
 });

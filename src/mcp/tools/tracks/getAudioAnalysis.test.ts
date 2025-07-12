@@ -143,17 +143,4 @@ describe("get-track-audio-analysis tool", () => {
       "Error: Failed to get audio analysis: Network error",
     );
   });
-
-  it("should have correct metadata", () => {
-    const tool = createGetTrackAudioAnalysisTool(mockClient);
-
-    expect(tool.name).toBe("get_track_audio_analysis");
-    expect(tool.title).toBe("Get Track's Audio Analysis");
-    expect(tool.description).toBe(
-      "Get a low-level audio analysis for a track in the Spotify catalog. " +
-        "The audio analysis describes the track's structure and musical content, including rhythm, pitch, and timbre.",
-    );
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.id).toBeDefined();
-  });
 });

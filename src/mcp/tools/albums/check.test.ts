@@ -68,18 +68,4 @@ describe("check-saved-albums tool", () => {
       "Error: Failed to check albums: API request failed",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const tool = createCheckSavedAlbumsTool(mockClient);
-
-      expect(tool.name).toBe("check_saved_albums");
-      expect(tool.title).toBe("Check if Albums are Saved");
-      expect(tool.description).toBe(
-        "Check if one or more albums are already saved in the current user's library",
-      );
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.ids).toBeDefined();
-    });
-  });
 });

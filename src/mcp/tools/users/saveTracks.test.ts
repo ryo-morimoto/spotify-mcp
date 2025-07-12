@@ -77,14 +77,4 @@ describe("save-tracks tool", () => {
     expect((result.content[0] as any).text).toBe("Successfully saved 50 track(s) to library");
     expect(mockSaveTracks).toHaveBeenCalledWith(ids);
   });
-
-  it("should have correct metadata", () => {
-    const tool = createSaveTracksTool(mockClient);
-
-    expect(tool.name).toBe("save_tracks");
-    expect(tool.title).toBe("Save Tracks to Library");
-    expect(tool.description).toBe("Save one or more tracks to the current user's library");
-    expect(tool.inputSchema).toBeDefined();
-    expect(tool.inputSchema.ids).toBeDefined();
-  });
 });

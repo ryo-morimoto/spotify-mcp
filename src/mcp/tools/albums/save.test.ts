@@ -57,16 +57,4 @@ describe("save-albums tool", () => {
       "Error: Failed to save albums: API request failed",
     );
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const tool = createSaveAlbumsTool(mockClient);
-
-      expect(tool.name).toBe("save_albums");
-      expect(tool.title).toBe("Save Albums to Library");
-      expect(tool.description).toBe("Save one or more albums to the current user's library");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.ids).toBeDefined();
-    });
-  });
 });

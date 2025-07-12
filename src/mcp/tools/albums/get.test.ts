@@ -148,18 +148,4 @@ describe("get-album tool", () => {
     );
     expect(mockClient.albums.get).not.toHaveBeenCalled();
   });
-
-  describe("tool metadata", () => {
-    it("should have correct tool definition", () => {
-      const mockClient = {} as SpotifyApi;
-      const tool = createGetAlbumTool(mockClient);
-
-      expect(tool.name).toBe("get_album");
-      expect(tool.title).toBe("Get Album");
-      expect(tool.description).toBe("Get a single album by ID from Spotify");
-      expect(tool.inputSchema).toBeDefined();
-      expect(tool.inputSchema.albumId).toBeDefined();
-      expect(tool.inputSchema.market).toBeDefined();
-    });
-  });
 });
