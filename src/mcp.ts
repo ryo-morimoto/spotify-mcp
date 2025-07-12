@@ -29,6 +29,12 @@ import { createGetSavedTracksTool } from "./mcp/tools/users/getSavedTracks.ts";
 import { createSaveTracksTool } from "./mcp/tools/users/saveTracks.ts";
 import { createRemoveSavedTracksTool } from "./mcp/tools/users/removeSavedTracks.ts";
 import { createCheckSavedTracksTool } from "./mcp/tools/users/checkSavedTracks.ts";
+import { createGetPlaybackStateTool } from "./mcp/tools/player/getPlaybackState.ts";
+import { createGetAvailableDevicesTool } from "./mcp/tools/player/getAvailableDevices.ts";
+import { createGetCurrentlyPlayingTrackTool } from "./mcp/tools/player/getCurrentlyPlayingTrack.ts";
+import { createStartResumePlaybackTool } from "./mcp/tools/player/startResumePlayback.ts";
+import { createPausePlaybackTool } from "./mcp/tools/player/pausePlayback.ts";
+import { createSkipToNextTool } from "./mcp/tools/player/skipToNext.ts";
 
 export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const server = new McpServer({
@@ -65,6 +71,12 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const saveTracksTool = createSaveTracksTool(spotifyClient);
   const removeSavedTracksTool = createRemoveSavedTracksTool(spotifyClient);
   const checkSavedTracksTool = createCheckSavedTracksTool(spotifyClient);
+  const getPlaybackStateTool = createGetPlaybackStateTool(spotifyClient);
+  const getAvailableDevicesTool = createGetAvailableDevicesTool(spotifyClient);
+  const getCurrentlyPlayingTrackTool = createGetCurrentlyPlayingTrackTool(spotifyClient);
+  const startResumePlaybackTool = createStartResumePlaybackTool(spotifyClient);
+  const pausePlaybackTool = createPausePlaybackTool(spotifyClient);
+  const skipToNextTool = createSkipToNextTool(spotifyClient);
 
   server.registerTool(
     searchTracksTool.name,
@@ -354,6 +366,66 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: checkSavedTracksTool.inputSchema,
     },
     checkSavedTracksTool.handler,
+  );
+
+  server.registerTool(
+    getPlaybackStateTool.name,
+    {
+      title: getPlaybackStateTool.title,
+      description: getPlaybackStateTool.description,
+      inputSchema: getPlaybackStateTool.inputSchema,
+    },
+    getPlaybackStateTool.handler,
+  );
+
+  server.registerTool(
+    getAvailableDevicesTool.name,
+    {
+      title: getAvailableDevicesTool.title,
+      description: getAvailableDevicesTool.description,
+      inputSchema: getAvailableDevicesTool.inputSchema,
+    },
+    getAvailableDevicesTool.handler,
+  );
+
+  server.registerTool(
+    getCurrentlyPlayingTrackTool.name,
+    {
+      title: getCurrentlyPlayingTrackTool.title,
+      description: getCurrentlyPlayingTrackTool.description,
+      inputSchema: getCurrentlyPlayingTrackTool.inputSchema,
+    },
+    getCurrentlyPlayingTrackTool.handler,
+  );
+
+  server.registerTool(
+    startResumePlaybackTool.name,
+    {
+      title: startResumePlaybackTool.title,
+      description: startResumePlaybackTool.description,
+      inputSchema: startResumePlaybackTool.inputSchema,
+    },
+    startResumePlaybackTool.handler,
+  );
+
+  server.registerTool(
+    pausePlaybackTool.name,
+    {
+      title: pausePlaybackTool.title,
+      description: pausePlaybackTool.description,
+      inputSchema: pausePlaybackTool.inputSchema,
+    },
+    pausePlaybackTool.handler,
+  );
+
+  server.registerTool(
+    skipToNextTool.name,
+    {
+      title: skipToNextTool.title,
+      description: skipToNextTool.description,
+      inputSchema: skipToNextTool.inputSchema,
+    },
+    skipToNextTool.handler,
   );
 
   return server;
