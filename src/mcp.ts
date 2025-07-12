@@ -8,6 +8,7 @@ import { createSearchShowsTool } from "./mcp/tools/search/shows.ts";
 import { createSearchEpisodesTool } from "./mcp/tools/search/episodes.ts";
 import { createSearchAudiobooksTool } from "./mcp/tools/search/audiobooks.ts";
 import { createGetTrackTool } from "./mcp/tools/tracks/get.ts";
+import { createGetTrackAudioFeaturesTool } from "./mcp/tools/tracks/getAudioFeatures.ts";
 import { createGetAlbumTool } from "./mcp/tools/albums/get.ts";
 import { createGetSavedAlbumsTool } from "./mcp/tools/albums/getSaved.ts";
 import { createSaveAlbumsTool } from "./mcp/tools/albums/save.ts";
@@ -41,6 +42,7 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const searchEpisodesTool = createSearchEpisodesTool(spotifyClient);
   const searchAudiobooksTool = createSearchAudiobooksTool(spotifyClient);
   const getTrackTool = createGetTrackTool(spotifyClient);
+  const getTrackAudioFeaturesTool = createGetTrackAudioFeaturesTool(spotifyClient);
   const getAlbumTool = createGetAlbumTool(spotifyClient);
   const getSavedAlbumsTool = createGetSavedAlbumsTool(spotifyClient);
   const saveAlbumsTool = createSaveAlbumsTool(spotifyClient);
@@ -138,6 +140,16 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: getTrackTool.inputSchema,
     },
     getTrackTool.handler,
+  );
+
+  server.registerTool(
+    getTrackAudioFeaturesTool.name,
+    {
+      title: getTrackAudioFeaturesTool.title,
+      description: getTrackAudioFeaturesTool.description,
+      inputSchema: getTrackAudioFeaturesTool.inputSchema,
+    },
+    getTrackAudioFeaturesTool.handler,
   );
 
   server.registerTool(
