@@ -1,0 +1,57 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - main
+
+env:
+  # デフォルト環境設定（将来的にはブランチやイベントに応じて動的に変更可能）
+  DEPLOY_ENVIRONMENT: production
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    name: Deploy to Cloudflare Workers
+    permissions:
+      contents: read  # checkoutに必要
+      deployments: write  # デプロイ状態の記録（オプション）
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false  # 認証情報を残さない
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        with:
+          version: 10
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+          cache: 'pnpm'
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@da0e0dfe58b7a431659754fdf3f186c529afbe65
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --env ${{ env.DEPLOY_ENVIRONMENT }}
+      
+      - name: Show deployment info
+        run: |
+          echo "Deployed to environment: ${DEPLOY_ENVIRONMENT}"
+          echo "Branch: ${BRANCH}"
+          echo "Commit: ${COMMIT}"
+        env:
+          DEPLOY_ENVIRONMENT: ${{ env.DEPLOY_ENVIRONMENT }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          COMMIT: ${{ github.event.workflow_run.head_sha }}
