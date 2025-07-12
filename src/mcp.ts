@@ -13,6 +13,8 @@ import { createGetArtistTool } from "./mcp/tools/getArtistTool.ts";
 import { createGetPlaylistTool } from "./mcp/tools/getPlaylistTool.ts";
 import { createGetAlbumTracksTool } from "./mcp/tools/getAlbumTracksTool.ts";
 import { createGetArtistAlbumsTool } from "./mcp/tools/getArtistAlbumsTool.ts";
+import { createGetSeveralAlbumsTool } from "./mcp/tools/getSeveralAlbumsTool.ts";
+import { createGetArtistTopTracksTool } from "./mcp/tools/getArtistTopTracksTool.ts";
 
 export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const server = new McpServer({
@@ -33,6 +35,8 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const getPlaylistTool = createGetPlaylistTool(spotifyClient);
   const getAlbumTracksTool = createGetAlbumTracksTool(spotifyClient);
   const getArtistAlbumsTool = createGetArtistAlbumsTool(spotifyClient);
+  const getSeveralAlbumsTool = createGetSeveralAlbumsTool(spotifyClient);
+  const getArtistTopTracksTool = createGetArtistTopTracksTool(spotifyClient);
 
   server.registerTool(
     searchTracksTool.name,
@@ -162,6 +166,26 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: getArtistAlbumsTool.inputSchema,
     },
     getArtistAlbumsTool.handler,
+  );
+
+  server.registerTool(
+    getSeveralAlbumsTool.name,
+    {
+      title: getSeveralAlbumsTool.title,
+      description: getSeveralAlbumsTool.description,
+      inputSchema: getSeveralAlbumsTool.inputSchema,
+    },
+    getSeveralAlbumsTool.handler,
+  );
+
+  server.registerTool(
+    getArtistTopTracksTool.name,
+    {
+      title: getArtistTopTracksTool.title,
+      description: getArtistTopTracksTool.description,
+      inputSchema: getArtistTopTracksTool.inputSchema,
+    },
+    getArtistTopTracksTool.handler,
   );
 
   return server;
