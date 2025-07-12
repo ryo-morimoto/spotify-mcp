@@ -1,19 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getPlaybackState } from "./getPlaybackState.ts";
+import { createGetPlaybackStateTool } from "./getPlaybackState.ts";
 
-describe("getPlaybackState", () => {
-  let mockClient: SpotifyApi;
-
-  beforeEach(() => {
-    mockClient = {
+describe("get-playback-state tool", () => {
+  it("should return playback state when playback is active", async () => {
+    const mockClient = {
       player: {
         getPlaybackState: vi.fn(),
       },
     } as unknown as SpotifyApi;
-  });
 
-  it("should return playback state when playback is active", async () => {
     const mockPlaybackState = {
       is_playing: true,
       shuffle_state: false,
@@ -71,48 +67,79 @@ describe("getPlaybackState", () => {
 
     vi.mocked(mockClient.player.getPlaybackState).mockResolvedValue(mockPlaybackState as any);
 
-    const result = await getPlaybackState(mockClient);
+    const tool = createGetPlaybackStateTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.is_playing).toBe(true);
-      expect(result.value.device.name).toBe("My Device");
-      expect(result.value.item.name).toBe("Test Track");
-      expect(result.value.currently_playing_type).toBe("track");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.is_playing).toBe(true);
+    expect(response.device.name).toBe("My Device");
+    expect(response.item.name).toBe("Test Track");
+    expect(response.currently_playing_type).toBe("track");
   });
 
   it("should return message when no playback is active", async () => {
-    vi.mocked(mockClient.player.getPlaybackState).mockResolvedValue(null as any);
+    const mockClient = {
+      player: {
+        getPlaybackState: vi.fn().mockResolvedValue(null as any),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await getPlaybackState(mockClient);
+    const tool = createGetPlaybackStateTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("No active playback found");
-      expect(result.value.is_playing).toBe(false);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("No active playback found");
   });
 
   it("should validate market parameter", async () => {
-    const result = await getPlaybackState(mockClient, "USA");
+    const mockClient = {
+      player: {
+        getPlaybackState: vi.fn(),
+      },
+    } as unknown as SpotifyApi;
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Market must be a valid ISO 3166-1 alpha-2 country code");
-    }
+    const tool = createGetPlaybackStateTool(mockClient);
+    const result = await tool.handler({ market: "USA" });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Market must be a valid ISO 3166-1 alpha-2 country code",
+    );
   });
 
   it("should validate additional types", async () => {
-    const result = await getPlaybackState(mockClient, undefined, ["invalid"]);
+    const mockClient = {
+      player: {
+        getPlaybackState: vi.fn(),
+      },
+    } as unknown as SpotifyApi;
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Invalid additional type: invalid. Must be 'track' or 'episode'");
-    }
+    const tool = createGetPlaybackStateTool(mockClient);
+    const result = await tool.handler({ additionalTypes: ["invalid" as any] });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Invalid additional type: invalid. Must be 'track' or 'episode'",
+    );
   });
 
   it("should handle episode playback", async () => {
+    const mockClient = {
+      player: {
+        getPlaybackState: vi.fn(),
+      },
+    } as unknown as SpotifyApi;
+
     const mockEpisodePlayback = {
       is_playing: true,
       shuffle_state: false,
@@ -185,27 +212,50 @@ describe("getPlaybackState", () => {
 
     vi.mocked(mockClient.player.getPlaybackState).mockResolvedValue(mockEpisodePlayback as any);
 
-    const result = await getPlaybackState(mockClient, undefined, ["episode"]);
+    const tool = createGetPlaybackStateTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.is_playing).toBe(true);
-      expect(result.value.item.type).toBe("episode");
-      expect(result.value.item.show.name).toBe("Test Show");
-      expect(result.value.currently_playing_type).toBe("episode");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.is_playing).toBe(true);
+    expect(response.item.type).toBe("episode");
+    expect(response.item.show.name).toBe("Test Show");
+    expect(response.currently_playing_type).toBe("episode");
   });
 
   it("should handle API errors", async () => {
-    vi.mocked(mockClient.player.getPlaybackState).mockRejectedValue(
-      new Error("API request failed"),
+    const mockClient = {
+      player: {
+        getPlaybackState: vi.fn().mockRejectedValue(new Error("API request failed")),
+      },
+    } as unknown as SpotifyApi;
+
+    const tool = createGetPlaybackStateTool(mockClient);
+    const result = await tool.handler({});
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to get playback state: API request failed",
     );
+  });
 
-    const result = await getPlaybackState(mockClient);
+  describe("tool metadata", () => {
+    it("should have correct tool definition", () => {
+      const mockClient = {} as SpotifyApi;
+      const tool = createGetPlaybackStateTool(mockClient);
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get playback state: API request failed");
-    }
+      expect(tool.name).toBe("get_playback_state");
+      expect(tool.title).toBe("Get Playback State");
+      expect(tool.description).toBe(
+        "Get information about the user's current playback state, including track or episode, progress, and active device",
+      );
+      expect(tool.inputSchema).toBeDefined();
+      expect(tool.inputSchema.market).toBeDefined();
+      expect(tool.inputSchema.additionalTypes).toBeDefined();
+    });
   });
 });

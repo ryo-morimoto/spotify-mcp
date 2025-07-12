@@ -1,18 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getCurrentlyPlayingTrack } from "./getCurrentlyPlayingTrack.ts";
+import { createGetCurrentlyPlayingTrackTool } from "./getCurrentlyPlayingTrack.ts";
 
-describe("getCurrentlyPlayingTrack", () => {
-  let mockClient: SpotifyApi;
-
-  beforeEach(() => {
-    mockClient = {
-      player: {
-        getCurrentlyPlayingTrack: vi.fn(),
-      },
-    } as unknown as SpotifyApi;
-  });
-
+describe("get-currently-playing-track tool", () => {
   it("should return currently playing track", async () => {
     const mockCurrentlyPlaying = {
       is_playing: true,
@@ -58,31 +48,43 @@ describe("getCurrentlyPlayingTrack", () => {
       },
     };
 
-    vi.mocked(mockClient.player.getCurrentlyPlayingTrack).mockResolvedValue(
-      mockCurrentlyPlaying as any,
-    );
+    const mockClient = {
+      player: {
+        getCurrentlyPlayingTrack: vi.fn().mockResolvedValue(mockCurrentlyPlaying as any),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await getCurrentlyPlayingTrack(mockClient);
+    const tool = createGetCurrentlyPlayingTrackTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.is_playing).toBe(true);
-      expect(result.value.item.name).toBe("Test Track");
-      expect(result.value.item.artists[0].name).toBe("Test Artist");
-      expect(result.value.currently_playing_type).toBe("track");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const data = JSON.parse((result.content[0] as any).text);
+    expect(data.is_playing).toBe(true);
+    expect(data.item.name).toBe("Test Track");
+    expect(data.item.artists[0].name).toBe("Test Artist");
+    expect(data.currently_playing_type).toBe("track");
   });
 
   it("should return message when no track is playing", async () => {
-    vi.mocked(mockClient.player.getCurrentlyPlayingTrack).mockResolvedValue(null as any);
+    const mockClient = {
+      player: {
+        getCurrentlyPlayingTrack: vi.fn().mockResolvedValue(null as any),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await getCurrentlyPlayingTrack(mockClient);
+    const tool = createGetCurrentlyPlayingTrackTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("No track currently playing");
-      expect(result.value.is_playing).toBe(false);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const data = JSON.parse((result.content[0] as any).text);
+    expect(data.message).toBe("No track currently playing");
+    expect(data.is_playing).toBe(false);
   });
 
   it("should return message when item is null", async () => {
@@ -96,33 +98,60 @@ describe("getCurrentlyPlayingTrack", () => {
       actions: null,
     };
 
-    vi.mocked(mockClient.player.getCurrentlyPlayingTrack).mockResolvedValue(mockResponse as any);
+    const mockClient = {
+      player: {
+        getCurrentlyPlayingTrack: vi.fn().mockResolvedValue(mockResponse as any),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await getCurrentlyPlayingTrack(mockClient);
+    const tool = createGetCurrentlyPlayingTrackTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("No track currently playing");
-      expect(result.value.is_playing).toBe(false);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const data = JSON.parse((result.content[0] as any).text);
+    expect(data.message).toBe("No track currently playing");
+    expect(data.is_playing).toBe(false);
   });
 
   it("should validate market parameter", async () => {
-    const result = await getCurrentlyPlayingTrack(mockClient, "USA");
+    const mockClient = {
+      player: {
+        getCurrentlyPlayingTrack: vi.fn(),
+      },
+    } as unknown as SpotifyApi;
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Market must be a valid ISO 3166-1 alpha-2 country code");
-    }
+    const tool = createGetCurrentlyPlayingTrackTool(mockClient);
+    const result = await tool.handler({ market: "USA" });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Market must be a valid ISO 3166-1 alpha-2 country code",
+    );
+    expect(mockClient.player.getCurrentlyPlayingTrack).not.toHaveBeenCalled();
   });
 
   it("should validate additional types", async () => {
-    const result = await getCurrentlyPlayingTrack(mockClient, undefined, ["invalid"]);
+    const mockClient = {
+      player: {
+        getCurrentlyPlayingTrack: vi.fn(),
+      },
+    } as unknown as SpotifyApi;
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Invalid additional type: invalid. Must be 'track' or 'episode'");
-    }
+    const tool = createGetCurrentlyPlayingTrackTool(mockClient);
+    const result = await tool.handler({ additionalTypes: ["invalid" as any] });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Invalid additional type: invalid. Must be 'track' or 'episode'",
+    );
+    expect(mockClient.player.getCurrentlyPlayingTrack).not.toHaveBeenCalled();
   });
 
   it("should handle episode playback", async () => {
@@ -150,31 +179,57 @@ describe("getCurrentlyPlayingTrack", () => {
       },
     };
 
-    vi.mocked(mockClient.player.getCurrentlyPlayingTrack).mockResolvedValue(
-      mockEpisodePlaying as any,
-    );
+    const mockClient = {
+      player: {
+        getCurrentlyPlayingTrack: vi.fn().mockResolvedValue(mockEpisodePlaying as any),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await getCurrentlyPlayingTrack(mockClient, undefined, ["episode"]);
+    const tool = createGetCurrentlyPlayingTrackTool(mockClient);
+    const result = await tool.handler({ additionalTypes: ["episode"] });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.is_playing).toBe(true);
-      expect(result.value.item.type).toBe("episode");
-      expect(result.value.item.show.name).toBe("Test Show");
-      expect(result.value.currently_playing_type).toBe("episode");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const data = JSON.parse((result.content[0] as any).text);
+    expect(data.is_playing).toBe(true);
+    expect(data.item.type).toBe("episode");
+    expect(data.item.show.name).toBe("Test Show");
+    expect(data.currently_playing_type).toBe("episode");
   });
 
   it("should handle API errors", async () => {
-    vi.mocked(mockClient.player.getCurrentlyPlayingTrack).mockRejectedValue(
-      new Error("API request failed"),
+    const mockClient = {
+      player: {
+        getCurrentlyPlayingTrack: vi.fn().mockRejectedValue(new Error("API request failed")),
+      },
+    } as unknown as SpotifyApi;
+
+    const tool = createGetCurrentlyPlayingTrackTool(mockClient);
+    const result = await tool.handler({});
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to get currently playing track: API request failed",
     );
+  });
 
-    const result = await getCurrentlyPlayingTrack(mockClient);
+  describe("tool metadata", () => {
+    it("should have correct tool definition", () => {
+      const mockClient = {} as SpotifyApi;
+      const tool = createGetCurrentlyPlayingTrackTool(mockClient);
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get currently playing track: API request failed");
-    }
+      expect(tool.name).toBe("get_currently_playing_track");
+      expect(tool.title).toBe("Get Currently Playing Track");
+      expect(tool.description).toBe(
+        "Get the object currently being played on the user's Spotify account",
+      );
+      expect(tool.inputSchema).toBeDefined();
+      expect(tool.inputSchema.market).toBeDefined();
+      expect(tool.inputSchema.additionalTypes).toBeDefined();
+    });
   });
 });

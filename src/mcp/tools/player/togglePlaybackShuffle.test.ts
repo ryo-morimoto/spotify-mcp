@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { togglePlaybackShuffle } from "./togglePlaybackShuffle.ts";
+import { createTogglePlaybackShuffleTool } from "./togglePlaybackShuffle.ts";
 
-describe("togglePlaybackShuffle", () => {
+describe("toggle-playback-shuffle tool", () => {
   let mockClient: SpotifyApi;
 
   beforeEach(() => {
@@ -16,46 +16,53 @@ describe("togglePlaybackShuffle", () => {
   it("should enable shuffle", async () => {
     vi.mocked(mockClient.player.togglePlaybackShuffle).mockResolvedValue(undefined);
 
-    const result = await togglePlaybackShuffle(mockClient, true);
+    const tool = createTogglePlaybackShuffleTool(mockClient);
+    const result = await tool.handler({ state: true });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Shuffle enabled successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Shuffle enabled successfully");
     expect(mockClient.player.togglePlaybackShuffle).toHaveBeenCalledWith(true, undefined);
   });
 
   it("should disable shuffle", async () => {
     vi.mocked(mockClient.player.togglePlaybackShuffle).mockResolvedValue(undefined);
 
-    const result = await togglePlaybackShuffle(mockClient, false);
+    const tool = createTogglePlaybackShuffleTool(mockClient);
+    const result = await tool.handler({ state: false });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Shuffle disabled successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Shuffle disabled successfully");
     expect(mockClient.player.togglePlaybackShuffle).toHaveBeenCalledWith(false, undefined);
   });
 
   it("should toggle shuffle on specific device", async () => {
     vi.mocked(mockClient.player.togglePlaybackShuffle).mockResolvedValue(undefined);
 
-    const result = await togglePlaybackShuffle(mockClient, true, "device123");
+    const tool = createTogglePlaybackShuffleTool(mockClient);
+    const result = await tool.handler({ state: true, deviceId: "device123" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Shuffle enabled successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Shuffle enabled successfully");
     expect(mockClient.player.togglePlaybackShuffle).toHaveBeenCalledWith(true, "device123");
   });
 
   it("should validate empty device ID", async () => {
-    const result = await togglePlaybackShuffle(mockClient, true, "");
+    const tool = createTogglePlaybackShuffleTool(mockClient);
+    const result = await tool.handler({ state: true, deviceId: "" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Device ID must not be empty if provided");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Device ID must not be empty if provided");
   });
 
   it("should handle API errors", async () => {
@@ -63,12 +70,15 @@ describe("togglePlaybackShuffle", () => {
       new Error("API request failed"),
     );
 
-    const result = await togglePlaybackShuffle(mockClient, true);
+    const tool = createTogglePlaybackShuffleTool(mockClient);
+    const result = await tool.handler({ state: true });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to toggle shuffle: API request failed");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to toggle shuffle: API request failed",
+    );
   });
 
   it("should handle network errors", async () => {
@@ -76,11 +86,23 @@ describe("togglePlaybackShuffle", () => {
       new Error("Network error"),
     );
 
-    const result = await togglePlaybackShuffle(mockClient, false, "device456");
+    const tool = createTogglePlaybackShuffleTool(mockClient);
+    const result = await tool.handler({ state: false });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to toggle shuffle: Network error");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Failed to toggle shuffle: Network error");
+  });
+
+  it("should have correct metadata", () => {
+    const tool = createTogglePlaybackShuffleTool(mockClient);
+
+    expect(tool.name).toBe("toggle_playback_shuffle");
+    expect(tool.title).toBe("Toggle Playback Shuffle");
+    expect(tool.description).toBe("Toggle shuffle on or off for the user's playback");
+    expect(tool.inputSchema).toBeDefined();
+    expect(tool.inputSchema.state).toBeDefined();
+    expect(tool.inputSchema.deviceId).toBeDefined();
   });
 });

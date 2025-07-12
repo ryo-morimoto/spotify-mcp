@@ -1,8 +1,17 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getTrack } from "./get.ts";
+import { createGetTrackTool } from "./get.ts";
 
-describe("getTrack", () => {
+describe("get_track tool", () => {
+  const mockClient = {
+    tracks: {
+      get: vi.fn(),
+    },
+  } as unknown as SpotifyApi;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
   const mockTrack = {
     id: "3n3Ppam7vgaVa1iaRUc9Lp",
     name: "Mr. Brightside",
@@ -49,87 +58,75 @@ describe("getTrack", () => {
     available_markets: ["US", "GB", "JP"],
   };
 
-  it("should return track when API call succeeds", async () => {
-    const mockClient = {
-      tracks: {
-        get: vi.fn().mockResolvedValue(mockTrack),
-      },
-    } as unknown as SpotifyApi;
+  it("should have correct metadata", () => {
+    const tool = createGetTrackTool(mockClient);
+    expect(tool.name).toBe("get_track");
+    expect(tool.title).toBe("Get Track");
+    expect(tool.description).toContain("Get a single track by ID from Spotify");
+    expect(tool.inputSchema).toBeDefined();
+    expect(tool.inputSchema.trackId).toBeDefined();
+    expect(tool.inputSchema.market).toBeDefined();
+  });
 
-    const result = await getTrack(mockClient, "3n3Ppam7vgaVa1iaRUc9Lp");
+  it("should get track successfully", async () => {
+    vi.mocked(mockClient.tracks.get).mockResolvedValue(mockTrack as any);
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      const track = result.value;
-      expect(track.id).toBe("3n3Ppam7vgaVa1iaRUc9Lp");
-      expect(track.name).toBe("Mr. Brightside");
-      expect(track.artists).toBe("The Killers");
-      expect(track.album).toBe("Hot Fuss");
-      expect(track.duration_ms).toBe(222973);
-      expect(track.preview_url).toBe("https://p.scdn.co/mp3-preview/12345");
-      expect(track.external_url).toBe("https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp");
-    }
+    const tool = createGetTrackTool(mockClient);
+    const result = await tool.handler({ trackId: "3n3Ppam7vgaVa1iaRUc9Lp" });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const content = JSON.parse((result.content[0] as any).text);
+    expect(content.id).toBe("3n3Ppam7vgaVa1iaRUc9Lp");
+    expect(content.name).toBe("Mr. Brightside");
+    expect(content.artists).toBe("The Killers");
+    expect(content.album).toBe("Hot Fuss");
+    expect(content.duration_ms).toBe(222973);
+    expect(content.preview_url).toBe("https://p.scdn.co/mp3-preview/12345");
+    expect(content.external_url).toBe("https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp");
 
     expect(mockClient.tracks.get).toHaveBeenCalledWith("3n3Ppam7vgaVa1iaRUc9Lp", undefined);
   });
 
   it("should pass market parameter when provided", async () => {
-    const mockClient = {
-      tracks: {
-        get: vi.fn().mockResolvedValue(mockTrack),
-      },
-    } as unknown as SpotifyApi;
+    vi.mocked(mockClient.tracks.get).mockResolvedValue(mockTrack as any);
 
-    const result = await getTrack(mockClient, "3n3Ppam7vgaVa1iaRUc9Lp", "JP");
+    const tool = createGetTrackTool(mockClient);
+    const result = await tool.handler({ trackId: "3n3Ppam7vgaVa1iaRUc9Lp", market: "JP" });
 
-    expect(result.isOk()).toBe(true);
+    expect(result.isError).toBeUndefined();
     expect(mockClient.tracks.get).toHaveBeenCalledWith("3n3Ppam7vgaVa1iaRUc9Lp", "JP");
   });
 
-  it("should return error when API call fails", async () => {
-    const mockClient = {
-      tracks: {
-        get: vi.fn().mockRejectedValue(new Error("Track not found")),
-      },
-    } as unknown as SpotifyApi;
+  it("should handle API errors", async () => {
+    vi.mocked(mockClient.tracks.get).mockRejectedValue(new Error("Track not found"));
 
-    const result = await getTrack(mockClient, "invalid-track-id");
+    const tool = createGetTrackTool(mockClient);
+    const result = await tool.handler({ trackId: "invalid-track-id" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get track: Track not found");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toContain("Error:");
   });
 
-  it("should validate track ID format", async () => {
-    const mockClient = {
-      tracks: {
-        get: vi.fn(),
-      },
-    } as unknown as SpotifyApi;
+  it("should validate empty track ID", async () => {
+    const tool = createGetTrackTool(mockClient);
+    const result = await tool.handler({ trackId: "" });
 
-    const result = await getTrack(mockClient, "");
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Track ID must not be empty");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toContain("Error:");
     expect(mockClient.tracks.get).not.toHaveBeenCalled();
   });
 
-  it("should validate market parameter format", async () => {
-    const mockClient = {
-      tracks: {
-        get: vi.fn(),
-      },
-    } as unknown as SpotifyApi;
+  it("should validate invalid market code", async () => {
+    const tool = createGetTrackTool(mockClient);
+    const result = await tool.handler({ trackId: "3n3Ppam7vgaVa1iaRUc9Lp", market: "INVALID" });
 
-    const result = await getTrack(mockClient, "3n3Ppam7vgaVa1iaRUc9Lp", "INVALID");
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Market must be a valid ISO 3166-1 alpha-2 country code");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toContain("Error:");
     expect(mockClient.tracks.get).not.toHaveBeenCalled();
   });
 });

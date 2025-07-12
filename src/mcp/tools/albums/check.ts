@@ -14,8 +14,7 @@ const checkSavedAlbumsSchema = {
 
 type CheckSavedAlbumsInput = z.infer<z.ZodObject<typeof checkSavedAlbumsSchema>>;
 
-// Export for testing
-export async function checkSavedAlbums(
+async function checkSavedAlbums(
   client: SpotifyApi,
   ids: string[],
 ): Promise<Result<boolean[], string>> {

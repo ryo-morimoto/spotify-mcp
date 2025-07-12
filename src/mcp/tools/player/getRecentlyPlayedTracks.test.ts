@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getRecentlyPlayedTracks } from "./getRecentlyPlayedTracks.ts";
+import { createGetRecentlyPlayedTracksTool } from "./getRecentlyPlayedTracks.ts";
 
-describe("getRecentlyPlayedTracks", () => {
+describe("get-recently-played-tracks tool", () => {
   let mockClient: SpotifyApi;
   const mockRecentlyPlayed = {
     items: [],
@@ -19,36 +19,42 @@ describe("getRecentlyPlayedTracks", () => {
   it("should get recently played tracks with default limit", async () => {
     vi.mocked(mockClient.player.getRecentlyPlayedTracks).mockResolvedValue(mockRecentlyPlayed);
 
-    const result = await getRecentlyPlayedTracks(mockClient);
+    const tool = createGetRecentlyPlayedTracksTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual(mockRecentlyPlayed);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response).toEqual(mockRecentlyPlayed);
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(undefined, undefined);
   });
 
   it("should get recently played tracks with custom limit", async () => {
     vi.mocked(mockClient.player.getRecentlyPlayedTracks).mockResolvedValue(mockRecentlyPlayed);
 
-    const result = await getRecentlyPlayedTracks(mockClient, 10);
+    const tool = createGetRecentlyPlayedTracksTool(mockClient);
+    const result = await tool.handler({ limit: 10 });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual(mockRecentlyPlayed);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response).toEqual(mockRecentlyPlayed);
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(10, undefined);
   });
 
   it("should get recently played tracks with before timestamp", async () => {
     vi.mocked(mockClient.player.getRecentlyPlayedTracks).mockResolvedValue(mockRecentlyPlayed);
 
-    const result = await getRecentlyPlayedTracks(mockClient, undefined, 1704110400000);
+    const tool = createGetRecentlyPlayedTracksTool(mockClient);
+    const result = await tool.handler({ before: 1704110400000 });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual(mockRecentlyPlayed);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response).toEqual(mockRecentlyPlayed);
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(undefined, {
       timestamp: 1704110400000,
       type: "before",
@@ -58,12 +64,14 @@ describe("getRecentlyPlayedTracks", () => {
   it("should get recently played tracks with after timestamp", async () => {
     vi.mocked(mockClient.player.getRecentlyPlayedTracks).mockResolvedValue(mockRecentlyPlayed);
 
-    const result = await getRecentlyPlayedTracks(mockClient, undefined, undefined, 1704110400000);
+    const tool = createGetRecentlyPlayedTracksTool(mockClient);
+    const result = await tool.handler({ after: 1704110400000 });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual(mockRecentlyPlayed);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response).toEqual(mockRecentlyPlayed);
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(undefined, {
       timestamp: 1704110400000,
       type: "after",
@@ -73,12 +81,14 @@ describe("getRecentlyPlayedTracks", () => {
   it("should only use before when both timestamps provided", async () => {
     vi.mocked(mockClient.player.getRecentlyPlayedTracks).mockResolvedValue(mockRecentlyPlayed);
 
-    const result = await getRecentlyPlayedTracks(mockClient, 5, 1704110400000, 1704096000000);
+    const tool = createGetRecentlyPlayedTracksTool(mockClient);
+    const result = await tool.handler({ limit: 5, before: 1704110400000, after: 1704024000000 });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual(mockRecentlyPlayed);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response).toEqual(mockRecentlyPlayed);
     // When both before and after are provided, before takes precedence
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(5, {
       timestamp: 1704110400000,
@@ -87,21 +97,23 @@ describe("getRecentlyPlayedTracks", () => {
   });
 
   it("should validate limit range", async () => {
-    const result = await getRecentlyPlayedTracks(mockClient, 0);
+    const tool = createGetRecentlyPlayedTracksTool(mockClient);
+    const result = await tool.handler({ limit: 0 });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Limit must be between 1 and 50");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Limit must be between 1 and 50");
   });
 
   it("should validate limit maximum", async () => {
-    const result = await getRecentlyPlayedTracks(mockClient, 51);
+    const tool = createGetRecentlyPlayedTracksTool(mockClient);
+    const result = await tool.handler({ limit: 51 });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Limit must be between 1 and 50");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Limit must be between 1 and 50");
   });
 
   it("should handle API errors", async () => {
@@ -109,12 +121,15 @@ describe("getRecentlyPlayedTracks", () => {
       new Error("API request failed"),
     );
 
-    const result = await getRecentlyPlayedTracks(mockClient);
+    const tool = createGetRecentlyPlayedTracksTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get recently played tracks: API request failed");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to get recently played tracks: API request failed",
+    );
   });
 
   it("should handle network errors", async () => {
@@ -122,11 +137,14 @@ describe("getRecentlyPlayedTracks", () => {
       new Error("Network error"),
     );
 
-    const result = await getRecentlyPlayedTracks(mockClient, 20);
+    const tool = createGetRecentlyPlayedTracksTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get recently played tracks: Network error");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to get recently played tracks: Network error",
+    );
   });
 });

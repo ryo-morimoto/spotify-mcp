@@ -4,8 +4,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition } from "../../../types.ts";
 import { z } from "zod";
 
-// Export for testing
-export async function getUserQueue(client: SpotifyApi): Promise<Result<Queue, string>> {
+async function getUserQueue(client: SpotifyApi): Promise<Result<Queue, string>> {
   try {
     const queue = await client.player.getUsersQueue();
 

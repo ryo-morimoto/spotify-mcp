@@ -14,11 +14,7 @@ const removeSavedAlbumsSchema = {
 
 type RemoveSavedAlbumsInput = z.infer<z.ZodObject<typeof removeSavedAlbumsSchema>>;
 
-// Export for testing
-export async function removeSavedAlbums(
-  client: SpotifyApi,
-  ids: string[],
-): Promise<Result<void, string>> {
+async function removeSavedAlbums(client: SpotifyApi, ids: string[]): Promise<Result<void, string>> {
   // Validate input
   if (ids.length === 0) {
     return err("At least one album ID is required");

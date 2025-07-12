@@ -6,8 +6,7 @@ import { z } from "zod";
 
 type RepeatState = "track" | "context" | "off";
 
-// Export for testing
-export async function setRepeatMode(
+async function setRepeatMode(
   client: SpotifyApi,
   state: RepeatState,
   deviceId?: string,

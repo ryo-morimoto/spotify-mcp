@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getArtistAlbums } from "./getAlbums.ts";
+import { createGetArtistAlbumsTool } from "./getAlbums.ts";
 
-describe("getArtistAlbums", () => {
+describe("get-artist-albums tool", () => {
   const mockAlbums = {
     href: "https://api.spotify.com/v1/artists/0OdUWJ0sBjDrqHygGUXeCF/albums",
     items: [
@@ -96,28 +96,30 @@ describe("getArtistAlbums", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtistAlbums(mockClient, "0OdUWJ0sBjDrqHygGUXeCF");
+    const tool = createGetArtistAlbumsTool(mockClient);
+    const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      const albums = result.value;
-      expect(albums).toHaveLength(2);
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
 
-      const firstAlbum = albums[0];
-      expect(firstAlbum.id).toBe("2vqf3lG9mvy9h5pBx8wXPC");
-      expect(firstAlbum.name).toBe("Everything All The Time");
-      expect(firstAlbum.artists).toBe("Band of Horses");
-      expect(firstAlbum.release_date).toBe("2006-03-21");
-      expect(firstAlbum.total_tracks).toBe(10);
-      expect(firstAlbum.album_type).toBe("album");
-      expect(firstAlbum.external_url).toBe("https://open.spotify.com/album/2vqf3lG9mvy9h5pBx8wXPC");
-      expect(firstAlbum.images).toHaveLength(2);
-      expect(firstAlbum.images[0]).toEqual({
-        url: "https://i.scdn.co/image/ab67616d00001e02",
-        height: 300,
-        width: 300,
-      });
-    }
+    const albums = JSON.parse((result.content[0] as any).text);
+    expect(albums).toHaveLength(2);
+
+    const firstAlbum = albums[0];
+    expect(firstAlbum.id).toBe("2vqf3lG9mvy9h5pBx8wXPC");
+    expect(firstAlbum.name).toBe("Everything All The Time");
+    expect(firstAlbum.artists).toBe("Band of Horses");
+    expect(firstAlbum.release_date).toBe("2006-03-21");
+    expect(firstAlbum.total_tracks).toBe(10);
+    expect(firstAlbum.album_type).toBe("album");
+    expect(firstAlbum.external_url).toBe("https://open.spotify.com/album/2vqf3lG9mvy9h5pBx8wXPC");
+    expect(firstAlbum.images).toHaveLength(2);
+    expect(firstAlbum.images[0]).toEqual({
+      url: "https://i.scdn.co/image/ab67616d00001e02",
+      height: 300,
+      width: 300,
+    });
 
     expect(mockClient.artists.albums).toHaveBeenCalledWith("0OdUWJ0sBjDrqHygGUXeCF");
   });
@@ -129,12 +131,14 @@ describe("getArtistAlbums", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtistAlbums(mockClient, "invalid-artist-id");
+    const tool = createGetArtistAlbumsTool(mockClient);
+    const result = await tool.handler({ artistId: "invalid-artist-id" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get artist albums: Artist not found");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to get artist albums: Artist not found",
+    );
   });
 
   it("should validate artist ID format", async () => {
@@ -144,12 +148,12 @@ describe("getArtistAlbums", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtistAlbums(mockClient, "");
+    const tool = createGetArtistAlbumsTool(mockClient);
+    const result = await tool.handler({ artistId: "" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Artist ID must not be empty");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Artist ID must not be empty");
     expect(mockClient.artists.albums).not.toHaveBeenCalled();
   });
 
@@ -166,12 +170,12 @@ describe("getArtistAlbums", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtistAlbums(mockClient, "0OdUWJ0sBjDrqHygGUXeCF");
+    const tool = createGetArtistAlbumsTool(mockClient);
+    const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual([]);
-    }
+    expect(result.isError).toBeFalsy();
+    const albums = JSON.parse((result.content[0] as any).text);
+    expect(albums).toEqual([]);
   });
 
   it("should handle albums with multiple artists", async () => {
@@ -212,12 +216,12 @@ describe("getArtistAlbums", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtistAlbums(mockClient, "0OdUWJ0sBjDrqHygGUXeCF");
+    const tool = createGetArtistAlbumsTool(mockClient);
+    const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value[0].artists).toBe("Band of Horses, Featured Artist");
-    }
+    expect(result.isError).toBeFalsy();
+    const albums = JSON.parse((result.content[0] as any).text);
+    expect(albums[0].artists).toBe("Band of Horses, Featured Artist");
   });
 
   it("should handle albums with no images", async () => {
@@ -237,11 +241,24 @@ describe("getArtistAlbums", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtistAlbums(mockClient, "0OdUWJ0sBjDrqHygGUXeCF");
+    const tool = createGetArtistAlbumsTool(mockClient);
+    const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value[0].images).toEqual([]);
-    }
+    expect(result.isError).toBeFalsy();
+    const albums = JSON.parse((result.content[0] as any).text);
+    expect(albums[0].images).toEqual([]);
+  });
+
+  describe("tool metadata", () => {
+    it("should have correct tool definition", () => {
+      const mockClient = {} as SpotifyApi;
+      const tool = createGetArtistAlbumsTool(mockClient);
+
+      expect(tool.name).toBe("get_artist_albums");
+      expect(tool.title).toBe("Get Artist Albums");
+      expect(tool.description).toBe("Get albums from an artist on Spotify");
+      expect(tool.inputSchema).toBeDefined();
+      expect(tool.inputSchema.artistId).toBeDefined();
+    });
   });
 });

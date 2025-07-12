@@ -76,6 +76,3 @@ export const createGetArtistAlbumsTool = (
     };
   },
 });
-
-// Export for testing only
-export { getArtistAlbums };

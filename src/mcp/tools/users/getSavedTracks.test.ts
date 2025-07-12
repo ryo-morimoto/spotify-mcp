@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getSavedTracks } from "./getSavedTracks.ts";
+import { createGetSavedTracksTool } from "./getSavedTracks.ts";
 
-describe("getSavedTracks", () => {
+describe("get-saved-tracks tool", () => {
   const mockClient = {
     currentUser: {
       tracks: {
@@ -34,40 +34,110 @@ describe("getSavedTracks", () => {
 
     vi.mocked(mockClient.currentUser.tracks.savedTracks).mockResolvedValue(mockSavedTracks as any);
 
-    const result = await getSavedTracks(mockClient);
+    const tool = createGetSavedTracksTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual(mockSavedTracks);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const content = JSON.parse((result.content[0] as any).text);
+    expect(content).toEqual(mockSavedTracks);
+    expect(mockClient.currentUser.tracks.savedTracks).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+      undefined,
+    );
+  });
+
+  it("should get saved tracks with parameters", async () => {
+    const mockSavedTracks = {
+      href: "https://api.spotify.com/v1/me/tracks",
+      items: [],
+      total: 100,
+      limit: 10,
+      offset: 20,
+      next: "https://api.spotify.com/v1/me/tracks?offset=30&limit=10",
+      previous: "https://api.spotify.com/v1/me/tracks?offset=10&limit=10",
+    };
+
+    vi.mocked(mockClient.currentUser.tracks.savedTracks).mockResolvedValue(mockSavedTracks as any);
+
+    const tool = createGetSavedTracksTool(mockClient);
+    const result = await tool.handler({ limit: 10, offset: 20, market: "US" });
+
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const content = JSON.parse((result.content[0] as any).text);
+    expect(content).toEqual(mockSavedTracks);
+    expect(mockClient.currentUser.tracks.savedTracks).toHaveBeenCalledWith(10, 20, "US");
   });
 
   it("should handle API errors", async () => {
     vi.mocked(mockClient.currentUser.tracks.savedTracks).mockRejectedValue(new Error("API Error"));
 
-    const result = await getSavedTracks(mockClient);
+    const tool = createGetSavedTracksTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toContain("Failed to get saved tracks: API Error");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Failed to get saved tracks: API Error");
   });
 
-  it("should validate limit parameter", async () => {
-    const result = await getSavedTracks(mockClient, { limit: 100 });
+  it("should validate limit parameter - too low", async () => {
+    const tool = createGetSavedTracksTool(mockClient);
+    const result = await tool.handler({ limit: 0 });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Limit must be between 1 and 50");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Limit must be between 1 and 50");
+  });
+
+  it("should validate limit parameter - too high", async () => {
+    const tool = createGetSavedTracksTool(mockClient);
+    const result = await tool.handler({ limit: 51 });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Limit must be between 1 and 50");
   });
 
   it("should validate offset parameter", async () => {
-    const result = await getSavedTracks(mockClient, { offset: -1 });
+    const tool = createGetSavedTracksTool(mockClient);
+    const result = await tool.handler({ offset: -1 });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Offset must be non-negative");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Offset must be non-negative");
+  });
+
+  it("should validate market parameter", async () => {
+    const tool = createGetSavedTracksTool(mockClient);
+    const result = await tool.handler({ market: "USA" });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Market must be a valid ISO 3166-1 alpha-2 country code",
+    );
+  });
+
+  it("should have correct metadata", () => {
+    const tool = createGetSavedTracksTool(mockClient);
+
+    expect(tool.name).toBe("get_saved_tracks");
+    expect(tool.title).toBe("Get User's Saved Tracks");
+    expect(tool.description).toBe(
+      "Get a list of the songs saved in the current Spotify user's library",
+    );
+    expect(tool.inputSchema).toBeDefined();
+    expect(tool.inputSchema.limit).toBeDefined();
+    expect(tool.inputSchema.offset).toBeDefined();
+    expect(tool.inputSchema.market).toBeDefined();
   });
 });

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getAlbumTracks } from "./getTracks.ts";
+import { createGetAlbumTracksTool } from "./getTracks.ts";
 
-describe("getAlbumTracks", () => {
+describe("get-album-tracks tool", () => {
   const mockTracks = {
     href: "https://api.spotify.com/v1/albums/6TJmQnO44YE5BtTxH8pop1/tracks",
     items: [
@@ -75,28 +75,30 @@ describe("getAlbumTracks", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getAlbumTracks(mockClient, "6TJmQnO44YE5BtTxH8pop1");
+    const tool = createGetAlbumTracksTool(mockClient);
+    const result = await tool.handler({ albumId: "6TJmQnO44YE5BtTxH8pop1" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      const tracks = result.value;
-      expect(tracks).toHaveLength(2);
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
 
-      const firstTrack = tracks[0];
-      expect(firstTrack.id).toBe("3n3Ppam7vgaVa1iaRUc9Lp");
-      expect(firstTrack.name).toBe("Mr. Brightside");
-      expect(firstTrack.artists).toBe("The Killers");
-      expect(firstTrack.album).toBe("Unknown Album"); // We don't have album info in tracks endpoint
-      expect(firstTrack.duration_ms).toBe(222973);
-      expect(firstTrack.preview_url).toBe(
-        "https://p.scdn.co/mp3-preview/32a0e6a97ede478c9ee91d0af5f8bbef9f",
-      );
-      expect(firstTrack.external_url).toBe("https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp");
+    const tracks = JSON.parse((result.content[0] as any).text);
+    expect(tracks).toHaveLength(2);
 
-      const secondTrack = tracks[1];
-      expect(secondTrack.id).toBe("7ojcb9kFDqHpKyOIlnWp30");
-      expect(secondTrack.name).toBe("Somebody Told Me");
-    }
+    const firstTrack = tracks[0];
+    expect(firstTrack.id).toBe("3n3Ppam7vgaVa1iaRUc9Lp");
+    expect(firstTrack.name).toBe("Mr. Brightside");
+    expect(firstTrack.artists).toBe("The Killers");
+    expect(firstTrack.album).toBe("Unknown Album"); // We don't have album info in tracks endpoint
+    expect(firstTrack.duration_ms).toBe(222973);
+    expect(firstTrack.preview_url).toBe(
+      "https://p.scdn.co/mp3-preview/32a0e6a97ede478c9ee91d0af5f8bbef9f",
+    );
+    expect(firstTrack.external_url).toBe("https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp");
+
+    const secondTrack = tracks[1];
+    expect(secondTrack.id).toBe("7ojcb9kFDqHpKyOIlnWp30");
+    expect(secondTrack.name).toBe("Somebody Told Me");
 
     expect(mockClient.albums.tracks).toHaveBeenCalledWith("6TJmQnO44YE5BtTxH8pop1");
   });
@@ -108,12 +110,14 @@ describe("getAlbumTracks", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getAlbumTracks(mockClient, "invalid-album-id");
+    const tool = createGetAlbumTracksTool(mockClient);
+    const result = await tool.handler({ albumId: "invalid-album-id" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get album tracks: Album not found");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to get album tracks: Album not found",
+    );
   });
 
   it("should validate album ID format", async () => {
@@ -123,12 +127,12 @@ describe("getAlbumTracks", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getAlbumTracks(mockClient, "");
+    const tool = createGetAlbumTracksTool(mockClient);
+    const result = await tool.handler({ albumId: "" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Album ID must not be empty");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Album ID must not be empty");
     expect(mockClient.albums.tracks).not.toHaveBeenCalled();
   });
 
@@ -145,12 +149,12 @@ describe("getAlbumTracks", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getAlbumTracks(mockClient, "6TJmQnO44YE5BtTxH8pop1");
+    const tool = createGetAlbumTracksTool(mockClient);
+    const result = await tool.handler({ albumId: "6TJmQnO44YE5BtTxH8pop1" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toHaveLength(0);
-    }
+    expect(result.isError).toBeFalsy();
+    const tracks = JSON.parse((result.content[0] as any).text);
+    expect(tracks).toHaveLength(0);
   });
 
   it("should handle tracks with null preview URLs", async () => {
@@ -170,11 +174,24 @@ describe("getAlbumTracks", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getAlbumTracks(mockClient, "6TJmQnO44YE5BtTxH8pop1");
+    const tool = createGetAlbumTracksTool(mockClient);
+    const result = await tool.handler({ albumId: "6TJmQnO44YE5BtTxH8pop1" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value[0].preview_url).toBeNull();
-    }
+    expect(result.isError).toBeFalsy();
+    const tracks = JSON.parse((result.content[0] as any).text);
+    expect(tracks[0].preview_url).toBeNull();
+  });
+
+  describe("tool metadata", () => {
+    it("should have correct tool definition", () => {
+      const mockClient = {} as SpotifyApi;
+      const tool = createGetAlbumTracksTool(mockClient);
+
+      expect(tool.name).toBe("get_album_tracks");
+      expect(tool.title).toBe("Get Album Tracks");
+      expect(tool.description).toBe("Get all tracks from a Spotify album");
+      expect(tool.inputSchema).toBeDefined();
+      expect(tool.inputSchema.albumId).toBeDefined();
+    });
   });
 });

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { transferPlayback } from "./transferPlayback.ts";
+import { createTransferPlaybackTool } from "./transferPlayback.ts";
 
-describe("transferPlayback", () => {
+describe("transfer-playback tool", () => {
   let mockClient: SpotifyApi;
 
   beforeEach(() => {
@@ -16,64 +16,73 @@ describe("transferPlayback", () => {
   it("should transfer playback to a device", async () => {
     vi.mocked(mockClient.player.transferPlayback).mockResolvedValue(undefined);
 
-    const result = await transferPlayback(mockClient, ["device123"]);
+    const tool = createTransferPlaybackTool(mockClient);
+    const result = await tool.handler({ deviceIds: ["device123"] });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Playback transferred successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Playback transferred successfully");
     expect(mockClient.player.transferPlayback).toHaveBeenCalledWith(["device123"], undefined);
   });
 
   it("should transfer playback to a device and start playing", async () => {
     vi.mocked(mockClient.player.transferPlayback).mockResolvedValue(undefined);
 
-    const result = await transferPlayback(mockClient, ["device456"], true);
+    const tool = createTransferPlaybackTool(mockClient);
+    const result = await tool.handler({ deviceIds: ["device456"], play: true });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Playback transferred and started successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Playback transferred and started successfully");
     expect(mockClient.player.transferPlayback).toHaveBeenCalledWith(["device456"], true);
   });
 
   it("should transfer playback to a device without starting", async () => {
     vi.mocked(mockClient.player.transferPlayback).mockResolvedValue(undefined);
 
-    const result = await transferPlayback(mockClient, ["device789"], false);
+    const tool = createTransferPlaybackTool(mockClient);
+    const result = await tool.handler({ deviceIds: ["device789"], play: false });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Playback transferred successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Playback transferred successfully");
     expect(mockClient.player.transferPlayback).toHaveBeenCalledWith(["device789"], false);
   });
 
   it("should validate empty device IDs array", async () => {
-    const result = await transferPlayback(mockClient, []);
+    const tool = createTransferPlaybackTool(mockClient);
+    const result = await tool.handler({ deviceIds: [] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("At least one device ID must be provided");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: At least one device ID must be provided");
   });
 
   it("should validate empty device ID string", async () => {
-    const result = await transferPlayback(mockClient, [""]);
+    const tool = createTransferPlaybackTool(mockClient);
+    const result = await tool.handler({ deviceIds: [""] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Device IDs must not be empty");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Device IDs must not be empty");
   });
 
   it("should validate whitespace-only device ID", async () => {
-    const result = await transferPlayback(mockClient, ["  "]);
+    const tool = createTransferPlaybackTool(mockClient);
+    const result = await tool.handler({ deviceIds: ["  "] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Device IDs must not be empty");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Device IDs must not be empty");
   });
 
   it("should handle API errors", async () => {
@@ -81,22 +90,41 @@ describe("transferPlayback", () => {
       new Error("API request failed"),
     );
 
-    const result = await transferPlayback(mockClient, ["device123"]);
+    const tool = createTransferPlaybackTool(mockClient);
+    const result = await tool.handler({ deviceIds: ["device123"] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to transfer playback: API request failed");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to transfer playback: API request failed",
+    );
   });
 
   it("should handle network errors", async () => {
     vi.mocked(mockClient.player.transferPlayback).mockRejectedValue(new Error("Network error"));
 
-    const result = await transferPlayback(mockClient, ["device456"], true);
+    const tool = createTransferPlaybackTool(mockClient);
+    const result = await tool.handler({ deviceIds: ["device123"], play: true });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to transfer playback: Network error");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to transfer playback: Network error",
+    );
+  });
+
+  it("should have correct metadata", () => {
+    const tool = createTransferPlaybackTool(mockClient);
+
+    expect(tool.name).toBe("transfer_playback");
+    expect(tool.title).toBe("Transfer Playback");
+    expect(tool.description).toBe(
+      "Transfer playback to a new device and determine if it should start playing",
+    );
+    expect(tool.inputSchema).toBeDefined();
+    expect(tool.inputSchema.deviceIds).toBeDefined();
+    expect(tool.inputSchema.play).toBeDefined();
   });
 });

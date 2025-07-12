@@ -39,9 +39,6 @@ const getAlbumTracksSchema = {
 
 type GetAlbumTracksInput = z.infer<z.ZodObject<typeof getAlbumTracksSchema>>;
 
-// Export for testing only
-export { getAlbumTracks };
-
 export const createGetAlbumTracksTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getAlbumTracksSchema> => ({

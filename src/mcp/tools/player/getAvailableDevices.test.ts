@@ -1,18 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getAvailableDevices } from "./getAvailableDevices.ts";
+import { createGetAvailableDevicesTool } from "./getAvailableDevices.ts";
 
-describe("getAvailableDevices", () => {
-  let mockClient: SpotifyApi;
-
-  beforeEach(() => {
-    mockClient = {
-      player: {
-        getAvailableDevices: vi.fn(),
-      },
-    } as unknown as SpotifyApi;
-  });
-
+describe("get-available-devices tool", () => {
   it("should return list of available devices", async () => {
     const mockDevices = {
       devices: [
@@ -37,20 +27,27 @@ describe("getAvailableDevices", () => {
       ],
     };
 
-    vi.mocked(mockClient.player.getAvailableDevices).mockResolvedValue(mockDevices);
+    const mockClient = {
+      player: {
+        getAvailableDevices: vi.fn().mockResolvedValue(mockDevices),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await getAvailableDevices(mockClient);
+    const tool = createGetAvailableDevicesTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.devices).toHaveLength(2);
-      expect(result.value.devices[0].name).toBe("My Computer");
-      expect(result.value.devices[0].type).toBe("Computer");
-      expect(result.value.devices[0].is_active).toBe(true);
-      expect(result.value.devices[1].name).toBe("My Phone");
-      expect(result.value.devices[1].type).toBe("Smartphone");
-      expect(result.value.devices[1].is_active).toBe(false);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.devices).toHaveLength(2);
+    expect(response.devices[0].name).toBe("My Computer");
+    expect(response.devices[0].type).toBe("Computer");
+    expect(response.devices[0].is_active).toBe(true);
+    expect(response.devices[1].name).toBe("My Phone");
+    expect(response.devices[1].type).toBe("Smartphone");
+    expect(response.devices[1].is_active).toBe(false);
   });
 
   it("should return empty list when no devices available", async () => {
@@ -58,27 +55,39 @@ describe("getAvailableDevices", () => {
       devices: [],
     };
 
-    vi.mocked(mockClient.player.getAvailableDevices).mockResolvedValue(mockDevices);
+    const mockClient = {
+      player: {
+        getAvailableDevices: vi.fn().mockResolvedValue(mockDevices),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await getAvailableDevices(mockClient);
+    const tool = createGetAvailableDevicesTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.devices).toHaveLength(0);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.devices).toHaveLength(0);
   });
 
   it("should handle API errors", async () => {
-    vi.mocked(mockClient.player.getAvailableDevices).mockRejectedValue(
-      new Error("API request failed"),
+    const mockClient = {
+      player: {
+        getAvailableDevices: vi.fn().mockRejectedValue(new Error("API request failed")),
+      },
+    } as unknown as SpotifyApi;
+
+    const tool = createGetAvailableDevicesTool(mockClient);
+    const result = await tool.handler({});
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to get available devices: API request failed",
     );
-
-    const result = await getAvailableDevices(mockClient);
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get available devices: API request failed");
-    }
   });
 
   it("should include all device properties", async () => {
@@ -96,22 +105,42 @@ describe("getAvailableDevices", () => {
       ],
     };
 
-    vi.mocked(mockClient.player.getAvailableDevices).mockResolvedValue(mockDevices);
+    const mockClient = {
+      player: {
+        getAvailableDevices: vi.fn().mockResolvedValue(mockDevices),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await getAvailableDevices(mockClient);
+    const tool = createGetAvailableDevicesTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      const device = result.value.devices[0];
-      expect(device).toEqual({
-        id: "device3",
-        name: "Smart TV",
-        type: "TV",
-        is_active: false,
-        is_private_session: true,
-        is_restricted: true,
-        volume_percent: 30,
-      });
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.devices[0]).toEqual({
+      id: "device3",
+      name: "Smart TV",
+      type: "TV",
+      is_active: false,
+      is_private_session: true,
+      is_restricted: true,
+      volume_percent: 30,
+    });
+  });
+
+  describe("tool metadata", () => {
+    it("should have correct tool definition", () => {
+      const mockClient = {} as SpotifyApi;
+      const tool = createGetAvailableDevicesTool(mockClient);
+
+      expect(tool.name).toBe("get_available_devices");
+      expect(tool.title).toBe("Get Available Devices");
+      expect(tool.description).toBe(
+        "Get information about a user's available devices for Spotify playback",
+      );
+      expect(tool.inputSchema).toBeDefined();
+    });
   });
 });

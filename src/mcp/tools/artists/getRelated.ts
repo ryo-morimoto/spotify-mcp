@@ -10,8 +10,7 @@ const getRelatedArtistsSchema = {
 
 type GetRelatedArtistsInput = z.infer<z.ZodObject<typeof getRelatedArtistsSchema>>;
 
-// Export for testing
-export async function getRelatedArtists(
+async function getRelatedArtists(
   client: SpotifyApi,
   id: string,
 ): Promise<Result<Artist[], string>> {

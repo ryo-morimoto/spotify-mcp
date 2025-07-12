@@ -31,8 +31,7 @@ interface GetSavedAlbumsOptions {
   market?: string;
 }
 
-// Export for testing
-export async function getSavedAlbums(
+async function getSavedAlbums(
   client: SpotifyApi,
   options?: GetSavedAlbumsOptions,
 ): Promise<Result<Page<SavedAlbum>, string>> {

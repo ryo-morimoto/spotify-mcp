@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi, Album } from "@spotify/web-api-ts-sdk";
 import { z } from "zod";
-import { createGetSeveralAlbumsTool, getSeveralAlbums } from "./getSeveral.ts";
+import { createGetSeveralAlbumsTool } from "./getSeveral.ts";
 
-describe("getSeveralAlbums", () => {
+describe("get-several-albums tool", () => {
   let mockClient: SpotifyApi;
 
   beforeEach(() => {
@@ -46,18 +46,21 @@ describe("getSeveralAlbums", () => {
 
     vi.mocked(mockClient.albums.get).mockResolvedValue(mockAlbums);
 
-    const result = await getSeveralAlbums(mockClient, ["album1", "album2"]);
+    const tool = createGetSeveralAlbumsTool(mockClient);
+    const result = await tool.handler({ albumIds: ["album1", "album2"] });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toHaveLength(2);
-      expect(result.value[0].id).toBe("album1");
-      expect(result.value[0].name).toBe("Album One");
-      expect(result.value[0].artists).toBe("Artist 1");
-      expect(result.value[1].id).toBe("album2");
-      expect(result.value[1].name).toBe("Album Two");
-      expect(result.value[1].artists).toBe("Artist 2");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const albums = JSON.parse((result.content[0] as any).text);
+    expect(albums).toHaveLength(2);
+    expect(albums[0].id).toBe("album1");
+    expect(albums[0].name).toBe("Album One");
+    expect(albums[0].artists).toBe("Artist 1");
+    expect(albums[1].id).toBe("album2");
+    expect(albums[1].name).toBe("Album Two");
+    expect(albums[1].artists).toBe("Artist 2");
     expect(mockClient.albums.get).toHaveBeenCalledWith(["album1", "album2"], undefined);
   });
 
@@ -78,62 +81,65 @@ describe("getSeveralAlbums", () => {
 
     vi.mocked(mockClient.albums.get).mockResolvedValue([mockAlbum]);
 
-    const result = await getSeveralAlbums(mockClient, ["album1"], "US");
+    const tool = createGetSeveralAlbumsTool(mockClient);
+    const result = await tool.handler({ albumIds: ["album1"], market: "US" });
 
-    expect(result.isOk()).toBe(true);
+    expect(result.isError).toBeFalsy();
     expect(mockClient.albums.get).toHaveBeenCalledWith(["album1"], "US");
   });
 
   it("should return error for empty album IDs array", async () => {
-    const result = await getSeveralAlbums(mockClient, []);
+    const tool = createGetSeveralAlbumsTool(mockClient);
+    const result = await tool.handler({ albumIds: [] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Album IDs must not be empty");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Album IDs must not be empty");
     expect(mockClient.albums.get).not.toHaveBeenCalled();
   });
 
   it("should return error for too many album IDs", async () => {
     const tooManyIds = Array.from({ length: 21 }, (_, i) => `album${i}`);
-    const result = await getSeveralAlbums(mockClient, tooManyIds);
+    const tool = createGetSeveralAlbumsTool(mockClient);
+    const result = await tool.handler({ albumIds: tooManyIds });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Maximum 20 album IDs allowed");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Maximum 20 album IDs allowed");
     expect(mockClient.albums.get).not.toHaveBeenCalled();
   });
 
   it("should return error for invalid album ID", async () => {
-    const result = await getSeveralAlbums(mockClient, ["valid", "", "also_valid"]);
+    const tool = createGetSeveralAlbumsTool(mockClient);
+    const result = await tool.handler({ albumIds: ["valid", "", "also_valid"] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("All album IDs must be non-empty strings");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: All album IDs must be non-empty strings");
     expect(mockClient.albums.get).not.toHaveBeenCalled();
   });
 
   it("should return error for invalid market code", async () => {
-    const result = await getSeveralAlbums(mockClient, ["album1"], "USA");
+    const tool = createGetSeveralAlbumsTool(mockClient);
+    const result = await tool.handler({ albumIds: ["album1"], market: "USA" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Market must be a valid ISO 3166-1 alpha-2 country code");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Market must be a valid ISO 3166-1 alpha-2 country code",
+    );
     expect(mockClient.albums.get).not.toHaveBeenCalled();
   });
 
   it("should handle API errors", async () => {
     vi.mocked(mockClient.albums.get).mockRejectedValue(new Error("API Error"));
 
-    const result = await getSeveralAlbums(mockClient, ["album1"]);
+    const tool = createGetSeveralAlbumsTool(mockClient);
+    const result = await tool.handler({ albumIds: ["album1"] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get albums: API Error");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Failed to get albums: API Error");
   });
 
   it("should handle albums with multiple artists", async () => {
@@ -157,12 +163,12 @@ describe("getSeveralAlbums", () => {
 
     vi.mocked(mockClient.albums.get).mockResolvedValue([mockAlbum]);
 
-    const result = await getSeveralAlbums(mockClient, ["album1"]);
+    const tool = createGetSeveralAlbumsTool(mockClient);
+    const result = await tool.handler({ albumIds: ["album1"] });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value[0].artists).toBe("Artist 1, Artist 2, Artist 3");
-    }
+    expect(result.isError).toBeFalsy();
+    const albums = JSON.parse((result.content[0] as any).text);
+    expect(albums[0].artists).toBe("Artist 1, Artist 2, Artist 3");
   });
 
   it("should handle albums without images", async () => {
@@ -182,67 +188,70 @@ describe("getSeveralAlbums", () => {
 
     vi.mocked(mockClient.albums.get).mockResolvedValue([mockAlbum]);
 
-    const result = await getSeveralAlbums(mockClient, ["album1"]);
+    const tool = createGetSeveralAlbumsTool(mockClient);
+    const result = await tool.handler({ albumIds: ["album1"] });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value[0].images).toEqual([]);
-    }
-  });
-});
-
-describe("createGetSeveralAlbumsTool", () => {
-  const mockSpotifyClient = {} as any;
-  const tool = createGetSeveralAlbumsTool(mockSpotifyClient);
-
-  it("should create tool with correct metadata", () => {
-    expect(tool.name).toBe("get_several_albums");
-    expect(tool.title).toBe("Get Several Albums");
-    expect(tool.description).toBe(
-      "Get multiple albums by their IDs from Spotify (maximum 20 albums)",
-    );
+    expect(result.isError).toBeFalsy();
+    const albums = JSON.parse((result.content[0] as any).text);
+    expect(albums[0].images).toEqual([]);
   });
 
-  it("should have correct input schema", () => {
-    const schema = z.object(tool.inputSchema);
+  describe("tool metadata", () => {
+    it("should have correct tool definition", () => {
+      const tool = createGetSeveralAlbumsTool(mockClient);
 
-    // Valid input
-    const validInput = {
-      albumIds: ["album1", "album2"],
-      market: "US",
-    };
-    expect(() => schema.parse(validInput)).not.toThrow();
+      expect(tool.name).toBe("get_several_albums");
+      expect(tool.title).toBe("Get Several Albums");
+      expect(tool.description).toBe(
+        "Get multiple albums by their IDs from Spotify (maximum 20 albums)",
+      );
+      expect(tool.inputSchema).toBeDefined();
+      expect(tool.inputSchema.albumIds).toBeDefined();
+      expect(tool.inputSchema.market).toBeDefined();
+    });
 
-    // Valid input without market
-    const validInputNoMarket = {
-      albumIds: ["album1"],
-    };
-    expect(() => schema.parse(validInputNoMarket)).not.toThrow();
+    it("should have correct input schema validation", () => {
+      const tool = createGetSeveralAlbumsTool(mockClient);
+      const schema = z.object(tool.inputSchema);
 
-    // Invalid: empty array
-    const invalidEmptyArray = {
-      albumIds: [],
-    };
-    expect(() => schema.parse(invalidEmptyArray)).toThrow();
+      // Valid input
+      const validInput = {
+        albumIds: ["album1", "album2"],
+        market: "US",
+      };
+      expect(() => schema.parse(validInput)).not.toThrow();
 
-    // Invalid: too many IDs
-    const invalidTooMany = {
-      albumIds: Array.from({ length: 21 }, (_, i) => `album${i}`),
-    };
-    expect(() => schema.parse(invalidTooMany)).toThrow();
+      // Valid input without market
+      const validInputNoMarket = {
+        albumIds: ["album1"],
+      };
+      expect(() => schema.parse(validInputNoMarket)).not.toThrow();
 
-    // Invalid: invalid market code
-    const invalidMarket = {
-      albumIds: ["album1"],
-      market: "USA",
-    };
-    expect(() => schema.parse(invalidMarket)).toThrow();
+      // Invalid: empty array
+      const invalidEmptyArray = {
+        albumIds: [],
+      };
+      expect(() => schema.parse(invalidEmptyArray)).toThrow();
 
-    // Invalid: lowercase market code
-    const invalidLowercaseMarket = {
-      albumIds: ["album1"],
-      market: "us",
-    };
-    expect(() => schema.parse(invalidLowercaseMarket)).toThrow();
+      // Invalid: too many IDs
+      const invalidTooMany = {
+        albumIds: Array.from({ length: 21 }, (_, i) => `album${i}`),
+      };
+      expect(() => schema.parse(invalidTooMany)).toThrow();
+
+      // Invalid: invalid market code
+      const invalidMarket = {
+        albumIds: ["album1"],
+        market: "USA",
+      };
+      expect(() => schema.parse(invalidMarket)).toThrow();
+
+      // Invalid: lowercase market code
+      const invalidLowercaseMarket = {
+        albumIds: ["album1"],
+        market: "us",
+      };
+      expect(() => schema.parse(invalidLowercaseMarket)).toThrow();
+    });
   });
 });

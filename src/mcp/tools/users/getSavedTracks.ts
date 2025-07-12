@@ -31,8 +31,7 @@ interface GetSavedTracksOptions {
   market?: string;
 }
 
-// Export for testing
-export async function getSavedTracks(
+async function getSavedTracks(
   client: SpotifyApi,
   options?: GetSavedTracksOptions,
 ): Promise<Result<Page<SavedTrack>, string>> {

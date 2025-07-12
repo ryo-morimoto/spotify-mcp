@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { removeSavedTracks } from "./removeSavedTracks.ts";
+import { createRemoveSavedTracksTool } from "./removeSavedTracks.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
-describe("removeSavedTracks", () => {
+describe("remove-saved-tracks tool", () => {
   const mockRemoveSavedTracks = vi.fn();
   const mockClient = {
     currentUser: {
@@ -19,35 +19,48 @@ describe("removeSavedTracks", () => {
   it("should remove tracks successfully", async () => {
     mockRemoveSavedTracks.mockResolvedValueOnce(undefined);
 
-    const result = await removeSavedTracks(mockClient, ["track1", "track2"]);
+    const tool = createRemoveSavedTracksTool(mockClient);
+    const result = await tool.handler({ ids: ["track1", "track2"] });
 
-    expect(result.isOk()).toBe(true);
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Successfully removed 2 track(s) from library");
     expect(mockRemoveSavedTracks).toHaveBeenCalledWith(["track1", "track2"]);
   });
 
   it("should handle API errors", async () => {
     mockRemoveSavedTracks.mockRejectedValueOnce(new Error("API error"));
 
-    const result = await removeSavedTracks(mockClient, ["track1"]);
+    const tool = createRemoveSavedTracksTool(mockClient);
+    const result = await tool.handler({ ids: ["track1", "track2"] });
 
-    expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toBe("Failed to remove tracks: API error");
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Failed to remove tracks: API error");
   });
 
   it("should validate empty array", async () => {
-    const result = await removeSavedTracks(mockClient, []);
+    const tool = createRemoveSavedTracksTool(mockClient);
+    const result = await tool.handler({ ids: [] });
 
-    expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toBe("At least one track ID is required");
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: At least one track ID is required");
     expect(mockRemoveSavedTracks).not.toHaveBeenCalled();
   });
 
   it("should validate maximum array size", async () => {
     const ids = Array(51).fill("track");
-    const result = await removeSavedTracks(mockClient, ids);
+    const tool = createRemoveSavedTracksTool(mockClient);
+    const result = await tool.handler({ ids });
 
-    expect(result.isErr()).toBe(true);
-    expect(result._unsafeUnwrapErr()).toBe("Maximum 50 track IDs allowed");
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Maximum 50 track IDs allowed");
     expect(mockRemoveSavedTracks).not.toHaveBeenCalled();
   });
 
@@ -55,9 +68,23 @@ describe("removeSavedTracks", () => {
     mockRemoveSavedTracks.mockResolvedValueOnce(undefined);
     const ids = Array(50).fill("track");
 
-    const result = await removeSavedTracks(mockClient, ids);
+    const tool = createRemoveSavedTracksTool(mockClient);
+    const result = await tool.handler({ ids });
 
-    expect(result.isOk()).toBe(true);
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Successfully removed 50 track(s) from library");
     expect(mockRemoveSavedTracks).toHaveBeenCalledWith(ids);
+  });
+
+  it("should have correct metadata", () => {
+    const tool = createRemoveSavedTracksTool(mockClient);
+
+    expect(tool.name).toBe("remove_saved_tracks");
+    expect(tool.title).toBe("Remove Tracks from Library");
+    expect(tool.description).toBe("Remove one or more tracks from the current user's library");
+    expect(tool.inputSchema).toBeDefined();
+    expect(tool.inputSchema.ids).toBeDefined();
   });
 });

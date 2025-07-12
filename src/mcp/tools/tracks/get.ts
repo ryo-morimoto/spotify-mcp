@@ -15,8 +15,7 @@ const getTrackSchema = {
 
 type GetTrackInput = z.infer<z.ZodObject<typeof getTrackSchema>>;
 
-// Export for testing
-export async function getTrack(
+async function getTrack(
   client: SpotifyApi,
   trackId: string,
   market?: string,

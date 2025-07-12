@@ -65,9 +65,6 @@ const getSeveralAlbumsSchema = {
 
 type GetSeveralAlbumsInput = z.infer<z.ZodObject<typeof getSeveralAlbumsSchema>>;
 
-// Export for testing only
-export { getSeveralAlbums };
-
 export const createGetSeveralAlbumsTool = (
   spotifyClient: SpotifyApi,
 ): ToolDefinition<typeof getSeveralAlbumsSchema> => ({

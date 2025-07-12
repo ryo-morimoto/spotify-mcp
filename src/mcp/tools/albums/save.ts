@@ -14,8 +14,7 @@ const saveAlbumsSchema = {
 
 type SaveAlbumsInput = z.infer<z.ZodObject<typeof saveAlbumsSchema>>;
 
-// Export for testing
-export async function saveAlbums(client: SpotifyApi, ids: string[]): Promise<Result<void, string>> {
+async function saveAlbums(client: SpotifyApi, ids: string[]): Promise<Result<void, string>> {
   // Validate input
   if (ids.length === 0) {
     return err("At least one album ID is required");

@@ -1,27 +1,23 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { addItemToPlaybackQueue } from "./addItemToPlaybackQueue.ts";
+import { createAddItemToPlaybackQueueTool } from "./addItemToPlaybackQueue.ts";
 
-describe("addItemToPlaybackQueue", () => {
-  let mockClient: SpotifyApi;
-
-  beforeEach(() => {
-    mockClient = {
+describe("add-item-to-playback-queue tool", () => {
+  it("should add track to queue", async () => {
+    const mockClient = {
       player: {
-        addItemToPlaybackQueue: vi.fn(),
+        addItemToPlaybackQueue: vi.fn().mockResolvedValue(undefined),
       },
     } as unknown as SpotifyApi;
-  });
 
-  it("should add track to queue", async () => {
-    vi.mocked(mockClient.player.addItemToPlaybackQueue).mockResolvedValue(undefined);
+    const tool = createAddItemToPlaybackQueueTool(mockClient);
+    const result = await tool.handler({ uri: "spotify:track:4iV5W9uYEdYUVa79Axb7Rh" });
 
-    const result = await addItemToPlaybackQueue(mockClient, "spotify:track:4iV5W9uYEdYUVa79Axb7Rh");
-
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Item added to queue successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Item added to queue successfully");
     expect(mockClient.player.addItemToPlaybackQueue).toHaveBeenCalledWith(
       "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
       "",
@@ -29,17 +25,20 @@ describe("addItemToPlaybackQueue", () => {
   });
 
   it("should add episode to queue", async () => {
-    vi.mocked(mockClient.player.addItemToPlaybackQueue).mockResolvedValue(undefined);
+    const mockClient = {
+      player: {
+        addItemToPlaybackQueue: vi.fn().mockResolvedValue(undefined),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await addItemToPlaybackQueue(
-      mockClient,
-      "spotify:episode:512ojhOuo1ktJprKbVcKyQ",
-    );
+    const tool = createAddItemToPlaybackQueueTool(mockClient);
+    const result = await tool.handler({ uri: "spotify:episode:512ojhOuo1ktJprKbVcKyQ" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Item added to queue successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Item added to queue successfully");
     expect(mockClient.player.addItemToPlaybackQueue).toHaveBeenCalledWith(
       "spotify:episode:512ojhOuo1ktJprKbVcKyQ",
       "",
@@ -47,18 +46,23 @@ describe("addItemToPlaybackQueue", () => {
   });
 
   it("should add item to queue on specific device", async () => {
-    vi.mocked(mockClient.player.addItemToPlaybackQueue).mockResolvedValue(undefined);
+    const mockClient = {
+      player: {
+        addItemToPlaybackQueue: vi.fn().mockResolvedValue(undefined),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await addItemToPlaybackQueue(
-      mockClient,
-      "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
-      "device123",
-    );
+    const tool = createAddItemToPlaybackQueueTool(mockClient);
+    const result = await tool.handler({
+      uri: "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+      deviceId: "device123",
+    });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Item added to queue successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Item added to queue successfully");
     expect(mockClient.player.addItemToPlaybackQueue).toHaveBeenCalledWith(
       "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
       "device123",
@@ -66,63 +70,109 @@ describe("addItemToPlaybackQueue", () => {
   });
 
   it("should validate empty URI", async () => {
-    const result = await addItemToPlaybackQueue(mockClient, "");
+    const mockClient = {
+      player: {
+        addItemToPlaybackQueue: vi.fn(),
+      },
+    } as unknown as SpotifyApi;
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("URI must not be empty");
-    }
+    const tool = createAddItemToPlaybackQueueTool(mockClient);
+    const result = await tool.handler({ uri: "" });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: URI must not be empty");
+    expect(mockClient.player.addItemToPlaybackQueue).not.toHaveBeenCalled();
   });
 
   it("should validate whitespace-only URI", async () => {
-    const result = await addItemToPlaybackQueue(mockClient, "  ");
+    const mockClient = {
+      player: {
+        addItemToPlaybackQueue: vi.fn(),
+      },
+    } as unknown as SpotifyApi;
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("URI must not be empty");
-    }
+    const tool = createAddItemToPlaybackQueueTool(mockClient);
+    const result = await tool.handler({ uri: "  " });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: URI must not be empty");
+    expect(mockClient.player.addItemToPlaybackQueue).not.toHaveBeenCalled();
   });
 
   it("should validate empty device ID", async () => {
-    const result = await addItemToPlaybackQueue(
-      mockClient,
-      "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
-      "",
-    );
+    const mockClient = {
+      player: {
+        addItemToPlaybackQueue: vi.fn(),
+      },
+    } as unknown as SpotifyApi;
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Device ID must not be empty if provided");
-    }
+    const tool = createAddItemToPlaybackQueueTool(mockClient);
+    const result = await tool.handler({
+      uri: "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+      deviceId: "",
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Device ID must not be empty if provided");
+    expect(mockClient.player.addItemToPlaybackQueue).not.toHaveBeenCalled();
   });
 
   it("should handle API errors", async () => {
-    vi.mocked(mockClient.player.addItemToPlaybackQueue).mockRejectedValue(
-      new Error("API request failed"),
+    const mockClient = {
+      player: {
+        addItemToPlaybackQueue: vi.fn().mockRejectedValue(new Error("API request failed")),
+      },
+    } as unknown as SpotifyApi;
+
+    const tool = createAddItemToPlaybackQueueTool(mockClient);
+    const result = await tool.handler({ uri: "spotify:track:4iV5W9uYEdYUVa79Axb7Rh" });
+
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to add item to queue: API request failed",
     );
-
-    const result = await addItemToPlaybackQueue(mockClient, "spotify:track:4iV5W9uYEdYUVa79Axb7Rh");
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to add item to queue: API request failed");
-    }
   });
 
   it("should handle network errors", async () => {
-    vi.mocked(mockClient.player.addItemToPlaybackQueue).mockRejectedValue(
-      new Error("Network error"),
-    );
+    const mockClient = {
+      player: {
+        addItemToPlaybackQueue: vi.fn().mockRejectedValue(new Error("Network error")),
+      },
+    } as unknown as SpotifyApi;
 
-    const result = await addItemToPlaybackQueue(
-      mockClient,
-      "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
-      "device456",
-    );
+    const tool = createAddItemToPlaybackQueueTool(mockClient);
+    const result = await tool.handler({
+      uri: "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+      deviceId: "device456",
+    });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to add item to queue: Network error");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to add item to queue: Network error",
+    );
+  });
+
+  describe("tool metadata", () => {
+    it("should have correct tool definition", () => {
+      const mockClient = {} as SpotifyApi;
+      const tool = createAddItemToPlaybackQueueTool(mockClient);
+
+      expect(tool.name).toBe("add_item_to_playback_queue");
+      expect(tool.title).toBe("Add Item to Playback Queue");
+      expect(tool.description).toBe("Add an item to the end of the user's current playback queue");
+      expect(tool.inputSchema).toBeDefined();
+      expect(tool.inputSchema.uri).toBeDefined();
+      expect(tool.inputSchema.deviceId).toBeDefined();
+    });
   });
 });

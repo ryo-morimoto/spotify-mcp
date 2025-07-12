@@ -10,8 +10,7 @@ const getSeveralArtistsSchema = {
 
 type GetSeveralArtistsInput = z.infer<z.ZodObject<typeof getSeveralArtistsSchema>>;
 
-// Export for testing
-export async function getSeveralArtists(
+async function getSeveralArtists(
   client: SpotifyApi,
   ids: string[],
 ): Promise<Result<Artist[], string>> {

@@ -12,8 +12,7 @@ type GetSeveralTracksAudioFeaturesInput = z.infer<
   z.ZodObject<typeof getSeveralTracksAudioFeaturesSchema>
 >;
 
-// Export for testing
-export async function getSeveralTracksAudioFeatures(
+async function getSeveralTracksAudioFeatures(
   client: SpotifyApi,
   ids: string[],
 ): Promise<Result<AudioFeatures[], string>> {

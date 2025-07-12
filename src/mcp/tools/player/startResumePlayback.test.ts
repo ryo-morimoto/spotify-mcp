@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { startResumePlayback } from "./startResumePlayback.ts";
+import { createStartResumePlaybackTool } from "./startResumePlayback.ts";
 
-describe("startResumePlayback", () => {
+describe("start-resume-playback tool", () => {
   let mockClient: SpotifyApi;
 
   beforeEach(() => {
@@ -16,12 +16,14 @@ describe("startResumePlayback", () => {
   it("should start playback with no parameters", async () => {
     vi.mocked(mockClient.player.startResumePlayback).mockResolvedValue(undefined);
 
-    const result = await startResumePlayback(mockClient);
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Playback started successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Playback started successfully");
     expect(mockClient.player.startResumePlayback).toHaveBeenCalledWith(
       "",
       undefined,
@@ -34,12 +36,14 @@ describe("startResumePlayback", () => {
   it("should start playback on specific device", async () => {
     vi.mocked(mockClient.player.startResumePlayback).mockResolvedValue(undefined);
 
-    const result = await startResumePlayback(mockClient, "device123");
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({ deviceId: "device123" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.message).toBe("Playback started successfully");
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response.message).toBe("Playback started successfully");
     expect(mockClient.player.startResumePlayback).toHaveBeenCalledWith(
       "device123",
       undefined,
@@ -52,13 +56,10 @@ describe("startResumePlayback", () => {
   it("should start playback with context URI", async () => {
     vi.mocked(mockClient.player.startResumePlayback).mockResolvedValue(undefined);
 
-    const result = await startResumePlayback(
-      mockClient,
-      undefined,
-      "spotify:album:1234567890abcdef",
-    );
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({ contextUri: "spotify:album:1234567890abcdef" });
 
-    expect(result.isOk()).toBe(true);
+    expect(result.isError).toBeFalsy();
     expect(mockClient.player.startResumePlayback).toHaveBeenCalledWith(
       "",
       "spotify:album:1234567890abcdef",
@@ -72,9 +73,10 @@ describe("startResumePlayback", () => {
     vi.mocked(mockClient.player.startResumePlayback).mockResolvedValue(undefined);
 
     const uris = ["spotify:track:abc123", "spotify:track:def456"];
-    const result = await startResumePlayback(mockClient, undefined, undefined, uris);
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({ uris });
 
-    expect(result.isOk()).toBe(true);
+    expect(result.isError).toBeFalsy();
     expect(mockClient.player.startResumePlayback).toHaveBeenCalledWith(
       "",
       undefined,
@@ -87,15 +89,13 @@ describe("startResumePlayback", () => {
   it("should start playback with offset position", async () => {
     vi.mocked(mockClient.player.startResumePlayback).mockResolvedValue(undefined);
 
-    const result = await startResumePlayback(
-      mockClient,
-      undefined,
-      "spotify:playlist:abc123",
-      undefined,
-      { position: 5 },
-    );
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({
+      contextUri: "spotify:playlist:abc123",
+      offset: { position: 5 },
+    });
 
-    expect(result.isOk()).toBe(true);
+    expect(result.isError).toBeFalsy();
     expect(mockClient.player.startResumePlayback).toHaveBeenCalledWith(
       "",
       "spotify:playlist:abc123",
@@ -108,16 +108,10 @@ describe("startResumePlayback", () => {
   it("should start playback with position in milliseconds", async () => {
     vi.mocked(mockClient.player.startResumePlayback).mockResolvedValue(undefined);
 
-    const result = await startResumePlayback(
-      mockClient,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      30000,
-    );
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({ positionMs: 30000 });
 
-    expect(result.isOk()).toBe(true);
+    expect(result.isError).toBeFalsy();
     expect(mockClient.player.startResumePlayback).toHaveBeenCalledWith(
       "",
       undefined,
@@ -128,92 +122,92 @@ describe("startResumePlayback", () => {
   });
 
   it("should validate empty device ID", async () => {
-    const result = await startResumePlayback(mockClient, "");
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({ deviceId: "" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Device ID must not be empty if provided");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Device ID must not be empty if provided");
   });
 
   it("should validate context URI format", async () => {
-    const result = await startResumePlayback(mockClient, undefined, "invalid:uri");
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({ contextUri: "invalid:uri" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Invalid context URI format");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Invalid context URI format");
   });
 
   it("should validate URIs format", async () => {
-    const result = await startResumePlayback(mockClient, undefined, undefined, [
-      "spotify:track:abc123",
-      "invalid:uri",
-    ]);
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({ uris: ["invalid:uri"] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Invalid URI format: invalid:uri");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Invalid URI format: invalid:uri");
   });
 
   it("should validate empty URIs array", async () => {
-    const result = await startResumePlayback(mockClient, undefined, undefined, []);
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({ uris: [] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("URIs array must not be empty if provided");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: URIs array must not be empty if provided");
   });
 
   it("should prevent both context_uri and uris", async () => {
-    const result = await startResumePlayback(mockClient, undefined, "spotify:album:abc123", [
-      "spotify:track:def456",
-    ]);
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({
+      contextUri: "spotify:album:abc123",
+      uris: ["spotify:track:def456"],
+    });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Cannot provide both context_uri and uris");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Cannot provide both context_uri and uris");
   });
 
   it("should validate offset with both position and uri", async () => {
-    const result = await startResumePlayback(mockClient, undefined, undefined, undefined, {
-      position: 5,
-      uri: "spotify:track:abc123",
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({
+      offset: { position: 5, uri: "spotify:track:abc123" },
     });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Offset can only have either position or uri, not both");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Offset can only have either position or uri, not both",
+    );
   });
 
   it("should validate negative offset position", async () => {
-    const result = await startResumePlayback(mockClient, undefined, undefined, undefined, {
-      position: -1,
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({
+      offset: { position: -1 },
     });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Offset position must be non-negative");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Offset position must be non-negative");
   });
 
   it("should validate negative position_ms", async () => {
-    const result = await startResumePlayback(
-      mockClient,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      -1000,
-    );
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({ positionMs: -1000 });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Position must be non-negative");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Position must be non-negative");
   });
 
   it("should handle API errors", async () => {
@@ -221,11 +215,30 @@ describe("startResumePlayback", () => {
       new Error("API request failed"),
     );
 
-    const result = await startResumePlayback(mockClient);
+    const tool = createStartResumePlaybackTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to start/resume playback: API request failed");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to start/resume playback: API request failed",
+    );
+  });
+
+  it("should have correct metadata", () => {
+    const tool = createStartResumePlaybackTool(mockClient);
+
+    expect(tool.name).toBe("start_resume_playback");
+    expect(tool.title).toBe("Start/Resume Playback");
+    expect(tool.description).toBe(
+      "Start a new context or resume current playback on the user's active device",
+    );
+    expect(tool.inputSchema).toBeDefined();
+    expect(tool.inputSchema.deviceId).toBeDefined();
+    expect(tool.inputSchema.contextUri).toBeDefined();
+    expect(tool.inputSchema.uris).toBeDefined();
+    expect(tool.inputSchema.offset).toBeDefined();
+    expect(tool.inputSchema.positionMs).toBeDefined();
   });
 });

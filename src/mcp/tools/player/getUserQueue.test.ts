@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getUserQueue } from "./getUserQueue.ts";
+import { createGetUserQueueTool } from "./getUserQueue.ts";
 
-describe("getUserQueue", () => {
+describe("get-user-queue tool", () => {
   let mockClient: SpotifyApi;
   const mockQueue = {
     currently_playing: {
@@ -41,12 +41,14 @@ describe("getUserQueue", () => {
   it("should get user queue", async () => {
     vi.mocked(mockClient.player.getUsersQueue).mockResolvedValue(mockQueue);
 
-    const result = await getUserQueue(mockClient);
+    const tool = createGetUserQueueTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual(mockQueue);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response).toEqual(mockQueue);
     expect(mockClient.player.getUsersQueue).toHaveBeenCalledWith();
   });
 
@@ -58,33 +60,39 @@ describe("getUserQueue", () => {
 
     vi.mocked(mockClient.player.getUsersQueue).mockResolvedValue(emptyQueue);
 
-    const result = await getUserQueue(mockClient);
+    const tool = createGetUserQueueTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual(emptyQueue);
-    }
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    const response = JSON.parse((result.content[0] as any).text);
+    expect(response).toEqual(emptyQueue);
   });
 
   it("should handle API errors", async () => {
     vi.mocked(mockClient.player.getUsersQueue).mockRejectedValue(new Error("API request failed"));
 
-    const result = await getUserQueue(mockClient);
+    const tool = createGetUserQueueTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get user queue: API request failed");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to get user queue: API request failed",
+    );
   });
 
   it("should handle network errors", async () => {
     vi.mocked(mockClient.player.getUsersQueue).mockRejectedValue(new Error("Network error"));
 
-    const result = await getUserQueue(mockClient);
+    const tool = createGetUserQueueTool(mockClient);
+    const result = await tool.handler({});
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get user queue: Network error");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Failed to get user queue: Network error");
   });
 });

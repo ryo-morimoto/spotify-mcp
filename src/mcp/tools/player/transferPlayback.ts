@@ -4,8 +4,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition } from "../../../types.ts";
 import { z } from "zod";
 
-// Export for testing
-export async function transferPlayback(
+async function transferPlayback(
   client: SpotifyApi,
   deviceIds: string[],
   play?: boolean,

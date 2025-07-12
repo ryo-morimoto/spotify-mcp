@@ -4,8 +4,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { SpotifyAlbumResult, ToolDefinition } from "../../../types.ts";
 import { z } from "zod";
 
-// Export for testing
-export async function getAlbum(
+async function getAlbum(
   client: SpotifyApi,
   albumId: string,
   market?: string,

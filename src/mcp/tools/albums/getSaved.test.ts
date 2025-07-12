@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getSavedAlbums, createGetSavedAlbumsTool } from "./getSaved.ts";
+import { createGetSavedAlbumsTool } from "./getSaved.ts";
 
-describe("getSavedAlbums", () => {
+describe("get-saved-albums tool", () => {
   const mockClient = {
     currentUser: {
       albums: {
@@ -37,11 +37,20 @@ describe("getSavedAlbums", () => {
 
     vi.mocked(mockClient.currentUser.albums.savedAlbums).mockResolvedValue(mockSavedAlbums as any);
 
-    const result = await getSavedAlbums(mockClient);
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toEqual(mockSavedAlbums);
-    }
+    const tool = createGetSavedAlbumsTool(mockClient);
+    const result = await tool.handler({});
+
+    expect(result.isError).toBeFalsy();
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const content = JSON.parse((result.content[0] as any).text);
+    expect(content).toEqual(mockSavedAlbums);
+    expect(mockClient.currentUser.albums.savedAlbums).toHaveBeenCalledWith(
+      undefined,
+      undefined,
+      undefined,
+    );
   });
 
   it("should respect limit parameter", async () => {
@@ -56,8 +65,10 @@ describe("getSavedAlbums", () => {
     };
     vi.mocked(mockClient.currentUser.albums.savedAlbums).mockResolvedValue(mockSavedAlbums as any);
 
-    const result = await getSavedAlbums(mockClient, { limit: 10 });
-    expect(result.isOk()).toBe(true);
+    const tool = createGetSavedAlbumsTool(mockClient);
+    const result = await tool.handler({ limit: 10 });
+
+    expect(result.isError).toBeFalsy();
     expect(mockClient.currentUser.albums.savedAlbums).toHaveBeenCalledWith(
       10,
       undefined,
@@ -77,33 +88,40 @@ describe("getSavedAlbums", () => {
     };
     vi.mocked(mockClient.currentUser.albums.savedAlbums).mockResolvedValue(mockSavedAlbums as any);
 
-    const result = await getSavedAlbums(mockClient, { offset: 5 });
-    expect(result.isOk()).toBe(true);
+    const tool = createGetSavedAlbumsTool(mockClient);
+    const result = await tool.handler({ offset: 5 });
+
+    expect(result.isError).toBeFalsy();
     expect(mockClient.currentUser.albums.savedAlbums).toHaveBeenCalledWith(undefined, 5, undefined);
   });
 
   it("should validate limit parameter", async () => {
-    const result = await getSavedAlbums(mockClient, { limit: 51 });
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toContain("Limit must be between 1 and 50");
-    }
+    const tool = createGetSavedAlbumsTool(mockClient);
+    const result = await tool.handler({ limit: 51 });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Limit must be between 1 and 50");
   });
 
   it("should validate offset parameter", async () => {
-    const result = await getSavedAlbums(mockClient, { offset: -1 });
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toContain("Offset must be non-negative");
-    }
+    const tool = createGetSavedAlbumsTool(mockClient);
+    const result = await tool.handler({ offset: -1 });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Offset must be non-negative");
   });
 
   it("should validate market parameter format", async () => {
-    const result = await getSavedAlbums(mockClient, { market: "USA" });
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toContain("Market must be a valid ISO 3166-1 alpha-2 country code");
-    }
+    const tool = createGetSavedAlbumsTool(mockClient);
+    const result = await tool.handler({ market: "USA" });
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Market must be a valid ISO 3166-1 alpha-2 country code",
+    );
   });
 
   it("should handle API errors", async () => {
@@ -111,59 +129,29 @@ describe("getSavedAlbums", () => {
       new Error("API request failed"),
     );
 
-    const result = await getSavedAlbums(mockClient);
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toContain("Failed to get saved albums: API request failed");
-    }
-  });
-});
-
-describe("createGetSavedAlbumsTool", () => {
-  const mockClient = {
-    currentUser: {
-      albums: {
-        savedAlbums: vi.fn(),
-      },
-    },
-  } as unknown as SpotifyApi;
-
-  it("should create a tool with correct metadata", () => {
     const tool = createGetSavedAlbumsTool(mockClient);
-    expect(tool.name).toBe("get_saved_albums");
-    expect(tool.title).toBe("Get User's Saved Albums");
-    expect(tool.description).toContain("saved in the current Spotify user's library");
-    expect(tool.inputSchema).toBeDefined();
-  });
-
-  it("should handle successful API response", async () => {
-    const mockSavedAlbums = {
-      items: [{ added_at: "2024-01-01", album: { id: "1", name: "Album" } }],
-      limit: 5,
-      offset: 0,
-      total: 1,
-      href: "",
-      next: null,
-      previous: null,
-    };
-    vi.mocked(mockClient.currentUser.albums.savedAlbums).mockResolvedValue(mockSavedAlbums as any);
-
-    const tool = createGetSavedAlbumsTool(mockClient);
-    const result = await tool.handler({ limit: 5 });
-
-    expect(result.isError).toBeUndefined();
-    expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const content = JSON.parse((result.content[0] as any).text);
-    expect(content).toEqual(mockSavedAlbums);
-  });
-
-  it("should handle API errors", async () => {
-    const tool = createGetSavedAlbumsTool(mockClient);
-    const result = await tool.handler({ limit: 100 });
+    const result = await tool.handler({});
 
     expect(result.isError).toBe(true);
     expect(result.content[0].type).toBe("text");
-    expect((result.content[0] as any).text).toContain("Error:");
+    expect((result.content[0] as any).text).toBe(
+      "Error: Failed to get saved albums: API request failed",
+    );
+  });
+
+  describe("tool metadata", () => {
+    it("should have correct tool definition", () => {
+      const tool = createGetSavedAlbumsTool(mockClient);
+
+      expect(tool.name).toBe("get_saved_albums");
+      expect(tool.title).toBe("Get User's Saved Albums");
+      expect(tool.description).toBe(
+        "Get a list of the albums saved in the current Spotify user's library",
+      );
+      expect(tool.inputSchema).toBeDefined();
+      expect(tool.inputSchema.limit).toBeDefined();
+      expect(tool.inputSchema.offset).toBeDefined();
+      expect(tool.inputSchema.market).toBeDefined();
+    });
   });
 });

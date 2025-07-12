@@ -10,8 +10,7 @@ const getTrackAudioFeaturesSchema = {
 
 type GetTrackAudioFeaturesInput = z.infer<z.ZodObject<typeof getTrackAudioFeaturesSchema>>;
 
-// Export for testing
-export async function getTrackAudioFeatures(
+async function getTrackAudioFeatures(
   client: SpotifyApi,
   id: string,
 ): Promise<Result<AudioFeatures, string>> {
