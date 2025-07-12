@@ -8,6 +8,9 @@ export const SPOTIFY_SCOPES = [
   "user-library-modify",
   "user-top-read",
   "user-read-recently-played",
+  "user-read-playback-state",
+  "user-modify-playback-state",
+  "user-read-currently-playing",
 ] as const;
 
 export type SpotifyScope = (typeof SPOTIFY_SCOPES)[number];
