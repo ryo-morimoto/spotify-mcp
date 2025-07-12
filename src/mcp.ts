@@ -15,6 +15,7 @@ import { createRemoveSavedAlbumsTool } from "./mcp/tools/albums/remove.ts";
 import { createCheckSavedAlbumsTool } from "./mcp/tools/albums/check.ts";
 import { createGetArtistTool } from "./mcp/tools/artists/get.ts";
 import { createGetSeveralArtistsTool } from "./mcp/tools/artists/getSeveral.ts";
+import { createGetRelatedArtistsTool } from "./mcp/tools/artists/getRelated.ts";
 import { createGetPlaylistTool } from "./mcp/tools/playlists/get.ts";
 import { createGetAlbumTracksTool } from "./mcp/tools/albums/getTracks.ts";
 import { createGetArtistAlbumsTool } from "./mcp/tools/artists/getAlbums.ts";
@@ -47,6 +48,7 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const checkSavedAlbumsTool = createCheckSavedAlbumsTool(spotifyClient);
   const getArtistTool = createGetArtistTool(spotifyClient);
   const getSeveralArtistsTool = createGetSeveralArtistsTool(spotifyClient);
+  const getRelatedArtistsTool = createGetRelatedArtistsTool(spotifyClient);
   const getPlaylistTool = createGetPlaylistTool(spotifyClient);
   const getAlbumTracksTool = createGetAlbumTracksTool(spotifyClient);
   const getArtistAlbumsTool = createGetArtistAlbumsTool(spotifyClient);
@@ -206,6 +208,16 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: getSeveralArtistsTool.inputSchema,
     },
     getSeveralArtistsTool.handler,
+  );
+
+  server.registerTool(
+    getRelatedArtistsTool.name,
+    {
+      title: getRelatedArtistsTool.title,
+      description: getRelatedArtistsTool.description,
+      inputSchema: getRelatedArtistsTool.inputSchema,
+    },
+    getRelatedArtistsTool.handler,
   );
 
   server.registerTool(
