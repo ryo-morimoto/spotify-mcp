@@ -1,8 +1,10 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi, Market } from "@spotify/web-api-ts-sdk";
-import type { SpotifyTrackResult } from "../../types.ts";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { SpotifyTrackResult, ToolDefinition } from "../../types.ts";
+import { z } from "zod";
 
-export async function getSeveralTracks(
+async function getSeveralTracks(
   client: SpotifyApi,
   trackIds: string[],
   market?: string,
@@ -46,3 +48,47 @@ export async function getSeveralTracks(
     return err(`Failed to get tracks: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+
+const getSeveralTracksSchema = {
+  trackIds: z.array(z.string()).min(1).max(50).describe("Array of Spotify track IDs (maximum 50)"),
+  market: z
+    .string()
+    .regex(/^[A-Z]{2}$/)
+    .optional()
+    .describe("ISO 3166-1 alpha-2 country code (e.g., 'US', 'JP')"),
+} as const;
+
+type GetSeveralTracksInput = z.infer<z.ZodObject<typeof getSeveralTracksSchema>>;
+
+export const createGetSeveralTracksTool = (
+  spotifyClient: SpotifyApi,
+): ToolDefinition<typeof getSeveralTracksSchema> => ({
+  name: "get-several-tracks",
+  title: "Get Several Tracks",
+  description: "Get multiple tracks by their IDs from Spotify (maximum 50 tracks)",
+  inputSchema: getSeveralTracksSchema,
+  handler: async (input: GetSeveralTracksInput): Promise<CallToolResult> => {
+    const result = await getSeveralTracks(spotifyClient, input.trackIds, input.market);
+
+    if (result.isErr()) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${result.error}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(result.value, null, 2),
+        },
+      ],
+    };
+  },
+});

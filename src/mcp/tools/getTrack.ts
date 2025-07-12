@@ -1,7 +1,21 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi, Market } from "@spotify/web-api-ts-sdk";
-import type { SpotifyTrackResult } from "../../types.ts";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { SpotifyTrackResult, ToolDefinition } from "../../types.ts";
+import { z } from "zod";
 
+const getTrackSchema = {
+  trackId: z.string().describe("Spotify track ID"),
+  market: z
+    .string()
+    .regex(/^[A-Z]{2}$/)
+    .optional()
+    .describe("ISO 3166-1 alpha-2 country code (e.g., 'US', 'JP')"),
+} as const;
+
+type GetTrackInput = z.infer<z.ZodObject<typeof getTrackSchema>>;
+
+// Export for testing
 export async function getTrack(
   client: SpotifyApi,
   trackId: string,
@@ -35,3 +49,36 @@ export async function getTrack(
     return err(`Failed to get track: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+
+export const createGetTrackTool = (
+  spotifyClient: SpotifyApi,
+): ToolDefinition<typeof getTrackSchema> => ({
+  name: "get-track",
+  title: "Get Track",
+  description: "Get a single track by ID from Spotify",
+  inputSchema: getTrackSchema,
+  handler: async (input: GetTrackInput): Promise<CallToolResult> => {
+    const result = await getTrack(spotifyClient, input.trackId, input.market);
+
+    if (result.isErr()) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${result.error}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(result.value, null, 2),
+        },
+      ],
+    };
+  },
+});

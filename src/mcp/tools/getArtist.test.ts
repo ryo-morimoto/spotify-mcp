@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getArtist } from "./getArtist.ts";
+import { createGetArtistTool } from "./getArtist.ts";
 
 describe("getArtist", () => {
   const mockArtist = {
@@ -39,24 +39,26 @@ describe("getArtist", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtist(mockClient, "0OdUWJ0sBjDrqHygGUXeCF");
+    const tool = createGetArtistTool(mockClient);
+    const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      const artist = result.value;
-      expect(artist.id).toBe("0OdUWJ0sBjDrqHygGUXeCF");
-      expect(artist.name).toBe("Band of Horses");
-      expect(artist.genres).toEqual(["indie rock", "modern rock", "stomp and holler"]);
-      expect(artist.popularity).toBe(65);
-      expect(artist.followers).toBe(1234567);
-      expect(artist.external_url).toBe("https://open.spotify.com/artist/0OdUWJ0sBjDrqHygGUXeCF");
-      expect(artist.images).toHaveLength(2);
-      expect(artist.images[0]).toEqual({
-        url: "https://i.scdn.co/image/0a74c",
-        height: 640,
-        width: 640,
-      });
-    }
+    expect(result.isError).toBe(undefined);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+
+    const content = JSON.parse((result.content[0] as any).text);
+    expect(content.id).toBe("0OdUWJ0sBjDrqHygGUXeCF");
+    expect(content.name).toBe("Band of Horses");
+    expect(content.genres).toEqual(["indie rock", "modern rock", "stomp and holler"]);
+    expect(content.popularity).toBe(65);
+    expect(content.followers).toBe(1234567);
+    expect(content.external_url).toBe("https://open.spotify.com/artist/0OdUWJ0sBjDrqHygGUXeCF");
+    expect(content.images).toHaveLength(2);
+    expect(content.images[0]).toEqual({
+      url: "https://i.scdn.co/image/0a74c",
+      height: 640,
+      width: 640,
+    });
 
     expect(mockClient.artists.get).toHaveBeenCalledWith("0OdUWJ0sBjDrqHygGUXeCF");
   });
@@ -68,12 +70,13 @@ describe("getArtist", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtist(mockClient, "invalid-artist-id");
+    const tool = createGetArtistTool(mockClient);
+    const result = await tool.handler({ artistId: "invalid-artist-id" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get artist: Artist not found");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Failed to get artist: Artist not found");
   });
 
   it("should validate artist ID format", async () => {
@@ -83,12 +86,13 @@ describe("getArtist", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtist(mockClient, "");
+    const tool = createGetArtistTool(mockClient);
+    const result = await tool.handler({ artistId: "" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Artist ID must not be empty");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("text");
+    expect((result.content[0] as any).text).toBe("Error: Artist ID must not be empty");
     expect(mockClient.artists.get).not.toHaveBeenCalled();
   });
 
@@ -104,12 +108,12 @@ describe("getArtist", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtist(mockClient, "0OdUWJ0sBjDrqHygGUXeCF");
+    const tool = createGetArtistTool(mockClient);
+    const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.images).toEqual([]);
-    }
+    expect(result.isError).toBe(undefined);
+    const content = JSON.parse((result.content[0] as any).text);
+    expect(content.images).toEqual([]);
   });
 
   it("should handle artist with empty genres", async () => {
@@ -124,11 +128,21 @@ describe("getArtist", () => {
       },
     } as unknown as SpotifyApi;
 
-    const result = await getArtist(mockClient, "0OdUWJ0sBjDrqHygGUXeCF");
+    const tool = createGetArtistTool(mockClient);
+    const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.genres).toEqual([]);
-    }
+    expect(result.isError).toBe(undefined);
+    const content = JSON.parse((result.content[0] as any).text);
+    expect(content.genres).toEqual([]);
+  });
+
+  it("should have correct tool metadata", () => {
+    const mockClient = {} as SpotifyApi;
+    const tool = createGetArtistTool(mockClient);
+
+    expect(tool.name).toBe("get-artist");
+    expect(tool.title).toBe("Get Artist");
+    expect(tool.description).toBe("Get a single artist by ID from Spotify");
+    expect(tool.inputSchema).toHaveProperty("artistId");
   });
 });

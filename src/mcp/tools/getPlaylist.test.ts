@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { getPlaylist } from "./getPlaylist.ts";
+import { createGetPlaylistTool } from "./getPlaylist.ts";
+import { expectToolResult } from "../../../test/helpers/assertions.ts";
 
 describe("getPlaylist", () => {
   const mockPlaylist = {
@@ -44,120 +45,134 @@ describe("getPlaylist", () => {
     snapshot_id: "MTY5MDU2NzIwMCwwMDAwMDAwMGQ0MWQ4Y2Q5OGYwMGIyMDRlOTgwMDk5OGVjZjg0Mjdl",
   };
 
-  it("should return playlist when API call succeeds", async () => {
-    const mockClient = {
-      playlists: {
-        getPlaylist: vi.fn().mockResolvedValue(mockPlaylist),
-      },
-    } as unknown as SpotifyApi;
+  let mockSpotifyClient: SpotifyApi;
+  let getPlaylistTool: ReturnType<typeof createGetPlaylistTool>;
 
-    const result = await getPlaylist(mockClient, "37i9dQZF1DXcBWIGoYBM5M");
-
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      const playlist = result.value;
-      expect(playlist.id).toBe("37i9dQZF1DXcBWIGoYBM5M");
-      expect(playlist.name).toBe("Today's Top Hits");
-      expect(playlist.description).toBe("The most played tracks right now.");
-      expect(playlist.owner).toBe("Spotify");
-      expect(playlist.public).toBe(true);
-      expect(playlist.collaborative).toBe(false);
-      expect(playlist.total_tracks).toBe(50);
-      expect(playlist.external_url).toBe(
-        "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M",
-      );
-      expect(playlist.images).toHaveLength(1);
-      expect(playlist.images[0].url).toBe("https://i.scdn.co/image/ab67616d00001e02");
-      expect(playlist.images[0].height).toBe(300);
-      expect(playlist.images[0].width).toBe(300);
-    }
-
-    expect(mockClient.playlists.getPlaylist).toHaveBeenCalledWith("37i9dQZF1DXcBWIGoYBM5M");
-  });
-
-  it("should handle playlists with null public field", async () => {
-    const mockPlaylistWithNullPublic = {
-      ...mockPlaylist,
-      public: null,
-    };
-
-    const mockClient = {
-      playlists: {
-        getPlaylist: vi.fn().mockResolvedValue(mockPlaylistWithNullPublic),
-      },
-    } as unknown as SpotifyApi;
-
-    const result = await getPlaylist(mockClient, "37i9dQZF1DXcBWIGoYBM5M");
-
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.public).toBe(null);
-    }
-  });
-
-  it("should handle playlists with null description", async () => {
-    const mockPlaylistWithNullDescription = {
-      ...mockPlaylist,
-      description: null,
-    };
-
-    const mockClient = {
-      playlists: {
-        getPlaylist: vi.fn().mockResolvedValue(mockPlaylistWithNullDescription),
-      },
-    } as unknown as SpotifyApi;
-
-    const result = await getPlaylist(mockClient, "37i9dQZF1DXcBWIGoYBM5M");
-
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.description).toBe(null);
-    }
-  });
-
-  it("should return error when API call fails", async () => {
-    const mockClient = {
-      playlists: {
-        getPlaylist: vi.fn().mockRejectedValue(new Error("Playlist not found")),
-      },
-    } as unknown as SpotifyApi;
-
-    const result = await getPlaylist(mockClient, "invalid-playlist-id");
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get playlist: Playlist not found");
-    }
-  });
-
-  it("should validate playlist ID format", async () => {
-    const mockClient = {
+  beforeEach(() => {
+    mockSpotifyClient = {
       playlists: {
         getPlaylist: vi.fn(),
       },
     } as unknown as SpotifyApi;
 
-    const result = await getPlaylist(mockClient, "");
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Playlist ID must not be empty");
-    }
-    expect(mockClient.playlists.getPlaylist).not.toHaveBeenCalled();
+    getPlaylistTool = createGetPlaylistTool(mockSpotifyClient);
   });
 
-  it("should handle API errors without message", async () => {
-    const mockClient = {
-      playlists: {
-        getPlaylist: vi.fn().mockRejectedValue("Some error"),
-      },
-    } as unknown as SpotifyApi;
+  describe("createGetPlaylistTool", () => {
+    it("should create tool definition with correct properties", () => {
+      expect(getPlaylistTool.name).toBe("get-playlist");
+      expect(getPlaylistTool.title).toBe("Get Playlist");
+      expect(getPlaylistTool.description).toBe("Get a single playlist by ID from Spotify");
+      expect(getPlaylistTool.inputSchema).toBeDefined();
+      expect(getPlaylistTool.handler).toBeInstanceOf(Function);
+    });
+  });
 
-    const result = await getPlaylist(mockClient, "37i9dQZF1DXcBWIGoYBM5M");
+  describe("handler - success cases", () => {
+    it("should return playlist when API call succeeds", async () => {
+      vi.mocked(mockSpotifyClient.playlists.getPlaylist).mockResolvedValue(mockPlaylist as any);
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get playlist: Some error");
-    }
+      const result = await getPlaylistTool.handler({
+        playlistId: "37i9dQZF1DXcBWIGoYBM5M",
+      });
+
+      expect(result.isError).toBeUndefined();
+      expect(result.content).toBeDefined();
+      expect(result.content[0].type).toBe("text");
+      const parsedData = JSON.parse((result.content[0] as any).text);
+      expect(parsedData.id).toBe("37i9dQZF1DXcBWIGoYBM5M");
+      expect(parsedData.name).toBe("Today's Top Hits");
+      expect(parsedData.description).toBe("The most played tracks right now.");
+      expect(parsedData.owner).toBe("Spotify");
+      expect(parsedData.public).toBe(true);
+      expect(parsedData.collaborative).toBe(false);
+      expect(parsedData.total_tracks).toBe(50);
+      expect(parsedData.external_url).toBe(
+        "https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M",
+      );
+      expect(parsedData.images).toHaveLength(1);
+      expect(parsedData.images[0].url).toBe("https://i.scdn.co/image/ab67616d00001e02");
+      expect(parsedData.images[0].height).toBe(300);
+      expect(parsedData.images[0].width).toBe(300);
+
+      expect(mockSpotifyClient.playlists.getPlaylist).toHaveBeenCalledWith(
+        "37i9dQZF1DXcBWIGoYBM5M",
+      );
+    });
+
+    it("should handle playlists with null public field", async () => {
+      const mockPlaylistWithNullPublic = {
+        ...mockPlaylist,
+        public: null,
+      };
+
+      vi.mocked(mockSpotifyClient.playlists.getPlaylist).mockResolvedValue(
+        mockPlaylistWithNullPublic as any,
+      );
+
+      const result = await getPlaylistTool.handler({
+        playlistId: "37i9dQZF1DXcBWIGoYBM5M",
+      });
+
+      expect(result.isError).toBeUndefined();
+      const parsedData = JSON.parse((result.content[0] as any).text);
+      expect(parsedData.public).toBe(null);
+    });
+
+    it("should handle playlists with null description", async () => {
+      const mockPlaylistWithNullDescription = {
+        ...mockPlaylist,
+        description: null,
+      };
+
+      vi.mocked(mockSpotifyClient.playlists.getPlaylist).mockResolvedValue(
+        mockPlaylistWithNullDescription as any,
+      );
+
+      const result = await getPlaylistTool.handler({
+        playlistId: "37i9dQZF1DXcBWIGoYBM5M",
+      });
+
+      expect(result.isError).toBeUndefined();
+      const parsedData = JSON.parse((result.content[0] as any).text);
+      expect(parsedData.description).toBe(null);
+    });
+  });
+
+  describe("handler - error cases", () => {
+    it("should return error when API call fails", async () => {
+      const apiError = new Error("Invalid authentication token");
+      vi.mocked(mockSpotifyClient.playlists.getPlaylist).mockRejectedValue(apiError);
+
+      const result = await getPlaylistTool.handler({
+        playlistId: "37i9dQZF1DXcBWIGoYBM5M",
+      });
+
+      expect(result.isError).toBe(true);
+      expectToolResult(result).toHaveTextContent(
+        "Error: Failed to get playlist: Invalid authentication token",
+      );
+    });
+
+    it("should validate empty playlist ID", async () => {
+      const result = await getPlaylistTool.handler({
+        playlistId: "",
+      });
+
+      expect(result.isError).toBe(true);
+      expectToolResult(result).toHaveTextContent("Error: Playlist ID must not be empty");
+      expect(mockSpotifyClient.playlists.getPlaylist).not.toHaveBeenCalled();
+    });
+
+    it("should handle API errors without message", async () => {
+      vi.mocked(mockSpotifyClient.playlists.getPlaylist).mockRejectedValue("Some error");
+
+      const result = await getPlaylistTool.handler({
+        playlistId: "37i9dQZF1DXcBWIGoYBM5M",
+      });
+
+      expect(result.isError).toBe(true);
+      expectToolResult(result).toHaveTextContent("Error: Failed to get playlist: Some error");
+    });
   });
 });

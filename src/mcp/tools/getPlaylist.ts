@@ -1,8 +1,10 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import type { SpotifyPlaylistResult } from "../../types.ts";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { SpotifyPlaylistResult, ToolDefinition } from "../../types.ts";
+import { z } from "zod";
 
-export async function getPlaylist(
+async function getPlaylist(
   client: SpotifyApi,
   playlistId: string,
 ): Promise<Result<SpotifyPlaylistResult, string>> {
@@ -32,3 +34,42 @@ export async function getPlaylist(
     return err(`Failed to get playlist: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
+
+const getPlaylistSchema = {
+  playlistId: z.string().describe("Spotify playlist ID"),
+} as const;
+
+type GetPlaylistInput = z.infer<z.ZodObject<typeof getPlaylistSchema>>;
+
+export const createGetPlaylistTool = (
+  spotifyClient: SpotifyApi,
+): ToolDefinition<typeof getPlaylistSchema> => ({
+  name: "get-playlist",
+  title: "Get Playlist",
+  description: "Get a single playlist by ID from Spotify",
+  inputSchema: getPlaylistSchema,
+  handler: async (input: GetPlaylistInput): Promise<CallToolResult> => {
+    const result = await getPlaylist(spotifyClient, input.playlistId);
+
+    if (result.isErr()) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${result.error}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(result.value, null, 2),
+        },
+      ],
+    };
+  },
+});

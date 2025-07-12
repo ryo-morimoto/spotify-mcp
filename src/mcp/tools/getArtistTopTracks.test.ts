@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
-import { getArtistTopTracks } from "./getArtistTopTracks.ts";
+import { z } from "zod";
+import { createGetArtistTopTracksTool } from "./getArtistTopTracks.ts";
 
 describe("getArtistTopTracks", () => {
   let mockClient: SpotifyApi;
+  let tool: ReturnType<typeof createGetArtistTopTracksTool>;
 
   beforeEach(() => {
     mockClient = {
@@ -11,6 +13,7 @@ describe("getArtistTopTracks", () => {
         topTracks: vi.fn(),
       },
     } as unknown as SpotifyApi;
+    tool = createGetArtistTopTracksTool(mockClient);
   });
 
   it("should get artist's top tracks successfully", async () => {
@@ -55,60 +58,51 @@ describe("getArtistTopTracks", () => {
       tracks: mockTracks,
     });
 
-    const result = await getArtistTopTracks(mockClient, "artist1", "US");
+    const result = await tool.handler({ artistId: "artist1", market: "US" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toHaveLength(2);
-      expect(result.value[0].id).toBe("track1");
-      expect(result.value[0].name).toBe("Popular Song 1");
-      expect(result.value[0].popularity).toBe(85);
-      expect(result.value[1].id).toBe("track2");
-      expect(result.value[1].name).toBe("Popular Song 2");
-      expect(result.value[1].popularity).toBe(80);
-    }
+    expect(result.isError).toBeUndefined();
+    const content = JSON.parse(result.content[0].text as string);
+    expect(content).toHaveLength(2);
+    expect(content[0].id).toBe("track1");
+    expect(content[0].name).toBe("Popular Song 1");
+    expect(content[0].popularity).toBe(85);
+    expect(content[1].id).toBe("track2");
+    expect(content[1].name).toBe("Popular Song 2");
+    expect(content[1].popularity).toBe(80);
     expect(mockClient.artists.topTracks).toHaveBeenCalledWith("artist1", "US");
   });
 
   it("should return error for empty artist ID", async () => {
-    const result = await getArtistTopTracks(mockClient, "", "US");
+    const result = await tool.handler({ artistId: "", market: "US" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Artist ID must not be empty");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toBe("Error: Artist ID must not be empty");
     expect(mockClient.artists.topTracks).not.toHaveBeenCalled();
   });
 
   it("should return error for invalid market code", async () => {
-    const result = await getArtistTopTracks(mockClient, "artist1", "USA");
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Market must be a valid ISO 3166-1 alpha-2 country code");
-    }
-    expect(mockClient.artists.topTracks).not.toHaveBeenCalled();
+    // This should be caught by zod validation, not the internal function
+    expect(() => {
+      const schema = z.object(tool.inputSchema);
+      schema.parse({ artistId: "artist1", market: "USA" });
+    }).toThrow();
   });
 
   it("should return error for missing market parameter", async () => {
-    const result = await getArtistTopTracks(mockClient, "artist1");
-
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Market parameter is required for top tracks");
-    }
-    expect(mockClient.artists.topTracks).not.toHaveBeenCalled();
+    // This should be caught by zod validation
+    expect(() => {
+      const schema = z.object(tool.inputSchema);
+      schema.parse({ artistId: "artist1" });
+    }).toThrow();
   });
 
   it("should handle API errors", async () => {
     vi.mocked(mockClient.artists.topTracks).mockRejectedValue(new Error("API Error"));
 
-    const result = await getArtistTopTracks(mockClient, "artist1", "US");
+    const result = await tool.handler({ artistId: "artist1", market: "US" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get artist's top tracks: API Error");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toBe("Error: Failed to get artist's top tracks: API Error");
   });
 
   it("should format duration correctly", async () => {
@@ -134,12 +128,11 @@ describe("getArtistTopTracks", () => {
       tracks: [mockTrack],
     });
 
-    const result = await getArtistTopTracks(mockClient, "artist1", "US");
+    const result = await tool.handler({ artistId: "artist1", market: "US" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value[0].duration).toBe("3:15");
-    }
+    expect(result.isError).toBeUndefined();
+    const content = JSON.parse(result.content[0].text as string);
+    expect(content[0].duration).toBe("3:15");
   });
 
   it("should handle tracks with multiple artists", async () => {
@@ -169,12 +162,11 @@ describe("getArtistTopTracks", () => {
       tracks: [mockTrack],
     });
 
-    const result = await getArtistTopTracks(mockClient, "artist1", "US");
+    const result = await tool.handler({ artistId: "artist1", market: "US" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value[0].artists).toBe("Artist 1, Artist 2, Artist 3");
-    }
+    expect(result.isError).toBeUndefined();
+    const content = JSON.parse(result.content[0].text as string);
+    expect(content[0].artists).toBe("Artist 1, Artist 2, Artist 3");
   });
 
   it("should handle empty response", async () => {
@@ -182,11 +174,65 @@ describe("getArtistTopTracks", () => {
       tracks: [],
     });
 
-    const result = await getArtistTopTracks(mockClient, "artist1", "US");
+    const result = await tool.handler({ artistId: "artist1", market: "US" });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toHaveLength(0);
-    }
+    expect(result.isError).toBeUndefined();
+    const content = JSON.parse(result.content[0].text as string);
+    expect(content).toHaveLength(0);
+  });
+});
+
+describe("createGetArtistTopTracksTool", () => {
+  const mockSpotifyClient = {} as any;
+  const tool = createGetArtistTopTracksTool(mockSpotifyClient);
+
+  it("should create tool with correct metadata", () => {
+    expect(tool.name).toBe("get-artist-top-tracks");
+    expect(tool.title).toBe("Get Artist's Top Tracks");
+    expect(tool.description).toBe("Get the top tracks of an artist on Spotify by country");
+  });
+
+  it("should have correct input schema", () => {
+    const schema = z.object(tool.inputSchema);
+
+    // Valid input
+    const validInput = {
+      artistId: "artist123",
+      market: "US",
+    };
+    expect(() => schema.parse(validInput)).not.toThrow();
+
+    // Invalid: missing artistId
+    const invalidMissingArtist = {
+      market: "US",
+    };
+    expect(() => schema.parse(invalidMissingArtist)).toThrow();
+
+    // Invalid: missing market (required for this endpoint)
+    const invalidMissingMarket = {
+      artistId: "artist123",
+    };
+    expect(() => schema.parse(invalidMissingMarket)).toThrow();
+
+    // Invalid: invalid market code (3 letters)
+    const invalidMarketThreeLetters = {
+      artistId: "artist123",
+      market: "USA",
+    };
+    expect(() => schema.parse(invalidMarketThreeLetters)).toThrow();
+
+    // Invalid: lowercase market code
+    const invalidLowercaseMarket = {
+      artistId: "artist123",
+      market: "us",
+    };
+    expect(() => schema.parse(invalidLowercaseMarket)).toThrow();
+
+    // Invalid: numeric market code
+    const invalidNumericMarket = {
+      artistId: "artist123",
+      market: "12",
+    };
+    expect(() => schema.parse(invalidNumericMarket)).toThrow();
   });
 });

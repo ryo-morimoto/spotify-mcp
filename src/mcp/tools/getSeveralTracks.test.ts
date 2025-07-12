@@ -1,9 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
-import { getSeveralTracks } from "./getSeveralTracks.ts";
+import { z } from "zod";
+import { createGetSeveralTracksTool } from "./getSeveralTracks.ts";
 
 describe("getSeveralTracks", () => {
   let mockClient: SpotifyApi;
+  let getSeveralTracksTool: ReturnType<typeof createGetSeveralTracksTool>;
 
   beforeEach(() => {
     mockClient = {
@@ -11,6 +13,7 @@ describe("getSeveralTracks", () => {
         get: vi.fn(),
       },
     } as unknown as SpotifyApi;
+    getSeveralTracksTool = createGetSeveralTracksTool(mockClient);
   });
 
   it("should get multiple tracks successfully", async () => {
@@ -55,21 +58,20 @@ describe("getSeveralTracks", () => {
 
     vi.mocked(mockClient.tracks.get).mockResolvedValue(mockTracks);
 
-    const result = await getSeveralTracks(mockClient, ["track1", "track2"]);
+    const result = await getSeveralTracksTool.handler({ trackIds: ["track1", "track2"] });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toHaveLength(2);
-      expect(result.value[0].id).toBe("track1");
-      expect(result.value[0].name).toBe("Song One");
-      expect(result.value[0].artists).toBe("Artist 1");
-      expect(result.value[0].album).toBe("Album 1");
-      expect(result.value[0].duration_ms).toBe(240000);
-      expect(result.value[0].preview_url).toBe("https://preview1.mp3");
-      expect(result.value[1].id).toBe("track2");
-      expect(result.value[1].name).toBe("Song Two");
-      expect(result.value[1].preview_url).toBe(null);
-    }
+    expect(result.isError).not.toBe(true);
+    const content = JSON.parse(result.content[0].text as string);
+    expect(content).toHaveLength(2);
+    expect(content[0].id).toBe("track1");
+    expect(content[0].name).toBe("Song One");
+    expect(content[0].artists).toBe("Artist 1");
+    expect(content[0].album).toBe("Album 1");
+    expect(content[0].duration_ms).toBe(240000);
+    expect(content[0].preview_url).toBe("https://preview1.mp3");
+    expect(content[1].id).toBe("track2");
+    expect(content[1].name).toBe("Song Two");
+    expect(content[1].preview_url).toBe(null);
     expect(mockClient.tracks.get).toHaveBeenCalledWith(["track1", "track2"], undefined);
   });
 
@@ -95,62 +97,54 @@ describe("getSeveralTracks", () => {
 
     vi.mocked(mockClient.tracks.get).mockResolvedValue([mockTrack]);
 
-    const result = await getSeveralTracks(mockClient, ["track1"], "US");
+    const result = await getSeveralTracksTool.handler({ trackIds: ["track1"], market: "US" });
 
-    expect(result.isOk()).toBe(true);
+    expect(result.isError).not.toBe(true);
     expect(mockClient.tracks.get).toHaveBeenCalledWith(["track1"], "US");
   });
 
   it("should return error for empty track IDs array", async () => {
-    const result = await getSeveralTracks(mockClient, []);
+    const result = await getSeveralTracksTool.handler({ trackIds: [] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Track IDs must not be empty");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toBe("Error: Track IDs must not be empty");
     expect(mockClient.tracks.get).not.toHaveBeenCalled();
   });
 
   it("should return error for too many track IDs", async () => {
     const tooManyIds = Array.from({ length: 51 }, (_, i) => `track${i}`);
-    const result = await getSeveralTracks(mockClient, tooManyIds);
+    const result = await getSeveralTracksTool.handler({ trackIds: tooManyIds });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Maximum 50 track IDs allowed");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toBe("Error: Maximum 50 track IDs allowed");
     expect(mockClient.tracks.get).not.toHaveBeenCalled();
   });
 
   it("should return error for invalid track ID", async () => {
-    const result = await getSeveralTracks(mockClient, ["valid", "", "also_valid"]);
+    const result = await getSeveralTracksTool.handler({ trackIds: ["valid", "", "also_valid"] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("All track IDs must be non-empty strings");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toBe("Error: All track IDs must be non-empty strings");
     expect(mockClient.tracks.get).not.toHaveBeenCalled();
   });
 
   it("should return error for invalid market code", async () => {
-    const result = await getSeveralTracks(mockClient, ["track1"], "USA");
+    const result = await getSeveralTracksTool.handler({ trackIds: ["track1"], market: "USA" });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Market must be a valid ISO 3166-1 alpha-2 country code");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toBe(
+      "Error: Market must be a valid ISO 3166-1 alpha-2 country code",
+    );
     expect(mockClient.tracks.get).not.toHaveBeenCalled();
   });
 
   it("should handle API errors", async () => {
     vi.mocked(mockClient.tracks.get).mockRejectedValue(new Error("API Error"));
 
-    const result = await getSeveralTracks(mockClient, ["track1"]);
+    const result = await getSeveralTracksTool.handler({ trackIds: ["track1"] });
 
-    expect(result.isErr()).toBe(true);
-    if (result.isErr()) {
-      expect(result.error).toBe("Failed to get tracks: API Error");
-    }
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toBe("Error: Failed to get tracks: API Error");
   });
 
   it("should handle tracks with multiple artists", async () => {
@@ -179,22 +173,76 @@ describe("getSeveralTracks", () => {
 
     vi.mocked(mockClient.tracks.get).mockResolvedValue([mockTrack]);
 
-    const result = await getSeveralTracks(mockClient, ["track1"]);
+    const result = await getSeveralTracksTool.handler({ trackIds: ["track1"] });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value[0].artists).toBe("Artist 1, Artist 2, Artist 3");
-    }
+    expect(result.isError).not.toBe(true);
+    const content = JSON.parse(result.content[0].text as string);
+    expect(content[0].artists).toBe("Artist 1, Artist 2, Artist 3");
   });
 
   it("should handle empty response", async () => {
     vi.mocked(mockClient.tracks.get).mockResolvedValue([]);
 
-    const result = await getSeveralTracks(mockClient, ["track1"]);
+    const result = await getSeveralTracksTool.handler({ trackIds: ["track1"] });
 
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value).toHaveLength(0);
-    }
+    expect(result.isError).not.toBe(true);
+    const content = JSON.parse(result.content[0].text as string);
+    expect(content).toHaveLength(0);
+  });
+});
+
+describe("createGetSeveralTracksTool", () => {
+  const mockSpotifyClient = {} as any;
+  const tool = createGetSeveralTracksTool(mockSpotifyClient);
+
+  it("should create tool with correct metadata", () => {
+    expect(tool.name).toBe("get-several-tracks");
+    expect(tool.title).toBe("Get Several Tracks");
+    expect(tool.description).toBe(
+      "Get multiple tracks by their IDs from Spotify (maximum 50 tracks)",
+    );
+  });
+
+  it("should have correct input schema", () => {
+    const schema = z.object(tool.inputSchema);
+
+    // Valid input
+    const validInput = {
+      trackIds: ["track1", "track2"],
+      market: "US",
+    };
+    expect(() => schema.parse(validInput)).not.toThrow();
+
+    // Valid input without market
+    const validInputNoMarket = {
+      trackIds: ["track1"],
+    };
+    expect(() => schema.parse(validInputNoMarket)).not.toThrow();
+
+    // Invalid: empty array
+    const invalidEmptyArray = {
+      trackIds: [],
+    };
+    expect(() => schema.parse(invalidEmptyArray)).toThrow();
+
+    // Invalid: too many IDs
+    const invalidTooMany = {
+      trackIds: Array.from({ length: 51 }, (_, i) => `track${i}`),
+    };
+    expect(() => schema.parse(invalidTooMany)).toThrow();
+
+    // Invalid: invalid market code
+    const invalidMarket = {
+      trackIds: ["track1"],
+      market: "USA",
+    };
+    expect(() => schema.parse(invalidMarket)).toThrow();
+
+    // Invalid: lowercase market code
+    const invalidLowercaseMarket = {
+      trackIds: ["track1"],
+      market: "us",
+    };
+    expect(() => schema.parse(invalidLowercaseMarket)).toThrow();
   });
 });
