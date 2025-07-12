@@ -12,6 +12,7 @@ import type {
 } from "./types.ts";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { SPOTIFY_SCOPES } from "./constants.ts";
+import { ensurePredefinedClients } from "./oauth/predefinedClients.ts";
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -28,6 +29,12 @@ app.use("*", async (c, next) => {
   return corsMiddleware(c, next);
 });
 
+// Initialize predefined clients on first request
+app.use("/auth/*", async (c, next) => {
+  await ensurePredefinedClients(c.env.OAUTH_KV);
+  return next();
+});
+
 // Mount auth endpoints
 app.route("/auth", authHandler);
 
@@ -37,11 +44,11 @@ app.get("/.well-known/oauth-authorization-server", async (c) => {
 
   return c.json({
     issuer: baseUrl,
+    response_types_supported: ["code"], // REQUIRED field per RFC 8414
     authorization_endpoint: `${baseUrl}/auth/authorize`,
     token_endpoint: `${baseUrl}/auth/token`,
     registration_endpoint: `${baseUrl}/auth/register`,
     scopes_supported: SPOTIFY_SCOPES,
-    response_types_supported: ["code"],
     grant_types_supported: ["authorization_code"],
     code_challenge_methods_supported: ["S256"],
     token_endpoint_auth_methods_supported: ["none"], // Public client with PKCE
