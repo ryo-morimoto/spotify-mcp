@@ -17,6 +17,9 @@ import { createGetSeveralAlbumsTool } from "./mcp/tools/albums/getSeveral.ts";
 import { createGetArtistTopTracksTool } from "./mcp/tools/artists/getTopTracks.ts";
 import { createGetSeveralTracksTool } from "./mcp/tools/tracks/getSeveral.ts";
 import { createGetSavedTracksTool } from "./mcp/tools/users/getSavedTracks.ts";
+import { createSaveTracksTool } from "./mcp/tools/users/saveTracks.ts";
+import { createRemoveSavedTracksTool } from "./mcp/tools/users/removeSavedTracks.ts";
+import { createCheckSavedTracksTool } from "./mcp/tools/users/checkSavedTracks.ts";
 
 export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const server = new McpServer({
@@ -41,6 +44,9 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const getArtistTopTracksTool = createGetArtistTopTracksTool(spotifyClient);
   const getSeveralTracksTool = createGetSeveralTracksTool(spotifyClient);
   const getSavedTracksTool = createGetSavedTracksTool(spotifyClient);
+  const saveTracksTool = createSaveTracksTool(spotifyClient);
+  const removeSavedTracksTool = createRemoveSavedTracksTool(spotifyClient);
+  const checkSavedTracksTool = createCheckSavedTracksTool(spotifyClient);
 
   server.registerTool(
     searchTracksTool.name,
@@ -210,6 +216,36 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: getSavedTracksTool.inputSchema,
     },
     getSavedTracksTool.handler,
+  );
+
+  server.registerTool(
+    saveTracksTool.name,
+    {
+      title: saveTracksTool.title,
+      description: saveTracksTool.description,
+      inputSchema: saveTracksTool.inputSchema,
+    },
+    saveTracksTool.handler,
+  );
+
+  server.registerTool(
+    removeSavedTracksTool.name,
+    {
+      title: removeSavedTracksTool.title,
+      description: removeSavedTracksTool.description,
+      inputSchema: removeSavedTracksTool.inputSchema,
+    },
+    removeSavedTracksTool.handler,
+  );
+
+  server.registerTool(
+    checkSavedTracksTool.name,
+    {
+      title: checkSavedTracksTool.title,
+      description: checkSavedTracksTool.description,
+      inputSchema: checkSavedTracksTool.inputSchema,
+    },
+    checkSavedTracksTool.handler,
   );
 
   return server;
