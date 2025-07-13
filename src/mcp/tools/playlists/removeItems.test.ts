@@ -26,7 +26,7 @@ describe("remove-playlist-items", () => {
     const response = JSON.parse((result.content[0] as any).text);
 
     expect(response).toEqual({
-      snapshot_id: "new-snapshot-123",
+      snapshot_id: "not-available-due-to-sdk-limitation",
       items_removed: 1,
     });
 

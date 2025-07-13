@@ -46,10 +46,18 @@ async function addItemsToPlaylist(
   }
 
   try {
-    const response = await client.playlists.addItemsToPlaylist(playlistId, uris, position);
+    // Note: The Spotify Web API TypeScript SDK currently does not return the snapshot_id
+    // from addItemsToPlaylist method, even though the underlying API does.
+    // This is a known issue tracked at:
+    // - Issue: https://github.com/spotify/spotify-web-api-ts-sdk/issues/122
+    // - PR (pending): https://github.com/spotify/spotify-web-api-ts-sdk/pull/123
+    //
+    // Until the PR is merged, the method returns undefined.
+    await client.playlists.addItemsToPlaylist(playlistId, uris, position);
 
+    // Return a placeholder response since the actual snapshot_id is not available
     return ok({
-      snapshot_id: (response as any).snapshot_id,
+      snapshot_id: "not-available-due-to-sdk-limitation",
       items_added: uris.length,
     });
   } catch (error) {

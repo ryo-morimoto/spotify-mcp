@@ -24,7 +24,7 @@ describe("add-items-to-playlist", () => {
     const response = JSON.parse((result.content[0] as any).text);
 
     expect(response).toEqual({
-      snapshot_id: "new-snapshot-123",
+      snapshot_id: "not-available-due-to-sdk-limitation",
       items_added: 1,
     });
 
@@ -52,7 +52,7 @@ describe("add-items-to-playlist", () => {
     const response = JSON.parse((result.content[0] as any).text);
 
     expect(response).toEqual({
-      snapshot_id: "new-snapshot-456",
+      snapshot_id: "not-available-due-to-sdk-limitation",
       items_added: 3,
     });
   });
@@ -70,7 +70,7 @@ describe("add-items-to-playlist", () => {
     expect(result.isError).not.toBe(true);
     const response = JSON.parse((result.content[0] as any).text);
 
-    expect(response.snapshot_id).toBe("new-snapshot-789");
+    expect(response.snapshot_id).toBe("not-available-due-to-sdk-limitation");
 
     expect(mockClient.playlists.addItemsToPlaylist).toHaveBeenCalledWith(
       "test-playlist-id",
