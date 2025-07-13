@@ -1,4 +1,4 @@
-name = "spotify-mcp-server"
+name = "spotify-mcp"
 main = "src/index.ts"
 compatibility_date = "2025-06-17"
 
