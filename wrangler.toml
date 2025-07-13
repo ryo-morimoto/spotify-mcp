@@ -2,6 +2,9 @@ name = "spotify-mcp-server"
 main = "src/index.ts"
 compatibility_date = "2025-06-17"
 
+[observability.logs]
+enabled = true
+
 [[kv_namespaces]]
 binding = "OAUTH_KV"
 id = "904d9fafb8374e308b9c7cc9f55f3a93"
