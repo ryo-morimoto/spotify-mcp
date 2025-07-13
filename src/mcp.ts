@@ -8,8 +8,6 @@ import { createSearchShowsTool } from "./mcp/tools/search/shows.ts";
 import { createSearchEpisodesTool } from "./mcp/tools/search/episodes.ts";
 import { createSearchAudiobooksTool } from "./mcp/tools/search/audiobooks.ts";
 import { createGetTrackTool } from "./mcp/tools/tracks/get.ts";
-import { createGetTrackAudioFeaturesTool } from "./mcp/tools/tracks/getAudioFeatures.ts";
-import { createGetSeveralTracksAudioFeaturesTool } from "./mcp/tools/tracks/getSeveralAudioFeatures.ts";
 import { createGetTrackAudioAnalysisTool } from "./mcp/tools/tracks/getAudioAnalysis.ts";
 import { createGetAlbumTool } from "./mcp/tools/albums/get.ts";
 import { createGetSavedAlbumsTool } from "./mcp/tools/albums/getSaved.ts";
@@ -71,8 +69,6 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const searchEpisodesTool = createSearchEpisodesTool(spotifyClient);
   const searchAudiobooksTool = createSearchAudiobooksTool(spotifyClient);
   const getTrackTool = createGetTrackTool(spotifyClient);
-  const getTrackAudioFeaturesTool = createGetTrackAudioFeaturesTool(spotifyClient);
-  const getSeveralTracksAudioFeaturesTool = createGetSeveralTracksAudioFeaturesTool(spotifyClient);
   const getTrackAudioAnalysisTool = createGetTrackAudioAnalysisTool(spotifyClient);
   const getAlbumTool = createGetAlbumTool(spotifyClient);
   const getSavedAlbumsTool = createGetSavedAlbumsTool(spotifyClient);
@@ -198,26 +194,6 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: getTrackTool.inputSchema,
     },
     getTrackTool.handler,
-  );
-
-  server.registerTool(
-    getTrackAudioFeaturesTool.name,
-    {
-      title: getTrackAudioFeaturesTool.title,
-      description: getTrackAudioFeaturesTool.description,
-      inputSchema: getTrackAudioFeaturesTool.inputSchema,
-    },
-    getTrackAudioFeaturesTool.handler,
-  );
-
-  server.registerTool(
-    getSeveralTracksAudioFeaturesTool.name,
-    {
-      title: getSeveralTracksAudioFeaturesTool.title,
-      description: getSeveralTracksAudioFeaturesTool.description,
-      inputSchema: getSeveralTracksAudioFeaturesTool.inputSchema,
-    },
-    getSeveralTracksAudioFeaturesTool.handler,
   );
 
   server.registerTool(
