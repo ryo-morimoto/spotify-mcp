@@ -31,6 +31,7 @@ import { createGetUserPlaylistsTool } from "./mcp/tools/playlists/getUser.ts";
 import { createGetFeaturedPlaylistsTool } from "./mcp/tools/playlists/getFeatured.ts";
 import { createGetCategoryPlaylistsTool } from "./mcp/tools/playlists/getCategory.ts";
 import { createGetPlaylistCoverImageTool } from "./mcp/tools/playlists/getCoverImage.ts";
+import { createAddPlaylistCoverImageTool } from "./mcp/tools/playlists/addCoverImage.ts";
 import { createGetAlbumTracksTool } from "./mcp/tools/albums/getTracks.ts";
 import { createGetArtistAlbumsTool } from "./mcp/tools/artists/getAlbums.ts";
 import { createGetSeveralAlbumsTool } from "./mcp/tools/albums/getSeveral.ts";
@@ -93,6 +94,7 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const getFeaturedPlaylistsTool = createGetFeaturedPlaylistsTool(spotifyClient);
   const getCategoryPlaylistsTool = createGetCategoryPlaylistsTool(spotifyClient);
   const getPlaylistCoverImageTool = createGetPlaylistCoverImageTool(spotifyClient);
+  const addPlaylistCoverImageTool = createAddPlaylistCoverImageTool(spotifyClient);
   const getAlbumTracksTool = createGetAlbumTracksTool(spotifyClient);
   const getArtistAlbumsTool = createGetArtistAlbumsTool(spotifyClient);
   const getSeveralAlbumsTool = createGetSeveralAlbumsTool(spotifyClient);
@@ -426,6 +428,16 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: getPlaylistCoverImageTool.inputSchema,
     },
     getPlaylistCoverImageTool.handler,
+  );
+
+  server.registerTool(
+    addPlaylistCoverImageTool.name,
+    {
+      title: addPlaylistCoverImageTool.title,
+      description: addPlaylistCoverImageTool.description,
+      inputSchema: addPlaylistCoverImageTool.inputSchema,
+    },
+    addPlaylistCoverImageTool.handler,
   );
 
   server.registerTool(
