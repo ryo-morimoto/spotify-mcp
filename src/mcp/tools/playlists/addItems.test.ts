@@ -12,8 +12,7 @@ describe("add-items-to-playlist", () => {
   const addItemsToPlaylistTool = createAddItemsToPlaylistTool(mockClient);
 
   it("should add a single track to playlist", async () => {
-    const mockSnapshot = { snapshot_id: "new-snapshot-123" };
-    vi.mocked(mockClient.playlists.addItemsToPlaylist).mockResolvedValueOnce(mockSnapshot as any);
+    vi.mocked(mockClient.playlists.addItemsToPlaylist).mockResolvedValueOnce(undefined as any);
 
     const result = await addItemsToPlaylistTool.handler({
       playlistId: "test-playlist-id",
@@ -36,8 +35,7 @@ describe("add-items-to-playlist", () => {
   });
 
   it("should add multiple tracks to playlist", async () => {
-    const mockSnapshot = { snapshot_id: "new-snapshot-456" };
-    vi.mocked(mockClient.playlists.addItemsToPlaylist).mockResolvedValueOnce(mockSnapshot as any);
+    vi.mocked(mockClient.playlists.addItemsToPlaylist).mockResolvedValueOnce(undefined as any);
 
     const result = await addItemsToPlaylistTool.handler({
       playlistId: "test-playlist-id",
@@ -58,8 +56,7 @@ describe("add-items-to-playlist", () => {
   });
 
   it("should add items at specific position", async () => {
-    const mockSnapshot = { snapshot_id: "new-snapshot-789" };
-    vi.mocked(mockClient.playlists.addItemsToPlaylist).mockResolvedValueOnce(mockSnapshot as any);
+    vi.mocked(mockClient.playlists.addItemsToPlaylist).mockResolvedValueOnce(undefined as any);
 
     const result = await addItemsToPlaylistTool.handler({
       playlistId: "test-playlist-id",

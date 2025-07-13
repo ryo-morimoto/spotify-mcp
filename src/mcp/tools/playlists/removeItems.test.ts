@@ -12,10 +12,7 @@ describe("remove-playlist-items", () => {
   const removePlaylistItemsTool = createRemovePlaylistItemsTool(mockClient);
 
   it("should remove a single track from playlist", async () => {
-    const mockSnapshot = { snapshot_id: "new-snapshot-123" };
-    vi.mocked(mockClient.playlists.removeItemsFromPlaylist).mockResolvedValueOnce(
-      mockSnapshot as any,
-    );
+    vi.mocked(mockClient.playlists.removeItemsFromPlaylist).mockResolvedValueOnce(undefined as any);
 
     const result = await removePlaylistItemsTool.handler({
       playlistId: "test-playlist-id",
@@ -37,10 +34,7 @@ describe("remove-playlist-items", () => {
   });
 
   it("should remove multiple tracks from playlist", async () => {
-    const mockSnapshot = { snapshot_id: "new-snapshot-456" };
-    vi.mocked(mockClient.playlists.removeItemsFromPlaylist).mockResolvedValueOnce(
-      mockSnapshot as any,
-    );
+    vi.mocked(mockClient.playlists.removeItemsFromPlaylist).mockResolvedValueOnce(undefined as any);
 
     const result = await removePlaylistItemsTool.handler({
       playlistId: "test-playlist-id",
@@ -67,10 +61,7 @@ describe("remove-playlist-items", () => {
   });
 
   it("should remove specific occurrences with positions", async () => {
-    const mockSnapshot = { snapshot_id: "new-snapshot-789" };
-    vi.mocked(mockClient.playlists.removeItemsFromPlaylist).mockResolvedValueOnce(
-      mockSnapshot as any,
-    );
+    vi.mocked(mockClient.playlists.removeItemsFromPlaylist).mockResolvedValueOnce(undefined as any);
 
     const result = await removePlaylistItemsTool.handler({
       playlistId: "test-playlist-id",
@@ -95,10 +86,7 @@ describe("remove-playlist-items", () => {
   });
 
   it("should use snapshot ID for concurrent safety", async () => {
-    const mockSnapshot = { snapshot_id: "new-snapshot-999" };
-    vi.mocked(mockClient.playlists.removeItemsFromPlaylist).mockResolvedValueOnce(
-      mockSnapshot as any,
-    );
+    vi.mocked(mockClient.playlists.removeItemsFromPlaylist).mockResolvedValueOnce(undefined as any);
 
     const result = await removePlaylistItemsTool.handler({
       playlistId: "test-playlist-id",
