@@ -29,6 +29,7 @@ import { createRemovePlaylistItemsTool } from "./mcp/tools/playlists/removeItems
 import { createGetCurrentUserPlaylistsTool } from "./mcp/tools/playlists/getCurrentUser.ts";
 import { createGetUserPlaylistsTool } from "./mcp/tools/playlists/getUser.ts";
 import { createGetFeaturedPlaylistsTool } from "./mcp/tools/playlists/getFeatured.ts";
+import { createGetCategoryPlaylistsTool } from "./mcp/tools/playlists/getCategory.ts";
 import { createGetAlbumTracksTool } from "./mcp/tools/albums/getTracks.ts";
 import { createGetArtistAlbumsTool } from "./mcp/tools/artists/getAlbums.ts";
 import { createGetSeveralAlbumsTool } from "./mcp/tools/albums/getSeveral.ts";
@@ -89,6 +90,7 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const getCurrentUserPlaylistsTool = createGetCurrentUserPlaylistsTool(spotifyClient);
   const getUserPlaylistsTool = createGetUserPlaylistsTool(spotifyClient);
   const getFeaturedPlaylistsTool = createGetFeaturedPlaylistsTool(spotifyClient);
+  const getCategoryPlaylistsTool = createGetCategoryPlaylistsTool(spotifyClient);
   const getAlbumTracksTool = createGetAlbumTracksTool(spotifyClient);
   const getArtistAlbumsTool = createGetArtistAlbumsTool(spotifyClient);
   const getSeveralAlbumsTool = createGetSeveralAlbumsTool(spotifyClient);
@@ -402,6 +404,16 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: getFeaturedPlaylistsTool.inputSchema,
     },
     getFeaturedPlaylistsTool.handler,
+  );
+
+  server.registerTool(
+    getCategoryPlaylistsTool.name,
+    {
+      title: getCategoryPlaylistsTool.title,
+      description: getCategoryPlaylistsTool.description,
+      inputSchema: getCategoryPlaylistsTool.inputSchema,
+    },
+    getCategoryPlaylistsTool.handler,
   );
 
   server.registerTool(
