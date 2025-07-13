@@ -1,0 +1,108 @@
+import { Result, ok, err } from "neverthrow";
+import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import type { ToolDefinition } from "../../../types.ts";
+import { z } from "zod";
+
+type AddItemsResult = {
+  snapshot_id: string;
+  items_added: number;
+};
+
+async function addItemsToPlaylist(
+  client: SpotifyApi,
+  playlistId: string,
+  uris: string[],
+  position?: number,
+): Promise<Result<AddItemsResult, string>> {
+  // Validate playlist ID
+  if (!playlistId.trim()) {
+    return err("Playlist ID must not be empty");
+  }
+
+  // Validate URIs
+  if (uris.length === 0) {
+    return err("At least one URI must be provided");
+  }
+
+  if (uris.length > 100) {
+    return err("Cannot add more than 100 items at once");
+  }
+
+  // Validate URI format and type
+  const uriPattern = /^spotify:(track|episode):[a-zA-Z0-9]+$/;
+  for (const uri of uris) {
+    if (!uriPattern.test(uri)) {
+      if (uri.includes("spotify:album:")) {
+        return err("Only track and episode URIs are supported");
+      }
+      return err(`Invalid URI format: ${uri}`);
+    }
+  }
+
+  // Validate position
+  if (position !== undefined && position < 0) {
+    return err("Position must be a non-negative number");
+  }
+
+  try {
+    const response = await client.playlists.addItemsToPlaylist(playlistId, uris, position);
+
+    return ok({
+      snapshot_id: (response as any).snapshot_id,
+      items_added: uris.length,
+    });
+  } catch (error) {
+    return err(
+      `Failed to add items to playlist: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+const addItemsToPlaylistSchema = {
+  playlistId: z.string().describe("The Spotify ID of the playlist"),
+  uris: z
+    .array(z.string())
+    .describe("An array of Spotify URIs (tracks or episodes) to add to the playlist"),
+  position: z.number().optional().describe("The position to insert the items, a zero-based index"),
+} as const;
+
+type AddItemsToPlaylistInput = z.infer<z.ZodObject<typeof addItemsToPlaylistSchema>>;
+
+export const createAddItemsToPlaylistTool = (
+  spotifyClient: SpotifyApi,
+): ToolDefinition<typeof addItemsToPlaylistSchema> => ({
+  name: "add_items_to_playlist",
+  title: "Add Items to Playlist",
+  description: "Add one or more items (tracks or episodes) to a user's playlist",
+  inputSchema: addItemsToPlaylistSchema,
+  handler: async (input: AddItemsToPlaylistInput): Promise<CallToolResult> => {
+    const result = await addItemsToPlaylist(
+      spotifyClient,
+      input.playlistId,
+      input.uris,
+      input.position,
+    );
+
+    if (result.isErr()) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${result.error}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(result.value, null, 2),
+        },
+      ],
+    };
+  },
+});

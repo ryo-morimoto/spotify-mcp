@@ -22,6 +22,11 @@ import { createGetRelatedArtistsTool } from "./mcp/tools/artists/getRelated.ts";
 import { createGetPlaylistTool } from "./mcp/tools/playlists/get.ts";
 import { createGetPlaylistItemsTool } from "./mcp/tools/playlists/getItems.ts";
 import { createCreatePlaylistTool } from "./mcp/tools/playlists/create.ts";
+import { createChangePlaylistDetailsTool } from "./mcp/tools/playlists/changeDetails.ts";
+import { createAddItemsToPlaylistTool } from "./mcp/tools/playlists/addItems.ts";
+import { createUpdatePlaylistItemsTool } from "./mcp/tools/playlists/updateItems.ts";
+import { createRemovePlaylistItemsTool } from "./mcp/tools/playlists/removeItems.ts";
+import { createGetCurrentUserPlaylistsTool } from "./mcp/tools/playlists/getCurrentUser.ts";
 import { createGetAlbumTracksTool } from "./mcp/tools/albums/getTracks.ts";
 import { createGetArtistAlbumsTool } from "./mcp/tools/artists/getAlbums.ts";
 import { createGetSeveralAlbumsTool } from "./mcp/tools/albums/getSeveral.ts";
@@ -75,6 +80,11 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const getPlaylistTool = createGetPlaylistTool(spotifyClient);
   const getPlaylistItemsTool = createGetPlaylistItemsTool(spotifyClient);
   const createPlaylistTool = createCreatePlaylistTool(spotifyClient);
+  const changePlaylistDetailsTool = createChangePlaylistDetailsTool(spotifyClient);
+  const addItemsToPlaylistTool = createAddItemsToPlaylistTool(spotifyClient);
+  const updatePlaylistItemsTool = createUpdatePlaylistItemsTool(spotifyClient);
+  const removePlaylistItemsTool = createRemovePlaylistItemsTool(spotifyClient);
+  const getCurrentUserPlaylistsTool = createGetCurrentUserPlaylistsTool(spotifyClient);
   const getAlbumTracksTool = createGetAlbumTracksTool(spotifyClient);
   const getArtistAlbumsTool = createGetArtistAlbumsTool(spotifyClient);
   const getSeveralAlbumsTool = createGetSeveralAlbumsTool(spotifyClient);
@@ -318,6 +328,56 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
       inputSchema: createPlaylistTool.inputSchema,
     },
     createPlaylistTool.handler,
+  );
+
+  server.registerTool(
+    changePlaylistDetailsTool.name,
+    {
+      title: changePlaylistDetailsTool.title,
+      description: changePlaylistDetailsTool.description,
+      inputSchema: changePlaylistDetailsTool.inputSchema,
+    },
+    changePlaylistDetailsTool.handler,
+  );
+
+  server.registerTool(
+    addItemsToPlaylistTool.name,
+    {
+      title: addItemsToPlaylistTool.title,
+      description: addItemsToPlaylistTool.description,
+      inputSchema: addItemsToPlaylistTool.inputSchema,
+    },
+    addItemsToPlaylistTool.handler,
+  );
+
+  server.registerTool(
+    updatePlaylistItemsTool.name,
+    {
+      title: updatePlaylistItemsTool.title,
+      description: updatePlaylistItemsTool.description,
+      inputSchema: updatePlaylistItemsTool.inputSchema,
+    },
+    updatePlaylistItemsTool.handler,
+  );
+
+  server.registerTool(
+    removePlaylistItemsTool.name,
+    {
+      title: removePlaylistItemsTool.title,
+      description: removePlaylistItemsTool.description,
+      inputSchema: removePlaylistItemsTool.inputSchema,
+    },
+    removePlaylistItemsTool.handler,
+  );
+
+  server.registerTool(
+    getCurrentUserPlaylistsTool.name,
+    {
+      title: getCurrentUserPlaylistsTool.title,
+      description: getCurrentUserPlaylistsTool.description,
+      inputSchema: getCurrentUserPlaylistsTool.inputSchema,
+    },
+    getCurrentUserPlaylistsTool.handler,
   );
 
   server.registerTool(
