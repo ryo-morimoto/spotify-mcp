@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createSearchAlbumsTool } from "@mcp/tools/search/albums.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 
 describe("createSearchAlbumsTool", () => {
   it("should validate input schema correctly", () => {
@@ -45,9 +46,10 @@ describe("createSearchAlbumsTool", () => {
     expect(mockClient.search).toHaveBeenCalledWith("Dark Side of the Moon", ["album"], "JP", 10);
     expect(result.isError).toBeUndefined();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const parsedContent = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as EmbeddedResource;
+    const parsedContent = JSON.parse(resource.resource.text as string);
     expect(parsedContent).toHaveLength(1);
     expect(parsedContent[0].name).toBe("Dark Side of the Moon");
     expect(parsedContent[0].artists).toBe("Pink Floyd");

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createSearchEpisodesTool } from "@mcp/tools/search/episodes.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 
 describe("createSearchEpisodesTool", () => {
   it("should validate input schema correctly", () => {
@@ -45,9 +46,10 @@ describe("createSearchEpisodesTool", () => {
     expect(mockClient.search).toHaveBeenCalledWith("machine learning", ["episode"], "JP", 10);
     expect(result.isError).toBeUndefined();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const parsedContent = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as EmbeddedResource;
+    const parsedContent = JSON.parse(resource.resource.text as string);
     expect(parsedContent).toHaveLength(1);
     expect(parsedContent[0].name).toBe("Introduction to Machine Learning");
     expect(parsedContent[0].duration_ms).toBe(3600000);

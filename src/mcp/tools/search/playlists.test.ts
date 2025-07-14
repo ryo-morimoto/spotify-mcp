@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createSearchPlaylistsTool } from "@mcp/tools/search/playlists.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 
 describe("createSearchPlaylistsTool", () => {
   it("should validate input schema correctly", () => {
@@ -46,9 +47,10 @@ describe("createSearchPlaylistsTool", () => {
     expect(mockClient.search).toHaveBeenCalledWith("Lo-Fi Study", ["playlist"], "JP", 10);
     expect(result.isError).toBeUndefined();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const parsedContent = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as EmbeddedResource;
+    const parsedContent = JSON.parse(resource.resource.text as string);
     expect(parsedContent).toHaveLength(1);
     expect(parsedContent[0].name).toBe("Lo-Fi Study Beats");
     expect(parsedContent[0].owner).toBe("Spotify");
@@ -108,7 +110,8 @@ describe("createSearchPlaylistsTool", () => {
     const tool = createSearchPlaylistsTool(mockClient);
     const result = await tool.handler({ query: "Private", limit: 5 });
 
-    const parsedContent = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as EmbeddedResource;
+    const parsedContent = JSON.parse(resource.resource.text as string);
     expect(parsedContent[0].description).toBeNull();
     expect(parsedContent[0].public).toBeNull();
     expect(parsedContent[0].images).toEqual([]);

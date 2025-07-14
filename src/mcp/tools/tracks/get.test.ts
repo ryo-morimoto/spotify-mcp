@@ -65,8 +65,13 @@ describe("get_track tool", () => {
 
     expect(result.isError).toBeUndefined();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const content = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resourceContent = result.content[0] as any;
+    expect(resourceContent.resource.uri).toBe("spotify:track:3n3Ppam7vgaVa1iaRUc9Lp");
+    expect(resourceContent.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resourceContent.resource.text);
     expect(content.id).toBe("3n3Ppam7vgaVa1iaRUc9Lp");
     expect(content.name).toBe("Mr. Brightside");
     expect(content.artists).toBe("The Killers");

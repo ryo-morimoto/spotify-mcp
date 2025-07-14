@@ -2,6 +2,7 @@ import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { SpotifyAlbumResult, ToolDefinition } from "@types";
 import { z } from "zod";
+import { createResourceResponse, createResourceUri } from "../helpers/resourceHelpers.ts";
 
 const searchAlbumsSchema = {
   query: z.string().describe("Search query for albums"),
@@ -46,14 +47,8 @@ export const createSearchAlbumsTool = (
 
         const albums: SpotifyAlbumResult[] = results.albums.items.map(mapAlbumToResult);
 
-        return {
-          content: [
-            {
-              type: "text",
-              text: JSON.stringify(albums, null, 2),
-            },
-          ],
-        };
+        const uri = createResourceUri("search:albums", undefined, { q: input.query });
+        return createResourceResponse(uri, albums);
       } catch (error) {
         return {
           content: [

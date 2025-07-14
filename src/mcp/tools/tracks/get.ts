@@ -3,6 +3,7 @@ import type { SpotifyApi, Market } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { SpotifyTrackResult, ToolDefinition } from "@types";
 import { z } from "zod";
+import { createResourceResponse, createResourceUri } from "../helpers/resourceHelpers.ts";
 
 const getTrackSchema = {
   trackId: z.string().describe("Spotify track ID"),
@@ -71,13 +72,8 @@ export const createGetTrackTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const track = result.value;
+    const uri = createResourceUri("track", track.id);
+    return createResourceResponse(uri, track);
   },
 });

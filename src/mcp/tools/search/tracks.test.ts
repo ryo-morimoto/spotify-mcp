@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 import { createSearchTracksTool } from "@mcp/tools/search/tracks.ts";
 import { expectToolResult } from "../../../../test/helpers/assertions.ts";
 
@@ -135,7 +136,7 @@ describe("searchTracks", () => {
   });
 
   describe("handler - 正常系（参考）", () => {
-    it("正常に検索結果を返す", async () => {
+    it("正常に検索結果をEmbeddedResourceとして返す", async () => {
       // Arrange
       const mockSearchResponse = {
         tracks: {
@@ -163,8 +164,13 @@ describe("searchTracks", () => {
       // Assert
       expect(result.isError).toBeUndefined();
       expect(result.content).toBeDefined();
-      expect(result.content[0].type).toBe("text");
-      const parsedData = JSON.parse((result.content[0] as any).text);
+      expect(result.content[0].type).toBe("resource");
+
+      const resource = result.content[0] as EmbeddedResource;
+      expect(resource.resource.uri).toBe("spotify:search:tracks?q=test");
+      expect(resource.resource.mimeType).toBe("application/json");
+
+      const parsedData = JSON.parse(resource.resource.text as string);
       expect(parsedData[0].name).toBe("Test Track");
       expect(parsedData[0].artists).toBe("Test Artist");
       expect(parsedData[0].album).toBe("Test Album");

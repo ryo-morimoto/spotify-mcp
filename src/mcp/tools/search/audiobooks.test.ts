@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createSearchAudiobooksTool } from "@mcp/tools/search/audiobooks.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 
 describe("createSearchAudiobooksTool", () => {
   it("should validate input schema correctly", () => {
@@ -47,9 +48,10 @@ describe("createSearchAudiobooksTool", () => {
     expect(mockClient.search).toHaveBeenCalledWith("Harry Potter", ["audiobook"], "JP", 10);
     expect(result.isError).toBeUndefined();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const parsedContent = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as EmbeddedResource;
+    const parsedContent = JSON.parse(resource.resource.text as string);
     expect(parsedContent).toHaveLength(1);
     expect(parsedContent[0].name).toBe("Harry Potter and the Philosopher's Stone");
     expect(parsedContent[0].authors).toEqual(["J.K. Rowling"]);

@@ -2,6 +2,7 @@ import { describe, test, expect } from "vitest";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import { createSearchTracksTool } from "../../src/mcp/tools/search/tracks.ts";
 import type { SpotifyTrackResult } from "../../src/types.ts";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 
 describe.skipIf(!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET)(
   "Spotify Track Search Integration",
@@ -17,9 +18,10 @@ describe.skipIf(!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SE
 
       expect(result.isError).toBeUndefined();
       expect(result.content).toHaveLength(1);
-      expect(result.content[0].type).toBe("text");
+      expect(result.content[0].type).toBe("resource");
 
-      const tracks: SpotifyTrackResult[] = JSON.parse((result.content[0] as any).text);
+      const resource = result.content[0] as EmbeddedResource;
+      const tracks: SpotifyTrackResult[] = JSON.parse(resource.resource.text as string);
       expect(tracks.length).toBeGreaterThan(0);
       expect(tracks.length).toBeLessThanOrEqual(5);
     });
@@ -28,7 +30,8 @@ describe.skipIf(!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SE
       const result = await tool.handler({ query: "Yesterday Beatles", limit: 1 });
 
       expect(result.isError).toBeUndefined();
-      const tracks: SpotifyTrackResult[] = JSON.parse((result.content[0] as any).text);
+      const resource = result.content[0] as EmbeddedResource;
+      const tracks: SpotifyTrackResult[] = JSON.parse(resource.resource.text as string);
       expect(tracks.length).toBeGreaterThan(0);
 
       const track = tracks[0];
@@ -49,7 +52,8 @@ describe.skipIf(!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SE
       });
 
       expect(result.isError).toBeUndefined();
-      const tracks: SpotifyTrackResult[] = JSON.parse((result.content[0] as any).text);
+      const resource = result.content[0] as EmbeddedResource;
+      const tracks: SpotifyTrackResult[] = JSON.parse(resource.resource.text as string);
       // Spotifyは部分一致も返すので、完全に結果がないことを保証できない
       // 代わりに、エラーなく処理できることを確認
       expect(Array.isArray(tracks)).toBe(true);
@@ -59,7 +63,8 @@ describe.skipIf(!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SE
       const result = await tool.handler({ query: "千本桜", limit: 3 });
 
       expect(result.isError).toBeUndefined();
-      const tracks: SpotifyTrackResult[] = JSON.parse((result.content[0] as any).text);
+      const resource = result.content[0] as EmbeddedResource;
+      const tracks: SpotifyTrackResult[] = JSON.parse(resource.resource.text as string);
       expect(tracks.length).toBeGreaterThan(0);
     });
   },
