@@ -1,7 +1,7 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi, Market, Page, SavedTrack } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition } from "../../../types.ts";
+import type { ToolDefinition, GetSavedItemsOptions } from "../../../types.ts";
 import { z } from "zod";
 
 const getSavedTracksSchema = {
@@ -25,15 +25,9 @@ const getSavedTracksSchema = {
 
 type GetSavedTracksInput = z.infer<z.ZodObject<typeof getSavedTracksSchema>>;
 
-interface GetSavedTracksOptions {
-  limit?: number;
-  offset?: number;
-  market?: string;
-}
-
 async function getSavedTracks(
   client: SpotifyApi,
-  options?: GetSavedTracksOptions,
+  options?: GetSavedItemsOptions,
 ): Promise<Result<Page<SavedTrack>, string>> {
   // Validate limit parameter
   if (options?.limit !== undefined) {

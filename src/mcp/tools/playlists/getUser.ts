@@ -1,27 +1,10 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition } from "../../../types.ts";
+import type { ToolDefinition, PlaylistSummary, SpotifyPaginatedResult } from "../../../types.ts";
 import { z } from "zod";
 
-type PlaylistSummary = {
-  id: string;
-  name: string;
-  description: string | null;
-  public: boolean;
-  collaborative: boolean;
-  owner: string;
-  total_tracks: number;
-  external_url: string;
-};
-
-type GetUserPlaylistsResult = {
-  playlists: PlaylistSummary[];
-  total: number;
-  limit: number;
-  offset: number;
-  has_more: boolean;
-};
+type GetUserPlaylistsResult = SpotifyPaginatedResult<PlaylistSummary>;
 
 async function getUserPlaylists(
   client: SpotifyApi,
@@ -47,22 +30,30 @@ async function getUserPlaylists(
     const response = await client.playlists.getUsersPlaylists(userId, limit as any, offset);
 
     const playlists: PlaylistSummary[] = response.items.map((playlist) => ({
-      id: playlist.id,
+      id: playlist.id as any,
       name: playlist.name,
       description: playlist.description,
+      owner: {
+        id: playlist.owner.id,
+        display_name: playlist.owner.display_name,
+      },
+      images: playlist.images || [],
+      tracks: {
+        total: playlist.tracks?.total || 0,
+      },
       public: playlist.public,
       collaborative: playlist.collaborative,
-      owner: playlist.owner.display_name || playlist.owner.id,
-      total_tracks: playlist.tracks?.total || 0,
       external_url: playlist.external_urls.spotify,
     }));
 
     return ok({
-      playlists,
-      total: response.total,
+      href: response.href,
+      items: playlists,
       limit: response.limit,
+      next: response.next,
       offset: response.offset,
-      has_more: response.next !== null,
+      previous: response.previous,
+      total: response.total,
     });
   } catch (error) {
     return err(

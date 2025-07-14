@@ -4,6 +4,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition } from "../../../types.ts";
 import { z } from "zod";
 
+// Simplified type for tool output
 type PlaylistItemResult = {
   track: {
     id: string;

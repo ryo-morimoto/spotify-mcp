@@ -1,17 +1,11 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition } from "../../../types.ts";
+import type { ToolDefinition, SpotifyImageObject } from "../../../types.ts";
 import { z } from "zod";
 
-type ImageObject = {
-  url: string;
-  height: number | null;
-  width: number | null;
-};
-
 type GetPlaylistCoverImageResult = {
-  images: ImageObject[];
+  images: SpotifyImageObject[];
 };
 
 async function getPlaylistCoverImage(
@@ -26,7 +20,7 @@ async function getPlaylistCoverImage(
   try {
     const images = await client.playlists.getPlaylistCoverImage(playlistId);
 
-    const mappedImages: ImageObject[] = images.map((image) => ({
+    const mappedImages: SpotifyImageObject[] = images.map((image) => ({
       url: image.url,
       height: image.height ?? null,
       width: image.width ?? null,

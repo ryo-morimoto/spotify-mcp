@@ -1,18 +1,8 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi, Market } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition } from "../../../types.ts";
+import type { ToolDefinition, SpotifyTopTrackResult } from "../../../types.ts";
 import { z } from "zod";
-
-export type SpotifyTopTrackResult = {
-  id: string;
-  name: string;
-  artists: string;
-  album: string;
-  duration: string; // Format: "3:15"
-  popularity: number;
-  external_url: string;
-};
 
 function formatDuration(milliseconds: number): string {
   const seconds = Math.floor(milliseconds / 1000);

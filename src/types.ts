@@ -32,11 +32,7 @@ export type SpotifyAlbumResult = {
   total_tracks: number;
   album_type: string;
   external_url: string;
-  images: Array<{
-    url: string;
-    height: number | null;
-    width: number | null;
-  }>;
+  images: ReadonlyArray<SpotifyImageObject>;
 };
 
 // Spotify artist type for search results
@@ -47,11 +43,7 @@ export type SpotifyArtistResult = {
   popularity: number;
   followers: number;
   external_url: string;
-  images: Array<{
-    url: string;
-    height: number | null;
-    width: number | null;
-  }>;
+  images: ReadonlyArray<SpotifyImageObject>;
 };
 
 // Spotify playlist type for search results
@@ -64,11 +56,7 @@ export type SpotifyPlaylistResult = {
   collaborative: boolean;
   total_tracks: number;
   external_url: string;
-  images: Array<{
-    url: string;
-    height: number | null;
-    width: number | null;
-  }>;
+  images: ReadonlyArray<SpotifyImageObject>;
 };
 
 // Spotify show (podcast) type for search results
@@ -80,11 +68,7 @@ export type SpotifyShowResult = {
   total_episodes: number;
   explicit: boolean;
   external_url: string;
-  images: Array<{
-    url: string;
-    height: number | null;
-    width: number | null;
-  }>;
+  images: ReadonlyArray<SpotifyImageObject>;
 };
 
 // Spotify episode type for search results
@@ -96,11 +80,7 @@ export type SpotifyEpisodeResult = {
   release_date: string;
   explicit: boolean;
   external_url: string;
-  images: Array<{
-    url: string;
-    height: number | null;
-    width: number | null;
-  }>;
+  images: ReadonlyArray<SpotifyImageObject>;
 };
 
 // Spotify audiobook type for search results
@@ -114,20 +94,127 @@ export type SpotifyAudiobookResult = {
   total_chapters: number;
   explicit: boolean;
   external_url: string;
-  images: Array<{
-    url: string;
-    height: number | null;
-    width: number | null;
-  }>;
+  images: ReadonlyArray<SpotifyImageObject>;
 };
 
 // Spotify-specific constants
 export const SPOTIFY_TRACK_MIME_TYPE = "application/x-spotify-track" as const;
 
-// Branded types for Spotify
-export type SpotifyClientId = string & { _brand: "SpotifyClientId" };
-export type SpotifyAccessToken = string & { _brand: "SpotifyAccessToken" };
-export type SpotifyRefreshToken = string & { _brand: "SpotifyRefreshToken" };
+// Brand type utility
+type Brand<K, T> = K & { __brand: T };
+
+// Spotify resource IDs (prevents mixing different ID types)
+export type SnapshotId = Brand<string, "SnapshotId">;
+export type SpotifyTrackId = Brand<string, "SpotifyTrackId">;
+export type SpotifyAlbumId = Brand<string, "SpotifyAlbumId">;
+export type SpotifyArtistId = Brand<string, "SpotifyArtistId">;
+export type SpotifyPlaylistId = Brand<string, "SpotifyPlaylistId">;
+export type SpotifyUserId = Brand<string, "SpotifyUserId">;
+export type SpotifyClientId = Brand<string, "SpotifyClientId">;
+export type SpotifyAccessToken = Brand<string, "SpotifyAccessToken">;
+export type SpotifyRefreshToken = Brand<string, "SpotifyRefreshToken">;
+
+// Spotify API enums
+export type RepeatState = "off" | "track" | "context";
+export type AlbumType = "album" | "single" | "compilation";
+export type ItemType = "track" | "episode";
+
+// Common utilities
+type Nullable<T> = T | null;
+
+// Base types
+export type SpotifyImageObject = {
+  readonly url: string;
+  readonly height: Nullable<number>;
+  readonly width: Nullable<number>;
+};
+
+type WithId<T extends string> = {
+  readonly id: T;
+};
+
+type WithName = {
+  readonly name: string;
+};
+
+type SpotifyUserBasic = WithId<string> & {
+  readonly display_name: Nullable<string>;
+};
+
+// Pagination
+type PaginationOptions = {
+  readonly limit?: number;
+  readonly offset?: number;
+};
+
+type ExtendOptions<T, U> = T & Partial<U>;
+
+export type GetSavedItemsOptions = ExtendOptions<PaginationOptions, { readonly market: string }>;
+
+export type SpotifyPaginatedResult<T> = Readonly<{
+  href: string;
+  items: ReadonlyArray<T>;
+  limit: number;
+  next: Nullable<string>;
+  offset: number;
+  previous: Nullable<string>;
+  total: number;
+}>;
+
+// Complex types
+type SpotifyPlaylistOwner = SpotifyUserBasic;
+
+// Domain types
+export type PlaylistSummary = WithId<SpotifyPlaylistId> &
+  WithName & {
+    readonly description: Nullable<string>;
+    readonly owner: SpotifyPlaylistOwner;
+    readonly images: ReadonlyArray<SpotifyImageObject>;
+    readonly tracks: {
+      readonly total: number;
+    };
+    readonly public: Nullable<boolean>;
+    readonly collaborative: boolean;
+    readonly external_url: string;
+  };
+
+// Artist top track result (simplified for tool output)
+export type SpotifyTopTrackResult = {
+  id: string;
+  name: string;
+  artists: string;
+  album: string;
+  duration: string; // Format: "3:15"
+  popularity: number;
+  external_url: string;
+};
+
+// Playlist item result
+export type PlaylistItemResult = {
+  readonly added_at: string;
+  readonly added_by: SpotifyUserBasic;
+  readonly is_local: boolean;
+  readonly track: SpotifyTrackResult | SpotifyEpisodeResult | null;
+};
+
+// Saved item types
+export type SavedTrack = {
+  readonly added_at: string;
+  readonly track: SpotifyTrackResult;
+};
+
+export type SavedAlbum = {
+  readonly added_at: string;
+  readonly album: SpotifyAlbumResult;
+};
+
+// Paginated type aliases
+export type PaginatedPlaylists = SpotifyPaginatedResult<PlaylistSummary>;
+export type PaginatedTracks = SpotifyPaginatedResult<SpotifyTrackResult>;
+export type PaginatedAlbums = SpotifyPaginatedResult<SpotifyAlbumResult>;
+export type PaginatedArtists = SpotifyPaginatedResult<SpotifyArtistResult>;
+export type PaginatedSavedTracks = SpotifyPaginatedResult<SavedTrack>;
+export type PaginatedSavedAlbums = SpotifyPaginatedResult<SavedAlbum>;
 
 // Spotify client configuration
 export type SpotifyConfig = {

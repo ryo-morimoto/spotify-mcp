@@ -1,27 +1,12 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition } from "../../../types.ts";
+import type { ToolDefinition, PlaylistSummary, SpotifyPaginatedResult } from "../../../types.ts";
 import { z } from "zod";
 
-type PlaylistSummary = {
-  id: string;
-  name: string;
-  description: string | null;
-  public: boolean;
-  collaborative: boolean;
-  owner: string;
-  total_tracks: number;
-  external_url: string;
-};
-
 type GetFeaturedPlaylistsResult = {
-  message: string;
-  playlists: PlaylistSummary[];
-  total: number;
-  limit: number;
-  offset: number;
-  has_more: boolean;
+  message?: string;
+  playlists: SpotifyPaginatedResult<PlaylistSummary>;
 };
 
 async function getFeaturedPlaylists(
@@ -57,23 +42,33 @@ async function getFeaturedPlaylists(
     );
 
     const playlists: PlaylistSummary[] = response.playlists.items.map((playlist) => ({
-      id: playlist.id,
+      id: playlist.id as any,
       name: playlist.name,
       description: playlist.description,
+      owner: {
+        id: playlist.owner.id,
+        display_name: playlist.owner.display_name,
+      },
+      images: playlist.images || [],
+      tracks: {
+        total: playlist.tracks?.total || 0,
+      },
       public: playlist.public,
       collaborative: playlist.collaborative,
-      owner: playlist.owner.display_name || playlist.owner.id,
-      total_tracks: playlist.tracks?.total || 0,
       external_url: playlist.external_urls.spotify,
     }));
 
     return ok({
-      message: response.message || "",
-      playlists,
-      total: response.playlists.total,
-      limit: response.playlists.limit,
-      offset: response.playlists.offset,
-      has_more: response.playlists.next !== null,
+      message: response.message || undefined,
+      playlists: {
+        href: response.playlists.href,
+        items: playlists,
+        limit: response.playlists.limit,
+        next: response.playlists.next,
+        offset: response.playlists.offset,
+        previous: response.playlists.previous,
+        total: response.playlists.total,
+      },
     });
   } catch (error) {
     return err(

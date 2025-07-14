@@ -1,10 +1,8 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition } from "../../../types.ts";
+import type { ToolDefinition, RepeatState } from "../../../types.ts";
 import { z } from "zod";
-
-type RepeatState = "track" | "context" | "off";
 
 async function setRepeatMode(
   client: SpotifyApi,
