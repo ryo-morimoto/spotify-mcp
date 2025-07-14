@@ -1,6 +1,6 @@
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { SpotifyTrackResult, ToolDefinition } from "../../../types.ts";
+import type { SpotifyTrackResult, ToolDefinition } from "@types";
 import { z } from "zod";
 
 const searchTracksSchema = {
@@ -16,47 +16,54 @@ const searchTracksSchema = {
 
 type SearchTracksInput = z.infer<z.ZodObject<typeof searchTracksSchema>>;
 
-const mapTrackToResult = (track: any): SpotifyTrackResult => ({
-  id: track.id,
-  name: track.name,
-  artists: track.artists.map((a: { name: string }) => a.name).join(", "),
-  album: track.album.name,
-  duration_ms: track.duration_ms,
-  preview_url: track.preview_url,
-  external_url: track.external_urls.spotify,
-});
-
 export const createSearchTracksTool = (
   spotifyClient: SpotifyApi,
-): ToolDefinition<typeof searchTracksSchema> => ({
-  name: "search_tracks",
-  title: "Search Tracks",
-  description: "Search for tracks on Spotify",
-  inputSchema: searchTracksSchema,
-  handler: async (input: SearchTracksInput): Promise<CallToolResult> => {
-    try {
-      const results = await spotifyClient.search(input.query, ["track"], "JP", input.limit as any);
+): ToolDefinition<typeof searchTracksSchema> => {
+  const mapTrackToResult = (track: any): SpotifyTrackResult => ({
+    id: track.id,
+    name: track.name,
+    artists: track.artists.map((a: { name: string }) => a.name).join(", "),
+    album: track.album.name,
+    duration_ms: track.duration_ms,
+    preview_url: track.preview_url,
+    external_url: track.external_urls.spotify,
+  });
 
-      const tracks: SpotifyTrackResult[] = results.tracks.items.map(mapTrackToResult);
+  return {
+    name: "search_tracks",
+    title: "Search Tracks",
+    description: "Search for tracks on Spotify",
+    inputSchema: searchTracksSchema,
+    handler: async (input: SearchTracksInput): Promise<CallToolResult> => {
+      try {
+        const results = await spotifyClient.search(
+          input.query,
+          ["track"],
+          "JP",
+          input.limit as any,
+        );
 
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(tracks, null, 2),
-          },
-        ],
-      };
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Error searching tracks: ${error}`,
-          },
-        ],
-        isError: true,
-      };
-    }
-  },
-});
+        const tracks: SpotifyTrackResult[] = results.tracks.items.map(mapTrackToResult);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(tracks, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error searching tracks: ${error}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  };
+};

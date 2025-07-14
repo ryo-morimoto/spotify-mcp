@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
 import { z } from "zod";
-import { createGetSeveralTracksTool } from "./getSeveral.ts";
+import { createGetSeveralTracksTool } from "@mcp/tools/tracks/getSeveral.ts";
 
 describe("getSeveralTracks", () => {
   let mockClient: SpotifyApi;

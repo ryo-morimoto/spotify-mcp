@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
-import { registerClient, getClient, validateRedirectUri } from "./clientRegistry.ts";
+import { registerClient, getClient, validateRedirectUri } from "@/oauth/clientRegistry.ts";
 import { createMockKV } from "../../test/helpers/mockKV.ts";
-import type { ClientRegistrationRequest, RegisteredClient } from "./types.ts";
+import type { ClientRegistrationRequest, RegisteredClient } from "@/oauth/types.ts";
 
 describe("clientRegistry", () => {
   let mockKV: ReturnType<typeof createMockKV>;

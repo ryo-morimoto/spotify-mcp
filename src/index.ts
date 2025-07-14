@@ -1,18 +1,18 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { createMCPServer } from "./mcp.ts";
-import { createSpotifyClient } from "./spotify.ts";
-import authHandler from "./authHandler.ts";
+import { createMCPServer } from "@/mcp.ts";
+import { createSpotifyClient } from "@/spotify.ts";
+import authHandler from "@/authHandler.ts";
 import type {
   SpotifyConfig,
   SpotifyClientId,
   SpotifyAccessToken,
   SpotifyRefreshToken,
   Bindings,
-} from "./types.ts";
+} from "@types";
 import { StreamableHTTPTransport } from "@hono/mcp";
-import { SPOTIFY_SCOPES } from "./constants.ts";
-import { ensurePredefinedClients } from "./oauth/predefinedClients.ts";
+import { SPOTIFY_SCOPES } from "@/constants.ts";
+import { ensurePredefinedClients } from "@/oauth/predefinedClients.ts";
 
 const app = new Hono<{ Bindings: Bindings }>();
 

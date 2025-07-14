@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { createMCPServer } from "./mcp.ts";
+import { createMCPServer } from "@/mcp.ts";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 

@@ -6,14 +6,14 @@ import {
   exchangeCodeForTokens,
   refreshAccessToken,
   createSpotifyClientWithRefresh,
-} from "./oauth.ts";
-import * as pkce from "./pkce.ts";
-import type { SpotifyClientId, SpotifyAccessToken, SpotifyRefreshToken } from "./types.ts";
+} from "@/oauth.ts";
+import * as pkce from "@/pkce.ts";
+import type { SpotifyClientId, SpotifyAccessToken, SpotifyRefreshToken } from "@types";
 import { tokenFixtures } from "../test/fixtures/tokens.ts";
 import { expectResult } from "../test/helpers/assertions.ts";
 
 // Mock modules
-vi.mock("./pkce.ts", () => ({
+vi.mock("@/pkce.ts", () => ({
   generateCodeVerifier: vi.fn(),
   generateCodeChallenge: vi.fn(),
 }));
@@ -165,8 +165,7 @@ describe("oauth", () => {
 
       // Assert
       const error = expectResult(result).toBeErr();
-      expect(error).toContain("Failed to exchange code for tokens");
-      expect(error).toContain("Network error");
+      expect(error).toContain("Error: Network error");
     });
 
     it("レスポンスのJSONパースに失敗した場合はエラーを返す", async () => {
@@ -183,8 +182,7 @@ describe("oauth", () => {
 
       // Assert
       const error = expectResult(result).toBeErr();
-      expect(error).toContain("Failed to exchange code for tokens");
-      expect(error).toContain("Invalid JSON");
+      expect(error).toContain("Error: Invalid JSON");
     });
   });
 
@@ -261,8 +259,7 @@ describe("oauth", () => {
 
       // Assert
       const error = expectResult(result).toBeErr();
-      expect(error).toContain("Failed to refresh access token");
-      expect(error).toContain("Connection timeout");
+      expect(error).toContain("Error: Connection timeout");
     });
   });
 

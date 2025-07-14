@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createUpdatePlaylistItemsTool } from "./updateItems.ts";
+import { createUpdatePlaylistItemsTool } from "@mcp/tools/playlists/updateItems.ts";
 
 describe("update-playlist-items", () => {
   const mockClient = {

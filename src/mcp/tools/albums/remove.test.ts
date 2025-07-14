@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createRemoveSavedAlbumsTool } from "./remove.ts";
+import { createRemoveSavedAlbumsTool } from "@mcp/tools/albums/remove.ts";
 
 describe("remove-saved-albums tool", () => {
   const mockClient = {

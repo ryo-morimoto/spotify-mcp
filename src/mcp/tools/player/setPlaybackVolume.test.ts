@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createSetPlaybackVolumeTool } from "./setPlaybackVolume.ts";
+import { createSetPlaybackVolumeTool } from "@mcp/tools/player/setPlaybackVolume.ts";
 
 describe("set-playback-volume tool", () => {
   let mockClient: SpotifyApi;

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createTogglePlaybackShuffleTool } from "./togglePlaybackShuffle.ts";
+import { createTogglePlaybackShuffleTool } from "@mcp/tools/player/togglePlaybackShuffle.ts";
 
 describe("toggle-playback-shuffle tool", () => {
   let mockClient: SpotifyApi;

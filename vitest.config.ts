@@ -1,7 +1,15 @@
 import { defineConfig } from "vitest/config";
 import { loadEnv } from "vite";
+import path from "node:path";
 
 export default defineConfig(({ mode }) => ({
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      "@types": path.resolve(__dirname, "./src/types.ts"),
+      "@mcp": path.resolve(__dirname, "./src/mcp"),
+    },
+  },
   test: {
     environment: "node",
     includeSource: ["src/**/*.ts"],

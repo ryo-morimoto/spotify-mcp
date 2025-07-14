@@ -1,59 +1,68 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createSearchTracksTool } from "./mcp/tools/search/tracks.ts";
-import { createSearchAlbumsTool } from "./mcp/tools/search/albums.ts";
-import { createSearchArtistsTool } from "./mcp/tools/search/artists.ts";
-import { createSearchPlaylistsTool } from "./mcp/tools/search/playlists.ts";
-import { createSearchShowsTool } from "./mcp/tools/search/shows.ts";
-import { createSearchEpisodesTool } from "./mcp/tools/search/episodes.ts";
-import { createSearchAudiobooksTool } from "./mcp/tools/search/audiobooks.ts";
-import { createGetTrackTool } from "./mcp/tools/tracks/get.ts";
-import { createGetTrackAudioAnalysisTool } from "./mcp/tools/tracks/getAudioAnalysis.ts";
-import { createGetAlbumTool } from "./mcp/tools/albums/get.ts";
-import { createGetSavedAlbumsTool } from "./mcp/tools/albums/getSaved.ts";
-import { createSaveAlbumsTool } from "./mcp/tools/albums/save.ts";
-import { createRemoveSavedAlbumsTool } from "./mcp/tools/albums/remove.ts";
-import { createCheckSavedAlbumsTool } from "./mcp/tools/albums/check.ts";
-import { createGetArtistTool } from "./mcp/tools/artists/get.ts";
-import { createGetSeveralArtistsTool } from "./mcp/tools/artists/getSeveral.ts";
-import { createGetRelatedArtistsTool } from "./mcp/tools/artists/getRelated.ts";
-import { createGetPlaylistTool } from "./mcp/tools/playlists/get.ts";
-import { createGetPlaylistItemsTool } from "./mcp/tools/playlists/getItems.ts";
-import { createCreatePlaylistTool } from "./mcp/tools/playlists/create.ts";
-import { createChangePlaylistDetailsTool } from "./mcp/tools/playlists/changeDetails.ts";
-import { createAddItemsToPlaylistTool } from "./mcp/tools/playlists/addItems.ts";
-import { createUpdatePlaylistItemsTool } from "./mcp/tools/playlists/updateItems.ts";
-import { createRemovePlaylistItemsTool } from "./mcp/tools/playlists/removeItems.ts";
-import { createGetCurrentUserPlaylistsTool } from "./mcp/tools/playlists/getCurrentUser.ts";
-import { createGetUserPlaylistsTool } from "./mcp/tools/playlists/getUser.ts";
-import { createGetFeaturedPlaylistsTool } from "./mcp/tools/playlists/getFeatured.ts";
-import { createGetCategoryPlaylistsTool } from "./mcp/tools/playlists/getCategory.ts";
-import { createGetPlaylistCoverImageTool } from "./mcp/tools/playlists/getCoverImage.ts";
-import { createAddPlaylistCoverImageTool } from "./mcp/tools/playlists/addCoverImage.ts";
-import { createGetAlbumTracksTool } from "./mcp/tools/albums/getTracks.ts";
-import { createGetArtistAlbumsTool } from "./mcp/tools/artists/getAlbums.ts";
-import { createGetSeveralAlbumsTool } from "./mcp/tools/albums/getSeveral.ts";
-import { createGetArtistTopTracksTool } from "./mcp/tools/artists/getTopTracks.ts";
-import { createGetSeveralTracksTool } from "./mcp/tools/tracks/getSeveral.ts";
-import { createGetSavedTracksTool } from "./mcp/tools/users/getSavedTracks.ts";
-import { createSaveTracksTool } from "./mcp/tools/users/saveTracks.ts";
-import { createRemoveSavedTracksTool } from "./mcp/tools/users/removeSavedTracks.ts";
-import { createCheckSavedTracksTool } from "./mcp/tools/users/checkSavedTracks.ts";
-import { createGetPlaybackStateTool } from "./mcp/tools/player/getPlaybackState.ts";
-import { createGetAvailableDevicesTool } from "./mcp/tools/player/getAvailableDevices.ts";
-import { createGetCurrentlyPlayingTrackTool } from "./mcp/tools/player/getCurrentlyPlayingTrack.ts";
-import { createStartResumePlaybackTool } from "./mcp/tools/player/startResumePlayback.ts";
-import { createPausePlaybackTool } from "./mcp/tools/player/pausePlayback.ts";
-import { createSkipToNextTool } from "./mcp/tools/player/skipToNext.ts";
-import { createSkipToPreviousTool } from "./mcp/tools/player/skipToPrevious.ts";
-import { createSeekToPositionTool } from "./mcp/tools/player/seekToPosition.ts";
-import { createSetRepeatModeTool } from "./mcp/tools/player/setRepeatMode.ts";
-import { createSetPlaybackVolumeTool } from "./mcp/tools/player/setPlaybackVolume.ts";
-import { createTogglePlaybackShuffleTool } from "./mcp/tools/player/togglePlaybackShuffle.ts";
-import { createTransferPlaybackTool } from "./mcp/tools/player/transferPlayback.ts";
-import { createGetRecentlyPlayedTracksTool } from "./mcp/tools/player/getRecentlyPlayedTracks.ts";
-import { createGetUserQueueTool } from "./mcp/tools/player/getUserQueue.ts";
-import { createAddItemToPlaybackQueueTool } from "./mcp/tools/player/addItemToPlaybackQueue.ts";
+import {
+  // Search tools
+  createSearchTracksTool,
+  createSearchAlbumsTool,
+  createSearchArtistsTool,
+  createSearchPlaylistsTool,
+  createSearchShowsTool,
+  createSearchEpisodesTool,
+  createSearchAudiobooksTool,
+  // Track tools
+  createGetTrackTool,
+  createGetTrackAudioAnalysisTool,
+  createGetSeveralTracksTool,
+  // Album tools
+  createGetAlbumTool,
+  createGetSavedAlbumsTool,
+  createSaveAlbumsTool,
+  createRemoveSavedAlbumsTool,
+  createCheckSavedAlbumsTool,
+  createGetAlbumTracksTool,
+  createGetSeveralAlbumsTool,
+  // Artist tools
+  createGetArtistTool,
+  createGetSeveralArtistsTool,
+  createGetRelatedArtistsTool,
+  createGetArtistAlbumsTool,
+  createGetArtistTopTracksTool,
+  // Playlist tools
+  createGetPlaylistTool,
+  createGetPlaylistItemsTool,
+  createCreatePlaylistTool,
+  createChangePlaylistDetailsTool,
+  createAddItemsToPlaylistTool,
+  createUpdatePlaylistItemsTool,
+  createRemovePlaylistItemsTool,
+  createGetCurrentUserPlaylistsTool,
+  createGetUserPlaylistsTool,
+  createGetFeaturedPlaylistsTool,
+  createGetCategoryPlaylistsTool,
+  createGetPlaylistCoverImageTool,
+  createAddPlaylistCoverImageTool,
+  // User tools
+  createGetSavedTracksTool,
+  createSaveTracksTool,
+  createRemoveSavedTracksTool,
+  createCheckSavedTracksTool,
+  // Player tools
+  createGetPlaybackStateTool,
+  createGetAvailableDevicesTool,
+  createGetCurrentlyPlayingTrackTool,
+  createStartResumePlaybackTool,
+  createPausePlaybackTool,
+  createSkipToNextTool,
+  createSkipToPreviousTool,
+  createSeekToPositionTool,
+  createSetRepeatModeTool,
+  createSetPlaybackVolumeTool,
+  createTogglePlaybackShuffleTool,
+  createTransferPlaybackTool,
+  createGetRecentlyPlayedTracksTool,
+  createGetUserQueueTool,
+  createAddItemToPlaybackQueueTool,
+} from "@mcp/tools/index.ts";
 
 export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
   const server = new McpServer({

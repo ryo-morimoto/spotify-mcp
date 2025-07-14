@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetUserQueueTool } from "./getUserQueue.ts";
+import { createGetUserQueueTool } from "@mcp/tools/player/getUserQueue.ts";
 
 describe("get-user-queue tool", () => {
   let mockClient: SpotifyApi;

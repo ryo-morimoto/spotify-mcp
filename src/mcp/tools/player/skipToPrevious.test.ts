@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createSkipToPreviousTool } from "./skipToPrevious.ts";
+import { createSkipToPreviousTool } from "@mcp/tools/player/skipToPrevious.ts";
 
 describe("skip-to-previous tool", () => {
   let mockClient: SpotifyApi;

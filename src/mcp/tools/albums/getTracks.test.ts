@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetAlbumTracksTool } from "./getTracks.ts";
+import { createGetAlbumTracksTool } from "@mcp/tools/albums/getTracks.ts";
 
 describe("get-album-tracks tool", () => {
   const mockTracks = {

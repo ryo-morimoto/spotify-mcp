@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetRelatedArtistsTool } from "./getRelated.ts";
+import { createGetRelatedArtistsTool } from "@mcp/tools/artists/getRelated.ts";
 
 describe("get_related_artists tool", () => {
   const mockClient = {

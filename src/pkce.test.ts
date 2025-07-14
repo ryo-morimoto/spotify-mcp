@@ -1,5 +1,5 @@
 import { describe, test, expect } from "vitest";
-import { generateCodeVerifier, generateCodeChallenge } from "./pkce.ts";
+import { generateCodeVerifier, generateCodeChallenge } from "@/pkce.ts";
 
 describe("PKCE functions", () => {
   test("generateCodeVerifier returns valid verifier", () => {

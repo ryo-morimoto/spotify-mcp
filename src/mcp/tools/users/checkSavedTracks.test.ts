@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createCheckSavedTracksTool } from "./checkSavedTracks.ts";
+import { createCheckSavedTracksTool } from "@mcp/tools/users/checkSavedTracks.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 describe("check-saved-tracks tool", () => {

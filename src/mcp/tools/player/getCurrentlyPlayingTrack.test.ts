@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetCurrentlyPlayingTrackTool } from "./getCurrentlyPlayingTrack.ts";
+import { createGetCurrentlyPlayingTrackTool } from "@mcp/tools/player/getCurrentlyPlayingTrack.ts";
 
 describe("get-currently-playing-track tool", () => {
   it("should return currently playing track", async () => {

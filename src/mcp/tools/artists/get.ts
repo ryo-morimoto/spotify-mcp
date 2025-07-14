@@ -1,7 +1,7 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { SpotifyArtistResult, ToolDefinition } from "../../../types.ts";
+import type { SpotifyArtistResult, ToolDefinition } from "@types";
 import { z } from "zod";
 
 async function getArtist(

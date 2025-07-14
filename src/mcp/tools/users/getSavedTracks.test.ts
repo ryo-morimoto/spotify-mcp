@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetSavedTracksTool } from "./getSavedTracks.ts";
+import { createGetSavedTracksTool } from "@mcp/tools/users/getSavedTracks.ts";
 
 describe("get-saved-tracks tool", () => {
   const mockClient = {

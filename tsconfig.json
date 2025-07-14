@@ -12,7 +12,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "types": ["vitest/importMeta"],
+    "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "@types": ["./src/types.ts"],
       "@mcp/*": ["./src/mcp/*"]
     }

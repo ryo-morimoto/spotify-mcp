@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createStartResumePlaybackTool } from "./startResumePlayback.ts";
+import { createStartResumePlaybackTool } from "@mcp/tools/player/startResumePlayback.ts";
 
 describe("start-resume-playback tool", () => {
   let mockClient: SpotifyApi;

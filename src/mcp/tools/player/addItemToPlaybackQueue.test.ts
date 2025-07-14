@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createAddItemToPlaybackQueueTool } from "./addItemToPlaybackQueue.ts";
+import { createAddItemToPlaybackQueueTool } from "@mcp/tools/player/addItemToPlaybackQueue.ts";
 
 describe("add-item-to-playback-queue tool", () => {
   it("should add track to queue", async () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetPlaylistCoverImageTool } from "./getCoverImage.ts";
+import { createGetPlaylistCoverImageTool } from "@mcp/tools/playlists/getCoverImage.ts";
 
 describe("get-playlist-cover-image", () => {
   const mockClient = {

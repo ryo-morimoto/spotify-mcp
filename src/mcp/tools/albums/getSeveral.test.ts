@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi, Album } from "@spotify/web-api-ts-sdk";
-import { createGetSeveralAlbumsTool } from "./getSeveral.ts";
+import { createGetSeveralAlbumsTool } from "@mcp/tools/albums/getSeveral.ts";
 
 describe("get-several-albums tool", () => {
   let mockClient: SpotifyApi;

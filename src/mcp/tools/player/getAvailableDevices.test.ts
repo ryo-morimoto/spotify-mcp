@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetAvailableDevicesTool } from "./getAvailableDevices.ts";
+import { createGetAvailableDevicesTool } from "@mcp/tools/player/getAvailableDevices.ts";
 
 describe("get-available-devices tool", () => {
   it("should return list of available devices", async () => {

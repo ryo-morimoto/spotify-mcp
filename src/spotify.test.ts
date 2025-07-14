@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import { createSpotifyClient } from "./spotify.ts";
-import type { SpotifyConfig } from "./types.ts";
+import { createSpotifyClient } from "@/spotify.ts";
+import type { SpotifyConfig } from "@types";
 
 // Mock SpotifyApi
 vi.mock("@spotify/web-api-ts-sdk", () => ({

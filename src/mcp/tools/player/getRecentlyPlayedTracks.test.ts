@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetRecentlyPlayedTracksTool } from "./getRecentlyPlayedTracks.ts";
+import { createGetRecentlyPlayedTracksTool } from "@mcp/tools/player/getRecentlyPlayedTracks.ts";
 
 describe("get-recently-played-tracks tool", () => {
   let mockClient: SpotifyApi;

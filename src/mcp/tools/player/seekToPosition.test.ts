@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createSeekToPositionTool } from "./seekToPosition.ts";
+import { createSeekToPositionTool } from "@mcp/tools/player/seekToPosition.ts";
 
 describe("seek-to-position tool", () => {
   let mockClient: SpotifyApi;

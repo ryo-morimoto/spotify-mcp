@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetPlaylistTool } from "./get.ts";
+import { createGetPlaylistTool } from "@mcp/tools/playlists/get.ts";
 import { expectToolResult } from "../../../../test/helpers/assertions.ts";
 
 describe("getPlaylist", () => {

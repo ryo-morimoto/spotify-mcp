@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { createSearchArtistsTool } from "./artists.ts";
+import { createSearchArtistsTool } from "@mcp/tools/search/artists.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 describe("createSearchArtistsTool", () => {

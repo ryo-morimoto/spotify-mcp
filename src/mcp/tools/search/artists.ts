@@ -1,6 +1,6 @@
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { SpotifyArtistResult, ToolDefinition } from "../../../types.ts";
+import type { SpotifyArtistResult, ToolDefinition } from "@types";
 import { z } from "zod";
 
 const searchArtistsSchema = {
@@ -16,52 +16,54 @@ const searchArtistsSchema = {
 
 type SearchArtistsInput = z.infer<z.ZodObject<typeof searchArtistsSchema>>;
 
-const mapArtistToResult = (artist: any): SpotifyArtistResult => ({
-  id: artist.id,
-  name: artist.name,
-  genres: artist.genres || [],
-  popularity: artist.popularity,
-  followers: artist.followers?.total || 0,
-  external_url: artist.external_urls.spotify,
-  images: artist.images.map((img: any) => ({
-    url: img.url,
-    height: img.height,
-    width: img.width,
-  })),
-});
-
 export const createSearchArtistsTool = (
   spotifyClient: SpotifyApi,
-): ToolDefinition<typeof searchArtistsSchema> => ({
-  name: "search_artists",
-  title: "Search Artists",
-  description: "Search for artists on Spotify",
-  inputSchema: searchArtistsSchema,
-  handler: async (input: SearchArtistsInput): Promise<CallToolResult> => {
-    try {
-      const limit = input.limit ?? 20;
-      const results = await spotifyClient.search(input.query, ["artist"], "JP", limit as any);
+): ToolDefinition<typeof searchArtistsSchema> => {
+  const mapArtistToResult = (artist: any): SpotifyArtistResult => ({
+    id: artist.id,
+    name: artist.name,
+    genres: artist.genres || [],
+    popularity: artist.popularity,
+    followers: artist.followers?.total || 0,
+    external_url: artist.external_urls.spotify,
+    images: artist.images.map((img: any) => ({
+      url: img.url,
+      height: img.height,
+      width: img.width,
+    })),
+  });
 
-      const artists: SpotifyArtistResult[] = results.artists.items.map(mapArtistToResult);
+  return {
+    name: "search_artists",
+    title: "Search Artists",
+    description: "Search for artists on Spotify",
+    inputSchema: searchArtistsSchema,
+    handler: async (input: SearchArtistsInput): Promise<CallToolResult> => {
+      try {
+        const limit = input.limit ?? 20;
+        const results = await spotifyClient.search(input.query, ["artist"], "JP", limit as any);
 
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(artists, null, 2),
-          },
-        ],
-      };
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Error searching artists: ${error}`,
-          },
-        ],
-        isError: true,
-      };
-    }
-  },
-});
+        const artists: SpotifyArtistResult[] = results.artists.items.map(mapArtistToResult);
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(artists, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error searching artists: ${error}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    },
+  };
+};

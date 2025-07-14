@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createSetRepeatModeTool } from "./setRepeatMode.ts";
+import { createSetRepeatModeTool } from "@mcp/tools/player/setRepeatMode.ts";
 
 describe("set-repeat-mode tool", () => {
   let mockClient: SpotifyApi;

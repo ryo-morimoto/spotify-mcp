@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetCurrentUserPlaylistsTool } from "./getCurrentUser.ts";
+import { createGetCurrentUserPlaylistsTool } from "@mcp/tools/playlists/getCurrentUser.ts";
 
 describe("get-current-user-playlists", () => {
   const mockClient = {

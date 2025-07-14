@@ -1,7 +1,7 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi, Market } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { SpotifyAlbumResult, ToolDefinition } from "../../../types.ts";
+import type { SpotifyAlbumResult, ToolDefinition } from "@types";
 import { z } from "zod";
 
 async function getSeveralAlbums(

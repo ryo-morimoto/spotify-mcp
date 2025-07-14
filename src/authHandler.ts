@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { generateAuthorizationUrl, exchangeCodeForTokens } from "./oauth.ts";
-import type { SpotifyClientId, Bindings } from "./types.ts";
-import { SPOTIFY_SCOPES } from "./constants.ts";
+import type { SpotifyClientId, Bindings } from "@types";
+import { SPOTIFY_SCOPES } from "@/constants.ts";
 import { registerClient, getClient, validateRedirectUri } from "./oauth/clientRegistry.ts";
 import type { ClientRegistrationRequest, ClientRegistrationResponse } from "./oauth/types.ts";
 

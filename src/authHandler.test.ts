@@ -1,28 +1,28 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
 import { Hono } from "hono";
-import authHandler from "./authHandler.ts";
+import authHandler from "@/authHandler.ts";
 import { createMockBindings, getMockKV, type MockBindings } from "../test/helpers/mockBindings.ts";
 import { clientFixtures, createRegisteredClient } from "../test/fixtures/clients.ts";
 import { expectResponse, expectOAuthError } from "../test/helpers/assertions.ts";
-import type { Bindings } from "./types.ts";
+import type { Bindings } from "@types";
 import { ok, err } from "neverthrow";
 
 // Mock the oauth.ts module
-vi.mock("./oauth.ts", () => ({
+vi.mock("@/oauth.ts", () => ({
   generateAuthorizationUrl: vi.fn(),
   exchangeCodeForTokens: vi.fn(),
 }));
 
 // Mock the clientRegistry.ts module
-vi.mock("./oauth/clientRegistry.ts", () => ({
+vi.mock("@/oauth/clientRegistry.ts", () => ({
   registerClient: vi.fn(),
   getClient: vi.fn(),
   validateRedirectUri: vi.fn(),
 }));
 
 // Import mocked functions for type safety
-import { registerClient, getClient, validateRedirectUri } from "./oauth/clientRegistry.ts";
-import { generateAuthorizationUrl, exchangeCodeForTokens } from "./oauth.ts";
+import { registerClient, getClient, validateRedirectUri } from "@/oauth/clientRegistry.ts";
+import { generateAuthorizationUrl, exchangeCodeForTokens } from "@/oauth.ts";
 
 describe("authHandler", () => {
   let app: Hono<{ Bindings: Bindings }>;

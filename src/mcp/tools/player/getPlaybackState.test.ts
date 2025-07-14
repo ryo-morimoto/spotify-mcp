@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createGetPlaybackStateTool } from "./getPlaybackState.ts";
+import { createGetPlaybackStateTool } from "@mcp/tools/player/getPlaybackState.ts";
 
 describe("get-playback-state tool", () => {
   it("should return playback state when playback is active", async () => {

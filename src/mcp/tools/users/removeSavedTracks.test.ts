@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createRemoveSavedTracksTool } from "./removeSavedTracks.ts";
+import { createRemoveSavedTracksTool } from "@mcp/tools/users/removeSavedTracks.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 describe("remove-saved-tracks tool", () => {

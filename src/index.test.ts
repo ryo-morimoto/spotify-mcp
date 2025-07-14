@@ -1,21 +1,21 @@
 import { describe, test, expect, beforeEach, vi } from "vitest";
-import app from "./index.ts";
+import app from "@/index.ts";
 import { createMockBindings, type MockBindings } from "../test/helpers/mockBindings.ts";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 
 // Mock dependencies
-vi.mock("./authHandler.ts", () => {
+vi.mock("@/authHandler.ts", () => {
   const { Hono } = require("hono");
   const authApp = new Hono();
   authApp.all("*", () => new Response("Auth handler"));
   return { default: authApp };
 });
 
-vi.mock("./mcp.ts", () => ({
+vi.mock("@/mcp.ts", () => ({
   createMCPServer: vi.fn(),
 }));
 
-vi.mock("./spotify.ts", () => ({
+vi.mock("@/spotify.ts", () => ({
   createSpotifyClient: vi.fn(),
 }));
 
@@ -23,8 +23,8 @@ vi.mock("@hono/mcp", () => ({
   StreamableHTTPTransport: vi.fn(),
 }));
 
-import { createMCPServer } from "./mcp.ts";
-import { createSpotifyClient } from "./spotify.ts";
+import { createMCPServer } from "@/mcp.ts";
+import { createSpotifyClient } from "@/spotify.ts";
 import { StreamableHTTPTransport } from "@hono/mcp";
 import { ok, err } from "neverthrow";
 

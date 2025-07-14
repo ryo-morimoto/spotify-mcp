@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createTransferPlaybackTool } from "./transferPlayback.ts";
+import { createTransferPlaybackTool } from "@mcp/tools/player/transferPlayback.ts";
 
 describe("transfer-playback tool", () => {
   let mockClient: SpotifyApi;

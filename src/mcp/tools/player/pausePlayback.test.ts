@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
-import { createPausePlaybackTool } from "./pausePlayback.ts";
+import { createPausePlaybackTool } from "@mcp/tools/player/pausePlayback.ts";
 
 describe("pause-playback tool", () => {
   it("should pause playback with no parameters", async () => {
