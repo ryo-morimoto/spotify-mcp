@@ -1,17 +1,15 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition, PlaylistSummary, SpotifyPaginatedResult } from "../../../types.ts";
+import type { ToolDefinition, PlaylistSummary, PaginatedPlaylists } from "../../../types.ts";
 import { z } from "zod";
-
-type GetUserPlaylistsResult = SpotifyPaginatedResult<PlaylistSummary>;
 
 async function getUserPlaylists(
   client: SpotifyApi,
   userId: string,
   limit: number = 20,
   offset: number = 0,
-): Promise<Result<GetUserPlaylistsResult, string>> {
+): Promise<Result<PaginatedPlaylists, string>> {
   // Validate user ID
   if (!userId.trim()) {
     return err("User ID must not be empty");

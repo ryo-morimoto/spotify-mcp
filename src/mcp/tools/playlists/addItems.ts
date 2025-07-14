@@ -1,20 +1,15 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition } from "../../../types.ts";
+import type { ToolDefinition, SnapshotWithCountResult } from "../../../types.ts";
 import { z } from "zod";
-
-type AddItemsResult = {
-  snapshot_id: string;
-  items_added: number;
-};
 
 async function addItemsToPlaylist(
   client: SpotifyApi,
   playlistId: string,
   uris: string[],
   position?: number,
-): Promise<Result<AddItemsResult, string>> {
+): Promise<Result<SnapshotWithCountResult, string>> {
   // Validate playlist ID
   if (!playlistId.trim()) {
     return err("Playlist ID must not be empty");

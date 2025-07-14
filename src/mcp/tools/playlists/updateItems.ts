@@ -1,12 +1,8 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition } from "../../../types.ts";
+import type { ToolDefinition, SnapshotResult } from "../../../types.ts";
 import { z } from "zod";
-
-type UpdatePlaylistItemsResult = {
-  snapshot_id: string;
-};
 
 async function updatePlaylistItems(
   client: SpotifyApi,
@@ -16,7 +12,7 @@ async function updatePlaylistItems(
   insertBefore?: number,
   rangeLength?: number,
   snapshotId?: string,
-): Promise<Result<UpdatePlaylistItemsResult, string>> {
+): Promise<Result<SnapshotResult, string>> {
   // Validate playlist ID
   if (!playlistId.trim()) {
     return err("Playlist ID must not be empty");

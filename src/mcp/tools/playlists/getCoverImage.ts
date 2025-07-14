@@ -1,17 +1,13 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition, SpotifyImageObject } from "../../../types.ts";
+import type { ToolDefinition, SpotifyImageObject, ImageResult } from "../../../types.ts";
 import { z } from "zod";
-
-type GetPlaylistCoverImageResult = {
-  images: SpotifyImageObject[];
-};
 
 async function getPlaylistCoverImage(
   client: SpotifyApi,
   playlistId: string,
-): Promise<Result<GetPlaylistCoverImageResult, string>> {
+): Promise<Result<ImageResult, string>> {
   // Validate playlist ID
   if (!playlistId.trim()) {
     return err("Playlist ID must not be empty");

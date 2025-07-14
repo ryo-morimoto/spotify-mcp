@@ -1,16 +1,14 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition, PlaylistSummary, SpotifyPaginatedResult } from "../../../types.ts";
+import type { ToolDefinition, PlaylistSummary, PaginatedPlaylists } from "../../../types.ts";
 import { z } from "zod";
-
-type GetCurrentUserPlaylistsResult = SpotifyPaginatedResult<PlaylistSummary>;
 
 async function getCurrentUserPlaylists(
   client: SpotifyApi,
   limit: number = 20,
   offset: number = 0,
-): Promise<Result<GetCurrentUserPlaylistsResult, string>> {
+): Promise<Result<PaginatedPlaylists, string>> {
   // Validate parameters
   if (limit < 1 || limit > 50) {
     return err("Limit must be between 1 and 50");

@@ -216,6 +216,31 @@ export type PaginatedArtists = SpotifyPaginatedResult<SpotifyArtistResult>;
 export type PaginatedSavedTracks = SpotifyPaginatedResult<SavedTrack>;
 export type PaginatedSavedAlbums = SpotifyPaginatedResult<SavedAlbum>;
 
+// Common result types
+export type SnapshotResult = Readonly<{
+  snapshot_id: string;
+}>;
+
+export type OperationCountResult = Readonly<{
+  items_added?: number;
+  items_removed?: number;
+}>;
+
+export type SnapshotWithCountResult = SnapshotResult & OperationCountResult;
+
+export type SuccessResult = Readonly<{
+  success: boolean;
+  message: string;
+}>;
+
+export type ImageResult = Readonly<{
+  images: ReadonlyArray<SpotifyImageObject>;
+}>;
+
+// Playlist operation results
+export type PlaylistModificationResult = SnapshotWithCountResult;
+export type PlaylistSnapshotResult = SnapshotResult;
+
 // Spotify client configuration
 export type SpotifyConfig = {
   clientId: SpotifyClientId;

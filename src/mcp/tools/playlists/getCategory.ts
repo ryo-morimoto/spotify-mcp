@@ -1,11 +1,11 @@
 import { Result, ok, err } from "neverthrow";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import type { ToolDefinition, PlaylistSummary, SpotifyPaginatedResult } from "../../../types.ts";
+import type { ToolDefinition, PlaylistSummary, PaginatedPlaylists } from "../../../types.ts";
 import { z } from "zod";
 
 type GetCategoryPlaylistsResult = {
-  playlists: SpotifyPaginatedResult<PlaylistSummary>;
+  playlists: PaginatedPlaylists;
 };
 
 async function getCategoryPlaylists(
