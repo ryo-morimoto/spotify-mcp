@@ -54,22 +54,30 @@ describe("get-category-playlists", () => {
     expect(result.isError).not.toBe(true);
     const response = JSON.parse((result.content[0] as any).text);
 
-    expect(response.playlists).toHaveLength(2);
-    expect(response.playlists[0]).toEqual({
+    expect(response.playlists.items).toHaveLength(2);
+    expect(response.playlists.items[0]).toEqual({
       id: "playlist1",
       name: "Rock Classics",
       description: "The best rock songs from the 70s and 80s",
+      owner: {
+        id: "spotify",
+        display_name: "Spotify",
+      },
+      images: [],
+      tracks: {
+        total: 100,
+      },
       public: true,
       collaborative: false,
-      owner: "Spotify",
-      total_tracks: 100,
       external_url: "https://open.spotify.com/playlist/playlist1",
     });
 
-    expect(response.total).toBe(50);
-    expect(response.limit).toBe(20);
-    expect(response.offset).toBe(0);
-    expect(response.has_more).toBe(true);
+    expect(response.playlists.total).toBe(50);
+    expect(response.playlists.limit).toBe(20);
+    expect(response.playlists.offset).toBe(0);
+    expect(response.playlists.next).toBe(
+      "https://api.spotify.com/v1/browse/categories/rock/playlists?offset=20&limit=20",
+    );
 
     expect(mockClient.browse.getPlaylistsForCategory).toHaveBeenCalledWith(
       "rock",
@@ -129,9 +137,11 @@ describe("get-category-playlists", () => {
     expect(result.isError).not.toBe(true);
     const response = JSON.parse((result.content[0] as any).text);
 
-    expect(response.limit).toBe(5);
-    expect(response.offset).toBe(10);
-    expect(response.has_more).toBe(true);
+    expect(response.playlists.limit).toBe(5);
+    expect(response.playlists.offset).toBe(10);
+    expect(response.playlists.next).toBe(
+      "https://api.spotify.com/v1/browse/categories/pop/playlists?offset=15&limit=5",
+    );
   });
 
   it("should handle empty category ID", async () => {

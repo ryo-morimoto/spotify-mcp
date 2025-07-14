@@ -52,22 +52,28 @@ describe("get-user-playlists", () => {
     expect(result.isError).not.toBe(true);
     const response = JSON.parse((result.content[0] as any).text);
 
-    expect(response.playlists).toHaveLength(2);
-    expect(response.playlists[0]).toEqual({
+    expect(response.items).toHaveLength(2);
+    expect(response.items[0]).toEqual({
       id: "playlist1",
       name: "User Playlist 1",
       description: "Description 1",
+      owner: {
+        id: "targetuser123",
+        display_name: "Target User",
+      },
+      images: [],
+      tracks: {
+        total: 15,
+      },
       public: true,
       collaborative: false,
-      owner: "Target User",
-      total_tracks: 15,
       external_url: "https://open.spotify.com/playlist/playlist1",
     });
 
     expect(response.total).toBe(2);
     expect(response.limit).toBe(20);
     expect(response.offset).toBe(0);
-    expect(response.has_more).toBe(false);
+    expect(response.next).toBe(null);
 
     expect(mockClient.playlists.getUsersPlaylists).toHaveBeenCalledWith("targetuser123", 20, 0);
   });
@@ -96,7 +102,9 @@ describe("get-user-playlists", () => {
 
     expect(response.limit).toBe(10);
     expect(response.offset).toBe(30);
-    expect(response.has_more).toBe(true);
+    expect(response.next).toBe(
+      "https://api.spotify.com/v1/users/targetuser123/playlists?offset=40&limit=10",
+    );
 
     expect(mockClient.playlists.getUsersPlaylists).toHaveBeenCalledWith("targetuser123", 10, 30);
   });
@@ -161,7 +169,7 @@ describe("get-user-playlists", () => {
     expect(result.isError).not.toBe(true);
     const response = JSON.parse((result.content[0] as any).text);
 
-    expect(response.playlists[0].total_tracks).toBe(0);
+    expect(response.items[0].tracks.total).toBe(0);
   });
 
   it("should handle API error", async () => {
