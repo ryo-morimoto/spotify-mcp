@@ -59,9 +59,13 @@ describe("get-currently-playing-track tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const data = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:currently-playing");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const data = JSON.parse(resource.resource.text);
     expect(data.is_playing).toBe(true);
     expect(data.item.name).toBe("Test Track");
     expect(data.item.artists[0].name).toBe("Test Artist");
@@ -80,9 +84,13 @@ describe("get-currently-playing-track tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const data = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:currently-playing");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const data = JSON.parse(resource.resource.text);
     expect(data.message).toBe("No track currently playing");
     expect(data.is_playing).toBe(false);
   });
@@ -109,9 +117,13 @@ describe("get-currently-playing-track tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const data = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:currently-playing");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const data = JSON.parse(resource.resource.text);
     expect(data.message).toBe("No track currently playing");
     expect(data.is_playing).toBe(false);
   });
@@ -190,9 +202,13 @@ describe("get-currently-playing-track tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const data = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:currently-playing");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const data = JSON.parse(resource.resource.text);
     expect(data.is_playing).toBe(true);
     expect(data.item.type).toBe("episode");
     expect(data.item.show.name).toBe("Test Show");

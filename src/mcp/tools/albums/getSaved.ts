@@ -3,6 +3,7 @@ import type { SpotifyApi, Market, Page, SavedAlbum } from "@spotify/web-api-ts-s
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition, GetSavedItemsOptions } from "@types";
 import { z } from "zod";
+import { createResourceResponse, createResourceUri } from "../helpers/resourceHelpers.ts";
 
 const getSavedAlbumsSchema = {
   limit: z
@@ -90,13 +91,7 @@ export const createGetSavedAlbumsTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("albums", undefined, undefined, "saved");
+    return createResourceResponse(uri, result.value);
   },
 });

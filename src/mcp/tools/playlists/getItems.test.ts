@@ -66,8 +66,14 @@ describe("get-playlist-items", () => {
     });
 
     expect(result.isError).not.toBe(true);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("resource");
 
-    const items = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:playlist:test-playlist-id:tracks");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const items = JSON.parse(resource.resource.text);
     expect(items).toHaveLength(2);
 
     expect(items[0]).toEqual({
@@ -265,7 +271,8 @@ describe("get-playlist-items", () => {
 
     expect(result.isError).not.toBe(true);
 
-    const items = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const items = JSON.parse(resource.resource.text);
     expect(items).toHaveLength(1); // Only the track should be included
     expect(items[0].track.id).toBe("track5");
   });

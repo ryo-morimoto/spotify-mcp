@@ -38,9 +38,13 @@ describe("get-available-devices tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:devices");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.devices).toHaveLength(2);
     expect(response.devices[0].name).toBe("My Computer");
     expect(response.devices[0].type).toBe("Computer");
@@ -66,9 +70,13 @@ describe("get-available-devices tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:devices");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.devices).toHaveLength(0);
   });
 
@@ -116,9 +124,13 @@ describe("get-available-devices tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:devices");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.devices[0]).toEqual({
       id: "device3",
       name: "Smart TV",

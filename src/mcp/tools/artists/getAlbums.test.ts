@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 import { createGetArtistAlbumsTool } from "@mcp/tools/artists/getAlbums.ts";
 
 describe("get-artist-albums tool", () => {
@@ -101,9 +102,13 @@ describe("get-artist-albums tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const albums = JSON.parse((result.content[0] as any).text);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    expect(resourceContent.resource.uri).toBe("spotify:artist:0OdUWJ0sBjDrqHygGUXeCF:albums");
+    expect(resourceContent.resource.mimeType).toBe("application/json");
+
+    const albums = JSON.parse(resourceContent.resource.text as string);
     expect(albums).toHaveLength(2);
 
     const firstAlbum = albums[0];
@@ -174,7 +179,8 @@ describe("get-artist-albums tool", () => {
     const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
     expect(result.isError).toBeFalsy();
-    const albums = JSON.parse((result.content[0] as any).text);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    const albums = JSON.parse(resourceContent.resource.text as string);
     expect(albums).toEqual([]);
   });
 
@@ -220,7 +226,8 @@ describe("get-artist-albums tool", () => {
     const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
     expect(result.isError).toBeFalsy();
-    const albums = JSON.parse((result.content[0] as any).text);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    const albums = JSON.parse(resourceContent.resource.text as string);
     expect(albums[0].artists).toBe("Band of Horses, Featured Artist");
   });
 
@@ -245,7 +252,8 @@ describe("get-artist-albums tool", () => {
     const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
     expect(result.isError).toBeFalsy();
-    const albums = JSON.parse((result.content[0] as any).text);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    const albums = JSON.parse(resourceContent.resource.text as string);
     expect(albums[0].images).toEqual([]);
   });
 });

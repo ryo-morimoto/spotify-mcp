@@ -3,6 +3,7 @@ import type { SpotifyApi, Market } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { SpotifyAlbumResult, ToolDefinition } from "@types";
 import { z } from "zod";
+import { createResourceResponse, createResourceUri } from "../helpers/resourceHelpers.ts";
 
 async function getSeveralAlbums(
   client: SpotifyApi,
@@ -87,13 +88,7 @@ export const createGetSeveralAlbumsTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("albums", undefined, { ids: input.albumIds.join(",") });
+    return createResourceResponse(uri, result.value);
   },
 });

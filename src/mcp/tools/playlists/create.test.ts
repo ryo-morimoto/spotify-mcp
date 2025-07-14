@@ -43,8 +43,14 @@ describe("create-playlist", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("resource");
 
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:playlist:newplaylist123");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response).toEqual({
       id: "newplaylist123",
       name: "My New Playlist",
@@ -96,8 +102,13 @@ describe("create-playlist", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("resource");
 
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:playlist:privateplaylist123");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.public).toBe(false);
     expect(response.description).toBe("This is a private playlist");
 
@@ -139,8 +150,13 @@ describe("create-playlist", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("resource");
 
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:playlist:collabplaylist123");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.collaborative).toBe(true);
     expect(response.public).toBe(false); // Collaborative playlists are always private
 

@@ -3,6 +3,7 @@ import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition } from "@types";
 import { z } from "zod";
+import { createResourceResponse, createResourceUri } from "../helpers/resourceHelpers.ts";
 
 // Simplified type for tool output
 type PlaylistItemResult = {
@@ -120,13 +121,7 @@ export const createGetPlaylistItemsTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("playlist", input.playlistId, undefined, "tracks");
+    return createResourceResponse(uri, result.value);
   },
 });

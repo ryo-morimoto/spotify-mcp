@@ -78,8 +78,14 @@ describe("getPlaylist", () => {
 
       expect(result.isError).toBeUndefined();
       expect(result.content).toBeDefined();
-      expect(result.content[0].type).toBe("text");
-      const parsedData = JSON.parse((result.content[0] as any).text);
+      expect(result.content).toHaveLength(1);
+      expect(result.content[0].type).toBe("resource");
+
+      const resource = result.content[0] as any;
+      expect(resource.resource.uri).toBe("spotify:playlist:37i9dQZF1DXcBWIGoYBM5M");
+      expect(resource.resource.mimeType).toBe("application/json");
+
+      const parsedData = JSON.parse(resource.resource.text);
       expect(parsedData.id).toBe("37i9dQZF1DXcBWIGoYBM5M");
       expect(parsedData.name).toBe("Today's Top Hits");
       expect(parsedData.description).toBe("The most played tracks right now.");
@@ -115,7 +121,8 @@ describe("getPlaylist", () => {
       });
 
       expect(result.isError).toBeUndefined();
-      const parsedData = JSON.parse((result.content[0] as any).text);
+      const resource = result.content[0] as any;
+      const parsedData = JSON.parse(resource.resource.text);
       expect(parsedData.public).toBe(null);
     });
 
@@ -134,7 +141,8 @@ describe("getPlaylist", () => {
       });
 
       expect(result.isError).toBeUndefined();
-      const parsedData = JSON.parse((result.content[0] as any).text);
+      const resource = result.content[0] as any;
+      const parsedData = JSON.parse(resource.resource.text);
       expect(parsedData.description).toBe(null);
     });
   });

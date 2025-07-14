@@ -61,7 +61,13 @@ describe("getSeveralTracks", () => {
     const result = await getSeveralTracksTool.handler({ trackIds: ["track1", "track2"] });
 
     expect(result.isError).not.toBe(true);
-    const content = JSON.parse(result.content[0].text as string);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:tracks:multiple");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resource.resource.text);
     expect(content).toHaveLength(2);
     expect(content[0].id).toBe("track1");
     expect(content[0].name).toBe("Song One");
@@ -176,7 +182,9 @@ describe("getSeveralTracks", () => {
     const result = await getSeveralTracksTool.handler({ trackIds: ["track1"] });
 
     expect(result.isError).not.toBe(true);
-    const content = JSON.parse(result.content[0].text as string);
+    expect(result.content[0].type).toBe("resource");
+    const resource = result.content[0] as any;
+    const content = JSON.parse(resource.resource.text);
     expect(content[0].artists).toBe("Artist 1, Artist 2, Artist 3");
   });
 
@@ -186,7 +194,9 @@ describe("getSeveralTracks", () => {
     const result = await getSeveralTracksTool.handler({ trackIds: ["track1"] });
 
     expect(result.isError).not.toBe(true);
-    const content = JSON.parse(result.content[0].text as string);
+    expect(result.content[0].type).toBe("resource");
+    const resource = result.content[0] as any;
+    const content = JSON.parse(resource.resource.text);
     expect(content).toHaveLength(0);
   });
 });

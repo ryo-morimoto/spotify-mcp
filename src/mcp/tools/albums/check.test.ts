@@ -19,9 +19,13 @@ describe("check-saved-albums tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const content = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:albums:check?ids=album1%2Calbum2%2Calbum3");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resource.resource.text);
     expect(content).toEqual([
       { id: "album1", saved: true },
       { id: "album2", saved: false },

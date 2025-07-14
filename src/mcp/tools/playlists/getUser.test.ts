@@ -50,8 +50,14 @@ describe("get-user-playlists", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("resource");
 
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:user:targetuser123:playlists");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.items).toHaveLength(2);
     expect(response.items[0]).toEqual({
       id: "playlist1",
@@ -98,7 +104,8 @@ describe("get-user-playlists", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const response = JSON.parse(resource.resource.text);
 
     expect(response.limit).toBe(10);
     expect(response.offset).toBe(30);
@@ -167,7 +174,8 @@ describe("get-user-playlists", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const response = JSON.parse(resource.resource.text);
 
     expect(response.items[0].tracks.total).toBe(0);
   });

@@ -52,8 +52,14 @@ describe("get-current-user-playlists", () => {
     const result = await getCurrentUserPlaylistsTool.handler({});
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("resource");
 
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:me:playlists");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.items).toHaveLength(2);
     expect(response.items[0]).toEqual({
       id: "playlist1",
@@ -101,7 +107,8 @@ describe("get-current-user-playlists", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const response = JSON.parse(resource.resource.text);
 
     expect(response.limit).toBe(5);
     expect(response.offset).toBe(20);
@@ -146,7 +153,8 @@ describe("get-current-user-playlists", () => {
     const result = await getCurrentUserPlaylistsTool.handler({});
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const response = JSON.parse(resource.resource.text);
 
     expect(response.items).toHaveLength(0);
     expect(response.total).toBe(0);

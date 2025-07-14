@@ -37,8 +37,14 @@ describe("get-playlist-cover-image", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("resource");
 
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:playlist:37i9dQZF1DXcBWIGoYBM5M:images");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.images).toHaveLength(3);
     expect(response.images[0]).toEqual({
       url: "https://image.spotify.com/image/640",
@@ -69,7 +75,8 @@ describe("get-playlist-cover-image", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const response = JSON.parse(resource.resource.text);
 
     expect(response.images).toEqual([]);
   });
@@ -90,7 +97,8 @@ describe("get-playlist-cover-image", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const response = JSON.parse(resource.resource.text);
 
     expect(response.images[0]).toEqual({
       url: "https://mosaic.scdn.co/640/image1",

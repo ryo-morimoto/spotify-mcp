@@ -3,6 +3,7 @@ import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition } from "@types";
 import { z } from "zod";
+import { createResourceResponse, createResourceUri } from "../helpers/resourceHelpers.ts";
 
 const checkSavedAlbumsSchema = {
   ids: z
@@ -62,13 +63,7 @@ export const createCheckSavedAlbumsTool = (
       saved: result.value[index],
     }));
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(albumStatus, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("albums", undefined, { ids: input.ids.join(",") }, "check");
+    return createResourceResponse(uri, albumStatus);
   },
 });

@@ -51,8 +51,14 @@ describe("get-featured-playlists", () => {
     const result = await getFeaturedPlaylistsTool.handler({});
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0].type).toBe("resource");
 
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:featured-playlists");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.message).toBe("Popular Playlists");
     expect(response.playlists.items).toHaveLength(2);
     expect(response.playlists.items[0]).toEqual({
@@ -109,7 +115,8 @@ describe("get-featured-playlists", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const response = JSON.parse(resource.resource.text);
 
     expect(response.message).toBe("Beliebte Playlists");
 
@@ -177,7 +184,8 @@ describe("get-featured-playlists", () => {
     });
 
     expect(result.isError).not.toBe(true);
-    const response = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const response = JSON.parse(resource.resource.text);
 
     expect(response.playlists.limit).toBe(5);
     expect(response.playlists.offset).toBe(10);

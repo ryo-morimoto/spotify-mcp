@@ -24,8 +24,13 @@ describe("get-recently-played-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:recently-played");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response).toEqual(mockRecentlyPlayed);
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(undefined, undefined);
   });
@@ -38,8 +43,13 @@ describe("get-recently-played-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:recently-played");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response).toEqual(mockRecentlyPlayed);
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(10, undefined);
   });
@@ -52,8 +62,13 @@ describe("get-recently-played-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:recently-played");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response).toEqual(mockRecentlyPlayed);
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(undefined, {
       timestamp: 1704110400000,
@@ -69,8 +84,13 @@ describe("get-recently-played-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:recently-played");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response).toEqual(mockRecentlyPlayed);
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(undefined, {
       timestamp: 1704110400000,
@@ -86,8 +106,13 @@ describe("get-recently-played-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:recently-played");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response).toEqual(mockRecentlyPlayed);
     // When both before and after are provided, before takes precedence
     expect(mockClient.player.getRecentlyPlayedTracks).toHaveBeenCalledWith(5, {

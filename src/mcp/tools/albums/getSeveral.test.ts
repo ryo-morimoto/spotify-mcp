@@ -50,9 +50,13 @@ describe("get-several-albums tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const albums = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:albums?ids=album1%2Calbum2");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const albums = JSON.parse(resource.resource.text);
     expect(albums).toHaveLength(2);
     expect(albums[0].id).toBe("album1");
     expect(albums[0].name).toBe("Album One");
@@ -166,7 +170,8 @@ describe("get-several-albums tool", () => {
     const result = await tool.handler({ albumIds: ["album1"] });
 
     expect(result.isError).toBeFalsy();
-    const albums = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const albums = JSON.parse(resource.resource.text);
     expect(albums[0].artists).toBe("Artist 1, Artist 2, Artist 3");
   });
 
@@ -191,7 +196,8 @@ describe("get-several-albums tool", () => {
     const result = await tool.handler({ albumIds: ["album1"] });
 
     expect(result.isError).toBeFalsy();
-    const albums = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const albums = JSON.parse(resource.resource.text);
     expect(albums[0].images).toEqual([]);
   });
 });

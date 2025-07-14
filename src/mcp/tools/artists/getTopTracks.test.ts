@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import { createGetArtistTopTracksTool } from "@mcp/tools/artists/getTopTracks.ts";
 
@@ -61,7 +62,13 @@ describe("getArtistTopTracks", () => {
     const result = await tool.handler({ artistId: "artist1", market: "US" });
 
     expect(result.isError).toBeUndefined();
-    const content = JSON.parse(result.content[0].text as string);
+    expect(result.content[0].type).toBe("resource");
+
+    const resourceContent = result.content[0] as EmbeddedResource;
+    expect(resourceContent.resource.uri).toBe("spotify:artist:artist1:top-tracks");
+    expect(resourceContent.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resourceContent.resource.text as string);
     expect(content).toHaveLength(2);
     expect(content[0].id).toBe("track1");
     expect(content[0].name).toBe("Popular Song 1");
@@ -131,7 +138,8 @@ describe("getArtistTopTracks", () => {
     const result = await tool.handler({ artistId: "artist1", market: "US" });
 
     expect(result.isError).toBeUndefined();
-    const content = JSON.parse(result.content[0].text as string);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    const content = JSON.parse(resourceContent.resource.text as string);
     expect(content[0].duration).toBe("3:15");
   });
 
@@ -165,7 +173,8 @@ describe("getArtistTopTracks", () => {
     const result = await tool.handler({ artistId: "artist1", market: "US" });
 
     expect(result.isError).toBeUndefined();
-    const content = JSON.parse(result.content[0].text as string);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    const content = JSON.parse(resourceContent.resource.text as string);
     expect(content[0].artists).toBe("Artist 1, Artist 2, Artist 3");
   });
 
@@ -177,7 +186,8 @@ describe("getArtistTopTracks", () => {
     const result = await tool.handler({ artistId: "artist1", market: "US" });
 
     expect(result.isError).toBeUndefined();
-    const content = JSON.parse(result.content[0].text as string);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    const content = JSON.parse(resourceContent.resource.text as string);
     expect(content).toHaveLength(0);
   });
 });

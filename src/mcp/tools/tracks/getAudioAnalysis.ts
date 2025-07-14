@@ -3,6 +3,7 @@ import type { SpotifyApi, AudioAnalysis } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition } from "@types";
 import { z } from "zod";
+import { createResourceResponse, createResourceUri } from "../helpers/resourceHelpers.ts";
 
 const getTrackAudioAnalysisSchema = {
   id: z.string().describe("The Spotify ID of the track"),
@@ -48,13 +49,7 @@ export const createGetTrackAudioAnalysisTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("track", input.id, undefined, "audio-analysis");
+    return createResourceResponse(uri, result.value);
   },
 });

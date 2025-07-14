@@ -46,8 +46,13 @@ describe("get-user-queue tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:queue");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response).toEqual(mockQueue);
     expect(mockClient.player.getUsersQueue).toHaveBeenCalledWith();
   });
@@ -65,8 +70,13 @@ describe("get-user-queue tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:queue");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response).toEqual(emptyQueue);
   });
 

@@ -3,6 +3,7 @@ import type { SpotifyApi, Market } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition, SpotifyTopTrackResult } from "@types";
 import { z } from "zod";
+import { createResourceUri, createResourceResponse } from "@mcp/tools/helpers/resourceHelpers.ts";
 
 function formatDuration(milliseconds: number): string {
   const seconds = Math.floor(milliseconds / 1000);
@@ -83,13 +84,7 @@ export const createGetArtistTopTracksTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("artist", input.artistId, undefined, "top-tracks");
+    return createResourceResponse(uri, result.value);
   },
 });

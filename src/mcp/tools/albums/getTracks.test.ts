@@ -80,9 +80,13 @@ describe("get-album-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const tracks = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:album:6TJmQnO44YE5BtTxH8pop1:tracks");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const tracks = JSON.parse(resource.resource.text);
     expect(tracks).toHaveLength(2);
 
     const firstTrack = tracks[0];
@@ -153,7 +157,8 @@ describe("get-album-tracks tool", () => {
     const result = await tool.handler({ albumId: "6TJmQnO44YE5BtTxH8pop1" });
 
     expect(result.isError).toBeFalsy();
-    const tracks = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const tracks = JSON.parse(resource.resource.text);
     expect(tracks).toHaveLength(0);
   });
 
@@ -178,7 +183,8 @@ describe("get-album-tracks tool", () => {
     const result = await tool.handler({ albumId: "6TJmQnO44YE5BtTxH8pop1" });
 
     expect(result.isError).toBeFalsy();
-    const tracks = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    const tracks = JSON.parse(resource.resource.text);
     expect(tracks[0].preview_url).toBeNull();
   });
 });

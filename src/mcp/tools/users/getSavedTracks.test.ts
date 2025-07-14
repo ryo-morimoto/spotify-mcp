@@ -39,8 +39,13 @@ describe("get-saved-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const content = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:me:saved-tracks");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resource.resource.text);
     expect(content).toEqual(mockSavedTracks);
     expect(mockClient.currentUser.tracks.savedTracks).toHaveBeenCalledWith(
       undefined,
@@ -67,8 +72,13 @@ describe("get-saved-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const content = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:me:saved-tracks");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resource.resource.text);
     expect(content).toEqual(mockSavedTracks);
     expect(mockClient.currentUser.tracks.savedTracks).toHaveBeenCalledWith(10, 20, "US");
   });

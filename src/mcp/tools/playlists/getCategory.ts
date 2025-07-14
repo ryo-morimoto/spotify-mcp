@@ -3,6 +3,7 @@ import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition, PlaylistSummary, PaginatedPlaylists } from "@types";
 import { z } from "zod";
+import { createResourceResponse, createResourceUri } from "../helpers/resourceHelpers.ts";
 
 type GetCategoryPlaylistsResult = {
   playlists: PaginatedPlaylists;
@@ -117,13 +118,7 @@ export const createGetCategoryPlaylistsTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("category", input.categoryId, undefined, "playlists");
+    return createResourceResponse(uri, result.value);
   },
 });

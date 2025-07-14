@@ -3,6 +3,7 @@ import type { SpotifyApi, Artist } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition } from "@types";
 import { z } from "zod";
+import { createResourceUri, createResourceResponse } from "@mcp/tools/helpers/resourceHelpers.ts";
 
 const getSeveralArtistsSchema = {
   ids: z.array(z.string()).min(1).max(50).describe("Array of Spotify artist IDs (maximum 50)"),
@@ -54,13 +55,7 @@ export const createGetSeveralArtistsTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("artists", "multiple");
+    return createResourceResponse(uri, result.value);
   },
 });

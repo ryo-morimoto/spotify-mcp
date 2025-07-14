@@ -3,6 +3,7 @@ import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { SpotifyArtistResult, ToolDefinition } from "@types";
 import { z } from "zod";
+import { createResourceUri, createResourceResponse } from "@mcp/tools/helpers/resourceHelpers.ts";
 
 async function getArtist(
   client: SpotifyApi,
@@ -61,13 +62,7 @@ export const createGetArtistTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("artist", input.artistId);
+    return createResourceResponse(uri, result.value);
   },
 });

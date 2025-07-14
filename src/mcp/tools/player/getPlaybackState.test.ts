@@ -72,8 +72,13 @@ describe("get-playback-state tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:state");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.is_playing).toBe(true);
     expect(response.device.name).toBe("My Device");
     expect(response.item.name).toBe("Test Track");
@@ -92,8 +97,13 @@ describe("get-playback-state tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:state");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.message).toBe("No active playback found");
   });
 
@@ -217,8 +227,13 @@ describe("get-playback-state tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const response = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:player:state");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const response = JSON.parse(resource.resource.text);
     expect(response.is_playing).toBe(true);
     expect(response.item.type).toBe("episode");
     expect(response.item.show.name).toBe("Test Show");

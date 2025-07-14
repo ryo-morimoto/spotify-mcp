@@ -65,9 +65,13 @@ describe("get-album tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const albumData = JSON.parse((result.content[0] as any).text);
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:album:6TJmQnO44YE5BtTxH8pop1");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const albumData = JSON.parse(resource.resource.text);
     expect(albumData.id).toBe("6TJmQnO44YE5BtTxH8pop1");
     expect(albumData.name).toBe("Hot Fuss");
     expect(albumData.artists).toBe("The Killers");

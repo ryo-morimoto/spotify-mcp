@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 import { createGetArtistTool } from "@mcp/tools/artists/get.ts";
 
 describe("getArtist", () => {
@@ -44,9 +45,13 @@ describe("getArtist", () => {
 
     expect(result.isError).toBe(undefined);
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
+    expect(result.content[0].type).toBe("resource");
 
-    const content = JSON.parse((result.content[0] as any).text);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    expect(resourceContent.resource.uri).toBe("spotify:artist:0OdUWJ0sBjDrqHygGUXeCF");
+    expect(resourceContent.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resourceContent.resource.text as string);
     expect(content.id).toBe("0OdUWJ0sBjDrqHygGUXeCF");
     expect(content.name).toBe("Band of Horses");
     expect(content.genres).toEqual(["indie rock", "modern rock", "stomp and holler"]);
@@ -112,7 +117,8 @@ describe("getArtist", () => {
     const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
     expect(result.isError).toBe(undefined);
-    const content = JSON.parse((result.content[0] as any).text);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    const content = JSON.parse(resourceContent.resource.text as string);
     expect(content.images).toEqual([]);
   });
 
@@ -132,7 +138,8 @@ describe("getArtist", () => {
     const result = await tool.handler({ artistId: "0OdUWJ0sBjDrqHygGUXeCF" });
 
     expect(result.isError).toBe(undefined);
-    const content = JSON.parse((result.content[0] as any).text);
+    const resourceContent = result.content[0] as EmbeddedResource;
+    const content = JSON.parse(resourceContent.resource.text as string);
     expect(content.genres).toEqual([]);
   });
 });

@@ -3,6 +3,7 @@ import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition, PlaylistSummary, PaginatedPlaylists } from "@types";
 import { z } from "zod";
+import { createResourceResponse, createResourceUri } from "../helpers/resourceHelpers.ts";
 
 type GetFeaturedPlaylistsResult = {
   message?: string;
@@ -124,13 +125,7 @@ export const createGetFeaturedPlaylistsTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("featured-playlists");
+    return createResourceResponse(uri, result.value);
   },
 });

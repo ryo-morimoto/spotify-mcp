@@ -3,6 +3,7 @@ import type { SpotifyApi, Artist } from "@spotify/web-api-ts-sdk";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition } from "@types";
 import { z } from "zod";
+import { createResourceUri, createResourceResponse } from "@mcp/tools/helpers/resourceHelpers.ts";
 
 const getRelatedArtistsSchema = {
   id: z.string().describe("The Spotify ID of the artist"),
@@ -47,13 +48,7 @@ export const createGetRelatedArtistsTool = (
       };
     }
 
-    return {
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(result.value, null, 2),
-        },
-      ],
-    };
+    const uri = createResourceUri("artist", input.id, undefined, "related");
+    return createResourceResponse(uri, result.value);
   },
 });

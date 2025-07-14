@@ -24,8 +24,13 @@ describe("check-saved-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const content = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toBe("spotify:tracks:check?ids=track1%2Ctrack2%2Ctrack3");
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resource.resource.text);
     expect(content).toEqual([
       { id: "track1", saved: true },
       { id: "track2", saved: false },
@@ -81,8 +86,13 @@ describe("check-saved-tracks tool", () => {
 
     expect(result.isError).toBeFalsy();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const content = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resource = result.content[0] as any;
+    expect(resource.resource.uri).toMatch(/^spotify:tracks:check\?ids=/);
+    expect(resource.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resource.resource.text);
     expect(content).toHaveLength(50);
     expect(content[0]).toEqual({ id: "track0", saved: true });
     expect(mockHasSavedTracks).toHaveBeenCalledWith(ids);

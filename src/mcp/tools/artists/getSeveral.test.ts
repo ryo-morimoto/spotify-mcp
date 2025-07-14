@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { EmbeddedResource } from "@modelcontextprotocol/sdk/types.js";
 import { createGetSeveralArtistsTool } from "@mcp/tools/artists/getSeveral.ts";
 
 describe("get_several_artists tool", () => {
@@ -30,8 +31,13 @@ describe("get_several_artists tool", () => {
 
     expect(result.isError).toBeUndefined();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const content = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resourceContent = result.content[0] as EmbeddedResource;
+    expect(resourceContent.resource.uri).toBe("spotify:artists:multiple");
+    expect(resourceContent.resource.mimeType).toBe("application/json");
+
+    const content = JSON.parse(resourceContent.resource.text as string);
     expect(content).toEqual(mockArtists);
   });
 
@@ -89,8 +95,10 @@ describe("get_several_artists tool", () => {
 
     expect(result.isError).toBeUndefined();
     expect(result.content).toHaveLength(1);
-    expect(result.content[0].type).toBe("text");
-    const content = JSON.parse((result.content[0] as any).text);
+    expect(result.content[0].type).toBe("resource");
+
+    const resourceContent = result.content[0] as EmbeddedResource;
+    const content = JSON.parse(resourceContent.resource.text as string);
     expect(content).toHaveLength(2);
     expect(content[0].id).toBe("artist1");
     expect(content[1].id).toBe("artist3");
