@@ -28,16 +28,13 @@ cd spotify-mcp
 
 # Install dependencies
 pnpm install
-
-# Copy configuration template
-cp wrangler.toml.example wrangler.toml
 ```
 
 ### Configuration
 
 1. Create a Spotify App at [developer.spotify.com](https://developer.spotify.com/dashboard)
-2. Set up Cloudflare KV namespace and update `wrangler.toml`
-3. Configure environment secrets
+2. Create `wrangler.toml` from the existing example in the repository
+3. Set up Cloudflare KV namespace and environment secrets
 
 See [docs/deployment.md](docs/deployment.md) for detailed setup instructions.
 
@@ -59,8 +56,73 @@ This server implements the OAuth 2.0 authorization flow for MCP. Compatible clie
 
 ## Available Tools
 
-- **search-tracks** - Search Spotify catalog
-  - Parameters: `query` (search term), `type` (track/artist/album/playlist), `limit` (1-50)
+### Search
+- **search_tracks**
+- **search_artists**
+- **search_albums**
+- **search_playlists**
+- **search_shows**
+- **search_episodes**
+- **search_audiobooks**
+
+### Albums
+- **get_album**
+- **get_several_albums**
+- **get_album_tracks**
+- **get_saved_albums**
+- **save_albums**
+- **remove_saved_albums**
+- **check_saved_albums**
+
+### Artists
+- **get_artist**
+- **get_several_artists**
+- **get_artist_albums**
+- **get_artist_top_tracks**
+- **get_related_artists**
+
+### Tracks
+- **get_track**
+- **get_several_tracks**
+- **get_track_audio_analysis**
+
+### Playlists
+- **get_playlist**
+- **get_playlist_items**
+- **get_playlist_cover_image**
+- **create_playlist**
+- **change_playlist_details**
+- **add_items_to_playlist**
+- **update_playlist_items**
+- **remove_playlist_items**
+- **add_custom_playlist_cover_image**
+- **get_current_user_playlists**
+- **get_user_playlists**
+- **get_featured_playlists**
+- **get_category_playlists**
+
+### Player
+- **get_playback_state**
+- **get_currently_playing_track**
+- **get_recently_played_tracks**
+- **get_available_devices**
+- **get_user_queue**
+- **start_resume_playback**
+- **pause_playback**
+- **skip_to_next**
+- **skip_to_previous**
+- **seek_to_position**
+- **set_repeat_mode**
+- **set_playback_volume**
+- **toggle_playback_shuffle**
+- **transfer_playback**
+- **add_item_to_playback_queue**
+
+### Library
+- **get_saved_tracks**
+- **save_tracks**
+- **remove_saved_tracks**
+- **check_saved_tracks**
 
 ## Development
 
