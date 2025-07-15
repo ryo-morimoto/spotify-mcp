@@ -1,5 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import type { ToolDefinition } from "@types";
+import { z } from "zod";
 import {
   // Search tools
   createSearchTracksTool,
@@ -70,600 +72,117 @@ export function createMCPServer(spotifyClient: SpotifyApi): McpServer {
     version: "1.0.0",
   });
 
-  const searchTracksTool = createSearchTracksTool(spotifyClient);
-  const searchAlbumsTool = createSearchAlbumsTool(spotifyClient);
-  const searchArtistsTool = createSearchArtistsTool(spotifyClient);
-  const searchPlaylistsTool = createSearchPlaylistsTool(spotifyClient);
-  const searchShowsTool = createSearchShowsTool(spotifyClient);
-  const searchEpisodesTool = createSearchEpisodesTool(spotifyClient);
-  const searchAudiobooksTool = createSearchAudiobooksTool(spotifyClient);
-  const getTrackTool = createGetTrackTool(spotifyClient);
-  const getTrackAudioAnalysisTool = createGetTrackAudioAnalysisTool(spotifyClient);
-  const getAlbumTool = createGetAlbumTool(spotifyClient);
-  const getSavedAlbumsTool = createGetSavedAlbumsTool(spotifyClient);
-  const saveAlbumsTool = createSaveAlbumsTool(spotifyClient);
-  const removeSavedAlbumsTool = createRemoveSavedAlbumsTool(spotifyClient);
-  const checkSavedAlbumsTool = createCheckSavedAlbumsTool(spotifyClient);
-  const getArtistTool = createGetArtistTool(spotifyClient);
-  const getSeveralArtistsTool = createGetSeveralArtistsTool(spotifyClient);
-  const getRelatedArtistsTool = createGetRelatedArtistsTool(spotifyClient);
-  const getPlaylistTool = createGetPlaylistTool(spotifyClient);
-  const getPlaylistItemsTool = createGetPlaylistItemsTool(spotifyClient);
-  const createPlaylistTool = createCreatePlaylistTool(spotifyClient);
-  const changePlaylistDetailsTool = createChangePlaylistDetailsTool(spotifyClient);
-  const addItemsToPlaylistTool = createAddItemsToPlaylistTool(spotifyClient);
-  const updatePlaylistItemsTool = createUpdatePlaylistItemsTool(spotifyClient);
-  const removePlaylistItemsTool = createRemovePlaylistItemsTool(spotifyClient);
-  const getCurrentUserPlaylistsTool = createGetCurrentUserPlaylistsTool(spotifyClient);
-  const getUserPlaylistsTool = createGetUserPlaylistsTool(spotifyClient);
-  const getFeaturedPlaylistsTool = createGetFeaturedPlaylistsTool(spotifyClient);
-  const getCategoryPlaylistsTool = createGetCategoryPlaylistsTool(spotifyClient);
-  const getPlaylistCoverImageTool = createGetPlaylistCoverImageTool(spotifyClient);
-  const addPlaylistCoverImageTool = createAddPlaylistCoverImageTool(spotifyClient);
-  const getAlbumTracksTool = createGetAlbumTracksTool(spotifyClient);
-  const getArtistAlbumsTool = createGetArtistAlbumsTool(spotifyClient);
-  const getSeveralAlbumsTool = createGetSeveralAlbumsTool(spotifyClient);
-  const getArtistTopTracksTool = createGetArtistTopTracksTool(spotifyClient);
-  const getSeveralTracksTool = createGetSeveralTracksTool(spotifyClient);
-  const getSavedTracksTool = createGetSavedTracksTool(spotifyClient);
-  const saveTracksTool = createSaveTracksTool(spotifyClient);
-  const removeSavedTracksTool = createRemoveSavedTracksTool(spotifyClient);
-  const checkSavedTracksTool = createCheckSavedTracksTool(spotifyClient);
-  const getPlaybackStateTool = createGetPlaybackStateTool(spotifyClient);
-  const getAvailableDevicesTool = createGetAvailableDevicesTool(spotifyClient);
-  const getCurrentlyPlayingTrackTool = createGetCurrentlyPlayingTrackTool(spotifyClient);
-  const startResumePlaybackTool = createStartResumePlaybackTool(spotifyClient);
-  const pausePlaybackTool = createPausePlaybackTool(spotifyClient);
-  const skipToNextTool = createSkipToNextTool(spotifyClient);
-  const skipToPreviousTool = createSkipToPreviousTool(spotifyClient);
-  const seekToPositionTool = createSeekToPositionTool(spotifyClient);
-  const setRepeatModeTool = createSetRepeatModeTool(spotifyClient);
-  const setPlaybackVolumeTool = createSetPlaybackVolumeTool(spotifyClient);
-  const togglePlaybackShuffleTool = createTogglePlaybackShuffleTool(spotifyClient);
-  const transferPlaybackTool = createTransferPlaybackTool(spotifyClient);
-  const getRecentlyPlayedTracksTool = createGetRecentlyPlayedTracksTool(spotifyClient);
-  const getUserQueueTool = createGetUserQueueTool(spotifyClient);
-  const addItemToPlaybackQueueTool = createAddItemToPlaybackQueueTool(spotifyClient);
+  // Search tools
+  const searchTools = [
+    createSearchTracksTool(spotifyClient),
+    createSearchAlbumsTool(spotifyClient),
+    createSearchArtistsTool(spotifyClient),
+    createSearchPlaylistsTool(spotifyClient),
+    createSearchShowsTool(spotifyClient),
+    createSearchEpisodesTool(spotifyClient),
+    createSearchAudiobooksTool(spotifyClient),
+  ];
 
-  server.registerTool(
-    searchTracksTool.name,
-    {
-      title: searchTracksTool.title,
-      description: searchTracksTool.description,
-      inputSchema: searchTracksTool.inputSchema,
-    },
-    searchTracksTool.handler,
-  );
+  // Track tools
+  const trackTools = [
+    createGetTrackTool(spotifyClient),
+    createGetTrackAudioAnalysisTool(spotifyClient),
+    createGetSeveralTracksTool(spotifyClient),
+  ];
 
-  server.registerTool(
-    searchAlbumsTool.name,
-    {
-      title: searchAlbumsTool.title,
-      description: searchAlbumsTool.description,
-      inputSchema: searchAlbumsTool.inputSchema,
-    },
-    searchAlbumsTool.handler,
-  );
+  // Album tools
+  const albumTools = [
+    createGetAlbumTool(spotifyClient),
+    createGetSavedAlbumsTool(spotifyClient),
+    createSaveAlbumsTool(spotifyClient),
+    createRemoveSavedAlbumsTool(spotifyClient),
+    createCheckSavedAlbumsTool(spotifyClient),
+    createGetAlbumTracksTool(spotifyClient),
+    createGetSeveralAlbumsTool(spotifyClient),
+  ];
 
-  server.registerTool(
-    searchArtistsTool.name,
-    {
-      title: searchArtistsTool.title,
-      description: searchArtistsTool.description,
-      inputSchema: searchArtistsTool.inputSchema,
-    },
-    searchArtistsTool.handler,
-  );
+  // Artist tools
+  const artistTools = [
+    createGetArtistTool(spotifyClient),
+    createGetSeveralArtistsTool(spotifyClient),
+    createGetRelatedArtistsTool(spotifyClient),
+    createGetArtistAlbumsTool(spotifyClient),
+    createGetArtistTopTracksTool(spotifyClient),
+  ];
 
-  server.registerTool(
-    searchPlaylistsTool.name,
-    {
-      title: searchPlaylistsTool.title,
-      description: searchPlaylistsTool.description,
-      inputSchema: searchPlaylistsTool.inputSchema,
-    },
-    searchPlaylistsTool.handler,
-  );
+  // Playlist tools
+  const playlistTools = [
+    createGetPlaylistTool(spotifyClient),
+    createGetPlaylistItemsTool(spotifyClient),
+    createCreatePlaylistTool(spotifyClient),
+    createChangePlaylistDetailsTool(spotifyClient),
+    createAddItemsToPlaylistTool(spotifyClient),
+    createUpdatePlaylistItemsTool(spotifyClient),
+    createRemovePlaylistItemsTool(spotifyClient),
+    createGetCurrentUserPlaylistsTool(spotifyClient),
+    createGetUserPlaylistsTool(spotifyClient),
+    createGetFeaturedPlaylistsTool(spotifyClient),
+    createGetCategoryPlaylistsTool(spotifyClient),
+    createGetPlaylistCoverImageTool(spotifyClient),
+    createAddPlaylistCoverImageTool(spotifyClient),
+  ];
 
-  server.registerTool(
-    searchShowsTool.name,
-    {
-      title: searchShowsTool.title,
-      description: searchShowsTool.description,
-      inputSchema: searchShowsTool.inputSchema,
-    },
-    searchShowsTool.handler,
-  );
+  // User tools
+  const userTools = [
+    createGetSavedTracksTool(spotifyClient),
+    createSaveTracksTool(spotifyClient),
+    createRemoveSavedTracksTool(spotifyClient),
+    createCheckSavedTracksTool(spotifyClient),
+  ];
 
-  server.registerTool(
-    searchEpisodesTool.name,
-    {
-      title: searchEpisodesTool.title,
-      description: searchEpisodesTool.description,
-      inputSchema: searchEpisodesTool.inputSchema,
-    },
-    searchEpisodesTool.handler,
-  );
+  // Player tools
+  const playerTools = [
+    createGetPlaybackStateTool(spotifyClient),
+    createGetAvailableDevicesTool(spotifyClient),
+    createGetCurrentlyPlayingTrackTool(spotifyClient),
+    createStartResumePlaybackTool(spotifyClient),
+    createPausePlaybackTool(spotifyClient),
+    createSkipToNextTool(spotifyClient),
+    createSkipToPreviousTool(spotifyClient),
+    createSeekToPositionTool(spotifyClient),
+    createSetRepeatModeTool(spotifyClient),
+    createSetPlaybackVolumeTool(spotifyClient),
+    createTogglePlaybackShuffleTool(spotifyClient),
+    createTransferPlaybackTool(spotifyClient),
+    createGetRecentlyPlayedTracksTool(spotifyClient),
+    createGetUserQueueTool(spotifyClient),
+    createAddItemToPlaybackQueueTool(spotifyClient),
+  ];
 
-  server.registerTool(
-    searchAudiobooksTool.name,
-    {
-      title: searchAudiobooksTool.title,
-      description: searchAudiobooksTool.description,
-      inputSchema: searchAudiobooksTool.inputSchema,
-    },
-    searchAudiobooksTool.handler,
-  );
-
-  server.registerTool(
-    getTrackTool.name,
-    {
-      title: getTrackTool.title,
-      description: getTrackTool.description,
-      inputSchema: getTrackTool.inputSchema,
-    },
-    getTrackTool.handler,
-  );
-
-  server.registerTool(
-    getTrackAudioAnalysisTool.name,
-    {
-      title: getTrackAudioAnalysisTool.title,
-      description: getTrackAudioAnalysisTool.description,
-      inputSchema: getTrackAudioAnalysisTool.inputSchema,
-    },
-    getTrackAudioAnalysisTool.handler,
-  );
-
-  server.registerTool(
-    getAlbumTool.name,
-    {
-      title: getAlbumTool.title,
-      description: getAlbumTool.description,
-      inputSchema: getAlbumTool.inputSchema,
-    },
-    getAlbumTool.handler,
-  );
-
-  server.registerTool(
-    getSavedAlbumsTool.name,
-    {
-      title: getSavedAlbumsTool.title,
-      description: getSavedAlbumsTool.description,
-      inputSchema: getSavedAlbumsTool.inputSchema,
-    },
-    getSavedAlbumsTool.handler,
-  );
-
-  server.registerTool(
-    saveAlbumsTool.name,
-    {
-      title: saveAlbumsTool.title,
-      description: saveAlbumsTool.description,
-      inputSchema: saveAlbumsTool.inputSchema,
-    },
-    saveAlbumsTool.handler,
-  );
-
-  server.registerTool(
-    removeSavedAlbumsTool.name,
-    {
-      title: removeSavedAlbumsTool.title,
-      description: removeSavedAlbumsTool.description,
-      inputSchema: removeSavedAlbumsTool.inputSchema,
-    },
-    removeSavedAlbumsTool.handler,
-  );
-
-  server.registerTool(
-    checkSavedAlbumsTool.name,
-    {
-      title: checkSavedAlbumsTool.title,
-      description: checkSavedAlbumsTool.description,
-      inputSchema: checkSavedAlbumsTool.inputSchema,
-    },
-    checkSavedAlbumsTool.handler,
-  );
-
-  server.registerTool(
-    getArtistTool.name,
-    {
-      title: getArtistTool.title,
-      description: getArtistTool.description,
-      inputSchema: getArtistTool.inputSchema,
-    },
-    getArtistTool.handler,
-  );
-
-  server.registerTool(
-    getSeveralArtistsTool.name,
-    {
-      title: getSeveralArtistsTool.title,
-      description: getSeveralArtistsTool.description,
-      inputSchema: getSeveralArtistsTool.inputSchema,
-    },
-    getSeveralArtistsTool.handler,
-  );
-
-  server.registerTool(
-    getRelatedArtistsTool.name,
-    {
-      title: getRelatedArtistsTool.title,
-      description: getRelatedArtistsTool.description,
-      inputSchema: getRelatedArtistsTool.inputSchema,
-    },
-    getRelatedArtistsTool.handler,
-  );
-
-  server.registerTool(
-    getPlaylistTool.name,
-    {
-      title: getPlaylistTool.title,
-      description: getPlaylistTool.description,
-      inputSchema: getPlaylistTool.inputSchema,
-    },
-    getPlaylistTool.handler,
-  );
-
-  server.registerTool(
-    getPlaylistItemsTool.name,
-    {
-      title: getPlaylistItemsTool.title,
-      description: getPlaylistItemsTool.description,
-      inputSchema: getPlaylistItemsTool.inputSchema,
-    },
-    getPlaylistItemsTool.handler,
-  );
-
-  server.registerTool(
-    createPlaylistTool.name,
-    {
-      title: createPlaylistTool.title,
-      description: createPlaylistTool.description,
-      inputSchema: createPlaylistTool.inputSchema,
-    },
-    createPlaylistTool.handler,
-  );
-
-  server.registerTool(
-    changePlaylistDetailsTool.name,
-    {
-      title: changePlaylistDetailsTool.title,
-      description: changePlaylistDetailsTool.description,
-      inputSchema: changePlaylistDetailsTool.inputSchema,
-    },
-    changePlaylistDetailsTool.handler,
-  );
-
-  server.registerTool(
-    addItemsToPlaylistTool.name,
-    {
-      title: addItemsToPlaylistTool.title,
-      description: addItemsToPlaylistTool.description,
-      inputSchema: addItemsToPlaylistTool.inputSchema,
-    },
-    addItemsToPlaylistTool.handler,
-  );
-
-  server.registerTool(
-    updatePlaylistItemsTool.name,
-    {
-      title: updatePlaylistItemsTool.title,
-      description: updatePlaylistItemsTool.description,
-      inputSchema: updatePlaylistItemsTool.inputSchema,
-    },
-    updatePlaylistItemsTool.handler,
-  );
-
-  server.registerTool(
-    removePlaylistItemsTool.name,
-    {
-      title: removePlaylistItemsTool.title,
-      description: removePlaylistItemsTool.description,
-      inputSchema: removePlaylistItemsTool.inputSchema,
-    },
-    removePlaylistItemsTool.handler,
-  );
-
-  server.registerTool(
-    getCurrentUserPlaylistsTool.name,
-    {
-      title: getCurrentUserPlaylistsTool.title,
-      description: getCurrentUserPlaylistsTool.description,
-      inputSchema: getCurrentUserPlaylistsTool.inputSchema,
-    },
-    getCurrentUserPlaylistsTool.handler,
-  );
-
-  server.registerTool(
-    getUserPlaylistsTool.name,
-    {
-      title: getUserPlaylistsTool.title,
-      description: getUserPlaylistsTool.description,
-      inputSchema: getUserPlaylistsTool.inputSchema,
-    },
-    getUserPlaylistsTool.handler,
-  );
-
-  server.registerTool(
-    getFeaturedPlaylistsTool.name,
-    {
-      title: getFeaturedPlaylistsTool.title,
-      description: getFeaturedPlaylistsTool.description,
-      inputSchema: getFeaturedPlaylistsTool.inputSchema,
-    },
-    getFeaturedPlaylistsTool.handler,
-  );
-
-  server.registerTool(
-    getCategoryPlaylistsTool.name,
-    {
-      title: getCategoryPlaylistsTool.title,
-      description: getCategoryPlaylistsTool.description,
-      inputSchema: getCategoryPlaylistsTool.inputSchema,
-    },
-    getCategoryPlaylistsTool.handler,
-  );
-
-  server.registerTool(
-    getPlaylistCoverImageTool.name,
-    {
-      title: getPlaylistCoverImageTool.title,
-      description: getPlaylistCoverImageTool.description,
-      inputSchema: getPlaylistCoverImageTool.inputSchema,
-    },
-    getPlaylistCoverImageTool.handler,
-  );
-
-  server.registerTool(
-    addPlaylistCoverImageTool.name,
-    {
-      title: addPlaylistCoverImageTool.title,
-      description: addPlaylistCoverImageTool.description,
-      inputSchema: addPlaylistCoverImageTool.inputSchema,
-    },
-    addPlaylistCoverImageTool.handler,
-  );
-
-  server.registerTool(
-    getAlbumTracksTool.name,
-    {
-      title: getAlbumTracksTool.title,
-      description: getAlbumTracksTool.description,
-      inputSchema: getAlbumTracksTool.inputSchema,
-    },
-    getAlbumTracksTool.handler,
-  );
-
-  server.registerTool(
-    getArtistAlbumsTool.name,
-    {
-      title: getArtistAlbumsTool.title,
-      description: getArtistAlbumsTool.description,
-      inputSchema: getArtistAlbumsTool.inputSchema,
-    },
-    getArtistAlbumsTool.handler,
-  );
-
-  server.registerTool(
-    getSeveralAlbumsTool.name,
-    {
-      title: getSeveralAlbumsTool.title,
-      description: getSeveralAlbumsTool.description,
-      inputSchema: getSeveralAlbumsTool.inputSchema,
-    },
-    getSeveralAlbumsTool.handler,
-  );
-
-  server.registerTool(
-    getArtistTopTracksTool.name,
-    {
-      title: getArtistTopTracksTool.title,
-      description: getArtistTopTracksTool.description,
-      inputSchema: getArtistTopTracksTool.inputSchema,
-    },
-    getArtistTopTracksTool.handler,
-  );
-
-  server.registerTool(
-    getSeveralTracksTool.name,
-    {
-      title: getSeveralTracksTool.title,
-      description: getSeveralTracksTool.description,
-      inputSchema: getSeveralTracksTool.inputSchema,
-    },
-    getSeveralTracksTool.handler,
-  );
-
-  server.registerTool(
-    getSavedTracksTool.name,
-    {
-      title: getSavedTracksTool.title,
-      description: getSavedTracksTool.description,
-      inputSchema: getSavedTracksTool.inputSchema,
-    },
-    getSavedTracksTool.handler,
-  );
-
-  server.registerTool(
-    saveTracksTool.name,
-    {
-      title: saveTracksTool.title,
-      description: saveTracksTool.description,
-      inputSchema: saveTracksTool.inputSchema,
-    },
-    saveTracksTool.handler,
-  );
-
-  server.registerTool(
-    removeSavedTracksTool.name,
-    {
-      title: removeSavedTracksTool.title,
-      description: removeSavedTracksTool.description,
-      inputSchema: removeSavedTracksTool.inputSchema,
-    },
-    removeSavedTracksTool.handler,
-  );
-
-  server.registerTool(
-    checkSavedTracksTool.name,
-    {
-      title: checkSavedTracksTool.title,
-      description: checkSavedTracksTool.description,
-      inputSchema: checkSavedTracksTool.inputSchema,
-    },
-    checkSavedTracksTool.handler,
-  );
-
-  server.registerTool(
-    getPlaybackStateTool.name,
-    {
-      title: getPlaybackStateTool.title,
-      description: getPlaybackStateTool.description,
-      inputSchema: getPlaybackStateTool.inputSchema,
-    },
-    getPlaybackStateTool.handler,
-  );
-
-  server.registerTool(
-    getAvailableDevicesTool.name,
-    {
-      title: getAvailableDevicesTool.title,
-      description: getAvailableDevicesTool.description,
-      inputSchema: getAvailableDevicesTool.inputSchema,
-    },
-    getAvailableDevicesTool.handler,
-  );
-
-  server.registerTool(
-    getCurrentlyPlayingTrackTool.name,
-    {
-      title: getCurrentlyPlayingTrackTool.title,
-      description: getCurrentlyPlayingTrackTool.description,
-      inputSchema: getCurrentlyPlayingTrackTool.inputSchema,
-    },
-    getCurrentlyPlayingTrackTool.handler,
-  );
-
-  server.registerTool(
-    startResumePlaybackTool.name,
-    {
-      title: startResumePlaybackTool.title,
-      description: startResumePlaybackTool.description,
-      inputSchema: startResumePlaybackTool.inputSchema,
-    },
-    startResumePlaybackTool.handler,
-  );
-
-  server.registerTool(
-    pausePlaybackTool.name,
-    {
-      title: pausePlaybackTool.title,
-      description: pausePlaybackTool.description,
-      inputSchema: pausePlaybackTool.inputSchema,
-    },
-    pausePlaybackTool.handler,
-  );
-
-  server.registerTool(
-    skipToNextTool.name,
-    {
-      title: skipToNextTool.title,
-      description: skipToNextTool.description,
-      inputSchema: skipToNextTool.inputSchema,
-    },
-    skipToNextTool.handler,
-  );
-
-  server.registerTool(
-    skipToPreviousTool.name,
-    {
-      title: skipToPreviousTool.title,
-      description: skipToPreviousTool.description,
-      inputSchema: skipToPreviousTool.inputSchema,
-    },
-    skipToPreviousTool.handler,
-  );
-
-  server.registerTool(
-    seekToPositionTool.name,
-    {
-      title: seekToPositionTool.title,
-      description: seekToPositionTool.description,
-      inputSchema: seekToPositionTool.inputSchema,
-    },
-    seekToPositionTool.handler,
-  );
-
-  server.registerTool(
-    setRepeatModeTool.name,
-    {
-      title: setRepeatModeTool.title,
-      description: setRepeatModeTool.description,
-      inputSchema: setRepeatModeTool.inputSchema,
-    },
-    setRepeatModeTool.handler,
-  );
-
-  server.registerTool(
-    setPlaybackVolumeTool.name,
-    {
-      title: setPlaybackVolumeTool.title,
-      description: setPlaybackVolumeTool.description,
-      inputSchema: setPlaybackVolumeTool.inputSchema,
-    },
-    setPlaybackVolumeTool.handler,
-  );
-
-  server.registerTool(
-    togglePlaybackShuffleTool.name,
-    {
-      title: togglePlaybackShuffleTool.title,
-      description: togglePlaybackShuffleTool.description,
-      inputSchema: togglePlaybackShuffleTool.inputSchema,
-    },
-    togglePlaybackShuffleTool.handler,
-  );
-
-  server.registerTool(
-    transferPlaybackTool.name,
-    {
-      title: transferPlaybackTool.title,
-      description: transferPlaybackTool.description,
-      inputSchema: transferPlaybackTool.inputSchema,
-    },
-    transferPlaybackTool.handler,
-  );
-
-  server.registerTool(
-    getRecentlyPlayedTracksTool.name,
-    {
-      title: getRecentlyPlayedTracksTool.title,
-      description: getRecentlyPlayedTracksTool.description,
-      inputSchema: getRecentlyPlayedTracksTool.inputSchema,
-    },
-    getRecentlyPlayedTracksTool.handler,
-  );
-
-  server.registerTool(
-    getUserQueueTool.name,
-    {
-      title: getUserQueueTool.title,
-      description: getUserQueueTool.description,
-      inputSchema: getUserQueueTool.inputSchema,
-    },
-    getUserQueueTool.handler,
-  );
-
-  server.registerTool(
-    addItemToPlaybackQueueTool.name,
-    {
-      title: addItemToPlaybackQueueTool.title,
-      description: addItemToPlaybackQueueTool.description,
-      inputSchema: addItemToPlaybackQueueTool.inputSchema,
-    },
-    addItemToPlaybackQueueTool.handler,
-  );
+  // Register all tool groups
+  for (const tool of [
+    ...searchTools,
+    ...trackTools,
+    ...albumTools,
+    ...artistTools,
+    ...playlistTools,
+    ...userTools,
+    ...playerTools,
+  ]) {
+    registerTool(server, tool as ToolDefinition<z.ZodRawShape>);
+  }
 
   return server;
+}
+
+function registerTool(server: McpServer, tool: ToolDefinition<z.ZodRawShape>): void {
+  const cb = async (args: z.objectOutputType<z.ZodRawShape, z.ZodTypeAny>) => {
+    const parsed = z.object(tool.inputSchema).parse(args);
+    return tool.handler(parsed);
+  };
+
+  server.registerTool(
+    tool.name,
+    {
+      title: tool.title,
+      description: tool.description,
+      inputSchema: tool.inputSchema,
+    },
+    cb as Parameters<typeof server.registerTool>[2],
+  );
 }
