@@ -1,3 +1,6 @@
+> [!WARNING]
+> Spotify has been added to the ChatGPT apps, so I will archive this project.
+
 # Spotify MCP Server
 
 A secure Model Context Protocol (MCP) server for Spotify with OAuth authentication.
